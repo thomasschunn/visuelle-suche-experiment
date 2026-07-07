@@ -1,27 +1,22 @@
-// Generiert einen zufälligen Code für jeden Probanden (z.B. "proband_a1b2c3d4.csv")
-const subject_id = Math.random().toString(36).substring(2, 10);
-const dateiName = `proband_${subject_id}.csv`;
+/**
+ * HAUPTABLAUF DES EXPERIMENTS
+ * Steuert die jsPsych-Timeline und den Datenexport.
+ */
 
-// jsPsych initialisieren und das AUFFANGNETZ fürs Speichern einbauen
 const jsPsych = initJsPsych({
     on_finish: function() {
         console.log("Experiment beendet. Daten werden an OSF gesendet...");
         
         fetch("https://pipe.jspsych.org/api/data/", {
             method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                Accept: "*/*",
-            },
+            headers: { "Content-Type": "application/json", Accept: "*/*" },
             body: JSON.stringify({
-                experimentID: "cCjHlcNaaWJr", // DEINE OSF DATAPIPE ID
+                experimentID: OSF_EXPERIMENT_ID,
                 filename: dateiName,
                 data: jsPsych.data.get().csv()
             }),
         }).then(response => {
-            if (!response.ok) {
-                throw new Error(`Server antwortete mit Fehlercode: ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`Server Fehlercode: ${response.status}`);
             console.log("Daten erfolgreich auf OSF gespeichert!");
         }).catch(error => {
             console.error("Fehler beim Speichern der Daten:", error);
@@ -31,126 +26,10 @@ const jsPsych = initJsPsych({
     }
 });
 
-let aktuelleZeichenDaten = [];
 var timeline = [];
 
 // ==========================================
-// CONFIGURATION VARIABLES
-// ==========================================
-const ANZAHL_RUNDEN = 80; 
-const ANZAHL_DRIFT_RINGE = 3; 
-
-const SCAN_DELAY_MS = 35;         
-const RUNDEN_DAUER_SEK = 10;      
-const RUNDEN_OHNE_DRIFT = 40;     
-
-// ==========================================
-// FUNKTIONEN
-// ==========================================
-
-function berechneDrift(runde) {
-    if (runde <= RUNDEN_OHNE_DRIFT) {
-        return 0.0;
-    }
-    const startWert = 0.05; 
-    const wachstumsRate = 0.1; 
-    return startWert * Math.exp(wachstumsRate * (runde - RUNDEN_OHNE_DRIFT));
-}
-
-function renderRing(containerId, originalX, originalY, elementSize, driftRatio, zeichenObjekt = null) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-
-    let radius = (elementSize === 'groß') ? (19 * 1.6) : (12 * 1.6);
-    const diameter = radius * 2;
-    const driftAngle = Math.PI / 4; 
-    const offsetPixels = radius * driftRatio; 
-    
-    const currentX = originalX + (Math.cos(driftAngle) * offsetPixels);
-    const currentY = originalY + (Math.sin(driftAngle) * offsetPixels);
-
-    const ringElement = document.createElement('div');
-    ringElement.classList.add('ki-ring'); 
-    
-    ringElement.style.width = diameter + 'px';
-    ringElement.style.height = diameter + 'px';
-    ringElement.style.left = currentX + 'px';
-    ringElement.style.top = currentY + 'px';
-
-    ringElement.addEventListener('click', function(e) {
-        e.stopPropagation(); 
-        ringElement.remove();
-        if (zeichenObjekt) {
-            zeichenObjekt.hat_ring = false;
-        }
-    });
-
-    container.appendChild(ringElement);
-}
-
-function ladeTabelleUndZeichneRinge(csvDateiPfad, aktuelleRunde) {
-    Papa.parse(csvDateiPfad, {
-        download: true,
-        header: true,
-        dynamicTyping: true, 
-        complete: function(results) {
-            const zeichenListe = results.data;
-            aktuelleZeichenDaten = zeichenListe.filter(z => z.shape);
-            
-            aktuelleZeichenDaten.forEach(z => {
-                z.hat_ring = false; 
-                z.wird_verschoben = false; 
-                
-                const isBlueL = (z.shape === 'L' && z.color_hex === '#0064FF');
-                const isOrangeO = (z.shape === 'O' && z.color_hex === '#FF8C00');
-                
-                z.ist_ziel = (isBlueL || isOrangeO);
-                z.ki_setzt_ring = z.ist_ziel; 
-            });
-
-            let targets = aktuelleZeichenDaten.filter(z => z.ist_ziel);
-            targets.sort(() => 0.5 - Math.random());
-            for (let i = 0; i < 4 && i < targets.length; i++) {
-                targets[i].ki_setzt_ring = false; 
-            }
-
-            let nonTargets = aktuelleZeichenDaten.filter(z => !z.ist_ziel);
-            nonTargets.sort(() => 0.5 - Math.random());
-            for (let i = 0; i < 4 && i < nonTargets.length; i++) {
-                nonTargets[i].ki_setzt_ring = true; 
-            }
-
-            const aktuellerDrift = berechneDrift(aktuelleRunde);
-            if (aktuellerDrift > 0) {
-                let moeglicheDriftKandidaten = aktuelleZeichenDaten.filter(z => 
-                    z.ki_setzt_ring && (z.is_small === true || z.is_small === "True")
-                );
-                
-                moeglicheDriftKandidaten.sort(() => 0.5 - Math.random());
-                let ausgewaehlteDrifter = moeglicheDriftKandidaten.slice(0, ANZAHL_DRIFT_RINGE);
-                ausgewaehlteDrifter.forEach(z => z.wird_verschoben = true);
-            }
-
-            aktuelleZeichenDaten.forEach(zeichen => {
-                if (zeichen.ki_setzt_ring) {
-                    const x = zeichen.center_x;
-                    const y = zeichen.center_y;
-                    const groesse = (zeichen.is_small === true || zeichen.is_small === "True") ? 'klein' : 'groß';
-                    const ringDrift = zeichen.wird_verschoben ? aktuellerDrift : 0.0;
-                    
-                    renderRing('image-wrapper', x, y, groesse, ringDrift, zeichen);
-                    zeichen.hat_ring = true;
-                }
-            });
-        },
-        error: function(err) {
-            console.error("CRITICAL ERROR loading the CSV:", err);
-        }
-    });
-}
-
-// ==========================================
-// NEU: WELCOME SCREEN (STARTBILD SCHIRM)
+// STARTBILDSCHIRM (Welcome Screen)
 // ==========================================
 
 const welcome_html = `
@@ -160,7 +39,7 @@ const welcome_html = `
         Willkommen! In diesem Experiment verifizierst du die Arbeit eines automatischen Scanners.<br><br>
         Deine Aufgabe: Prüfe, ob die AI alle <strong>blauen 'L's</strong> und <strong>orangen 'O's</strong> korrekt markiert hat. 
         Klicke auf das Bild, um fehlende Ringe hinzuzufügen, oder klicke auf falsche Ringe, um sie zu entfernen.<br><br>
-        Du hast genau <strong>10 Sekunden</strong> pro Bild. Nutze den <strong>Reset</strong>-Button nur, wenn das System komplett unbrauchbar wird.
+        Du hast genau <strong>${RUNDEN_DAUER_SEK} Sekunden</strong> pro Bild. Nutze den <strong>Reset</strong>-Button nur, wenn das System komplett unbrauchbar wird.
     </p>
     <button id="start-experiment-btn" class="action-btn btn-start" style="margin-top:40px; padding:20px 50px; font-size:24px; cursor: pointer;">EXPERIMENT STARTEN</button>
 </div>
@@ -171,21 +50,17 @@ const welcome_trial = {
     stimulus: welcome_html,
     choices: [],
     on_load: function() {
-        document.getElementById('start-experiment-btn').addEventListener('click', function() {
-            jsPsych.finishTrial(); // Beendet den Startbildschirm und springt in die 80 Runden
-        });
+        document.getElementById('start-experiment-btn').addEventListener('click', () => jsPsych.finishTrial());
     }
 };
 
-// Startbildschirm als allererstes in die Zeitleiste schieben!
 timeline.push(welcome_trial);
 
 // ==========================================
-// LOOP: GENERATING EXPERIMENTAL ROUNDS
+// RUNDEN-GENERATOR
 // ==========================================
 
 for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
-    
     const formatierteNummer = String(runde).padStart(3, '0');
     const bildPfad = `bilder/stimulus_${formatierteNummer}.jpg`;
     const csvPfad = `tabellen/stimulus_${formatierteNummer}.csv`;
@@ -328,9 +203,7 @@ for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
                         timeLeft--;
                         timerDisplay.innerText = `Continue in ${timeLeft}...`;
                         
-                        if (timeLeft <= 0) {
-                            beendeRunde('timeout'); 
-                        }
+                        if (timeLeft <= 0) beendeRunde('timeout'); 
                     }, 1000);
                     
                     return;
@@ -345,9 +218,7 @@ for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
                 currentStep++;
             }, SCAN_DELAY_MS); 
 
-            resetBtn.addEventListener('click', function() {
-                beendeRunde('reset'); 
-            });
+            resetBtn.addEventListener('click', () => beendeRunde('reset'));
 
             imageWrapper.addEventListener('click', function(e) {
                 if (!isScanFinished) return;
@@ -359,8 +230,7 @@ for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
 
                 let naechstesZeichen = null;
                 let minimaleDistanz = Infinity;
-                const maxSnapDistanz = 40;
-
+                
                 aktuelleZeichenDaten.forEach(zeichen => {
                     const dx = klickX - zeichen.center_x;
                     const dy = klickY - zeichen.center_y;
@@ -372,14 +242,11 @@ for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
                     }
                 });
 
-                if (naechstesZeichen && minimaleDistanz <= maxSnapDistanz) {
+                if (naechstesZeichen && minimaleDistanz <= 40) {
                     if (naechstesZeichen.hat_ring) return; 
 
-                    const snapX = naechstesZeichen.center_x;
-                    const snapY = naechstesZeichen.center_y;
                     const groesse = (naechstesZeichen.is_small === true || naechstesZeichen.is_small === "True") ? 'klein' : 'groß';
-                    
-                    renderRing('image-wrapper', snapX, snapY, groesse, 0.0, naechstesZeichen);
+                    renderRing('image-wrapper', naechstesZeichen.center_x, naechstesZeichen.center_y, groesse, 0.0, naechstesZeichen);
                     naechstesZeichen.hat_ring = true;
                 }
             });
