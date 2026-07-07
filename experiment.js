@@ -7,35 +7,30 @@ const jsPsych = initJsPsych({
 let aktuelleZeichenDaten = [];
 var timeline = [];
 
-// Configurable: Anzahl der Runden
-const ANZAHL_RUNDEN = 15; 
+// ==========================================
+// CONFIGURATION VARIABLES (Hier alles anpassen!)
+// ==========================================
+const ANZAHL_RUNDEN = 80; 
+const ANZAHL_DRIFT_RINGE = 3; 
 
-/**
- * Calculates the exponential drift ratio based on the current round.
- * Rounds 1-5 have 0 drift. After that, it grows exponentially.
- * @param {number} runde - The current round number.
- * @returns {number} The calculated drift ratio.
- */
+const SCAN_DELAY_MS = 35;         
+const RUNDEN_DAUER_SEK = 10;      
+const RUNDEN_OHNE_DRIFT = 40;     
+
+// ==========================================
+
 function berechneDrift(runde) {
-    if (runde <= 5) {
+    if (runde <= RUNDEN_OHNE_DRIFT) {
         return 0.0;
     }
-    const startWert = 0.05; 
-    const wachstumsRate = 0.3; 
     
-    const drift = startWert * Math.exp(wachstumsRate * (runde - 5));
+    const startWert = 0.05; 
+    const wachstumsRate = 0.1; 
+    
+    const drift = startWert * Math.exp(wachstumsRate * (runde - RUNDEN_OHNE_DRIFT));
     return drift;
 }
 
-/**
- * Renders a circular ring over the specified image container.
- * @param {string} containerId - The HTML ID of the container.
- * @param {number} originalX - The original X coordinate (center).
- * @param {number} originalY - The original Y coordinate (center).
- * @param {string} elementSize - Size of the element ('groß' or 'klein').
- * @param {number} driftRatio - Ratio determining how far the ring drifts.
- * @param {Object} [zeichenObjekt=null] - Reference to the data object.
- */
 function renderRing(containerId, originalX, originalY, elementSize, driftRatio, zeichenObjekt = null) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -49,7 +44,7 @@ function renderRing(containerId, originalX, originalY, elementSize, driftRatio, 
     const currentY = originalY + (Math.sin(driftAngle) * offsetPixels);
 
     const ringElement = document.createElement('div');
-    ringElement.classList.add('ki-ring');
+    ringElement.classList.add('ki-ring'); 
     
     ringElement.style.width = diameter + 'px';
     ringElement.style.height = diameter + 'px';
@@ -67,11 +62,6 @@ function renderRing(containerId, originalX, originalY, elementSize, driftRatio, 
     container.appendChild(ringElement);
 }
 
-/**
- * Parses the CSV, calculates AI errors, and draws rings.
- * @param {string} csvDateiPfad - Path to CSV.
- * @param {number} aktuelleRunde - The current round to calculate drift and errors.
- */
 function ladeTabelleUndZeichneRinge(csvDateiPfad, aktuelleRunde) {
     Papa.parse(csvDateiPfad, {
         download: true,
@@ -81,48 +71,56 @@ function ladeTabelleUndZeichneRinge(csvDateiPfad, aktuelleRunde) {
             const zeichenListe = results.data;
             aktuelleZeichenDaten = zeichenListe.filter(z => z.shape);
             
-            // 1. Allen Zeichen den perfekten "Ziel-Zustand" zuweisen
             aktuelleZeichenDaten.forEach(z => {
-                z.hat_ring = false; // Noch ist kein Ring im HTML
-                // Configurable: Was soll die KI eigentlich finden?
-                if (z.shape === 'T' && z.color_hex === '#0064FF') {
+                z.hat_ring = false; 
+                z.wird_verschoben = false; 
+                
+                const isBlueL = (z.shape === 'L' && z.color_hex === '#0064FF');
+                const isOrangeO = (z.shape === 'O' && z.color_hex === '#FF8C00');
+                
+                if (isBlueL || isOrangeO) {
                     z.soll_ring_haben = true;
                 } else {
                     z.soll_ring_haben = false;
                 }
             });
 
-            // 2. Fehler generieren, falls wir in Runde 4 oder höher sind
-            if (aktuelleRunde > 3) {
-                const minErrors = Math.floor(1 + (aktuelleRunde / 2));
-                const maxErrors = Math.floor(5 + aktuelleRunde);
-                const errorCount = Math.floor(Math.random() * (maxErrors - minErrors + 1)) + minErrors;
-                
-                console.log(`Runde ${aktuelleRunde}: KI macht absichtlich ${errorCount} Fehler.`);
-
-                // Liste mischen, um zufällige Zeichen auszuwählen
-                let gemischteZeichen = [...aktuelleZeichenDaten].sort(() => 0.5 - Math.random());
-                
-                // Den ersten 'errorCount' Zeichen ihren Zustand umdrehen
-                for (let i = 0; i < errorCount; i++) {
-                    if (i < gemischteZeichen.length) {
-                        gemischteZeichen[i].soll_ring_haben = !gemischteZeichen[i].soll_ring_haben;
-                    }
-                }
-            } else {
-                console.log(`Runde ${aktuelleRunde}: KI arbeitet perfekt (0 Fehler).`);
+            let targets = aktuelleZeichenDaten.filter(z => z.soll_ring_haben);
+            targets.sort(() => 0.5 - Math.random());
+            
+            for (let i = 0; i < 4 && i < targets.length; i++) {
+                targets[i].soll_ring_haben = false;
             }
 
-            // 3. Ringe tatsächlich zeichnen
+            let nonTargets = aktuelleZeichenDaten.filter(z => !z.soll_ring_haben);
+            nonTargets.sort(() => 0.5 - Math.random());
+            
+            for (let i = 0; i < 4 && i < nonTargets.length; i++) {
+                nonTargets[i].soll_ring_haben = true;
+            }
+
             const aktuellerDrift = berechneDrift(aktuelleRunde);
             
+            if (aktuellerDrift > 0) {
+                let moeglicheDriftKandidaten = aktuelleZeichenDaten.filter(z => 
+                    z.soll_ring_haben && (z.is_small === true || z.is_small === "True")
+                );
+                
+                moeglicheDriftKandidaten.sort(() => 0.5 - Math.random());
+                let ausgewaehlteDrifter = moeglicheDriftKandidaten.slice(0, ANZAHL_DRIFT_RINGE);
+                
+                ausgewaehlteDrifter.forEach(z => z.wird_verschoben = true);
+            }
+
             aktuelleZeichenDaten.forEach(zeichen => {
                 if (zeichen.soll_ring_haben) {
                     const x = zeichen.center_x;
                     const y = zeichen.center_y;
                     const groesse = (zeichen.is_small === true || zeichen.is_small === "True") ? 'klein' : 'groß';
                     
-                    renderRing('image-wrapper', x, y, groesse, aktuellerDrift, zeichen);
+                    const ringDrift = zeichen.wird_verschoben ? aktuellerDrift : 0.0;
+                    
+                    renderRing('image-wrapper', x, y, groesse, ringDrift, zeichen);
                     zeichen.hat_ring = true;
                 }
             });
@@ -144,6 +142,15 @@ for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
     const csvPfad = `tabellen/stimulus_${formatierteNummer}.csv`;
 
     const trial_html = `
+    <style>
+        .scanning-active #ki-val-size {
+            opacity: 0.4 !important; /* Schwächeres Aufleuchten während des Scans */
+        }
+        #ki-val-size {
+            transition: opacity 0.5s ease; /* Weicher Übergang beim Ausgrauen */
+        }
+    </style>
+
     <div class="experiment-container">
         <div id="image-wrapper" class="image-container">
             <img src="${bildPfad}" alt="Prüfbild" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;" />
@@ -151,7 +158,7 @@ for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
         
         <div class="right-column">
             <div class="ki-panel">
-                <h3>KI ASSISTANT <span style="float:right; font-size:10px; color:#32b5a1;" id="scan-status">STANDBY</span></h3>
+                <h3>AI ASSISTANT <span style="float:right; font-size:10px; color:#32b5a1;" id="scan-status">STANDBY</span></h3>
                 <p>Search start points (Round ${runde}):</p>
                 <ul id="ki-list">
                     <li><span class="ki-number">1</span> <span id="ki-val-loc">dark spots</span></li>
@@ -162,9 +169,11 @@ for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
                 </ul>
             </div>
             
-            <div class="button-container">
-                <button id="custom-bestaetigen-btn" class="action-btn btn-start">Bestätigen</button>
-                <button id="custom-verwerfen-btn" class="action-btn btn-reset">Verwerfen</button>
+            <div class="button-container" style="flex-direction: column; text-align: center; margin-top: 20px;">
+                <div id="countdown-timer" style="font-size: 16px; color: #e0e0e0; margin-bottom: 12px; font-weight: bold;">
+                    Continue in ${RUNDEN_DAUER_SEK}...
+                </div>
+                <button id="custom-reset-btn" class="action-btn btn-reset">Reset</button>
             </div>
         </div>
     </div>
@@ -176,21 +185,23 @@ for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
         choices: [],
         
         on_load: function() {
-            const bestaetigenBtn = document.getElementById('custom-bestaetigen-btn');
-            const verwerfenBtn = document.getElementById('custom-verwerfen-btn');
+            const resetBtn = document.getElementById('custom-reset-btn');
             const listItems = document.querySelectorAll('#ki-list li');
             const statusText = document.getElementById('scan-status');
             const imageWrapper = document.getElementById('image-wrapper'); 
+            const timerDisplay = document.getElementById('countdown-timer');
+            
+            // Greifen uns explizit nur den Text, um ihn später auszugrauen
+            const szSpan = document.getElementById('ki-val-size');
             
             let isScanFinished = false;
+            let countdownInterval;
 
-            bestaetigenBtn.disabled = true;
-            verwerfenBtn.disabled = true;
+            resetBtn.disabled = true;
 
             const locSpan = document.getElementById('ki-val-loc');
             const colSpan = document.getElementById('ki-val-col');
             const shpSpan = document.getElementById('ki-val-shp');
-            const szSpan = document.getElementById('ki-val-size');
             const rotSpan = document.getElementById('ki-val-rot');
 
             const locations = ["dark spots", "light spots"];
@@ -217,7 +228,6 @@ for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
             listItems.forEach(li => li.classList.add('scanning-active'));
 
             let currentStep = 0;
-            const scanDelayMS = 150; 
 
             let scanInterval = setInterval(() => {
                 if (currentStep >= combinations.length) {
@@ -235,9 +245,27 @@ for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
                     szSpan.innerText = "large elements";
                     rotSpan.innerText = "0° rotation";
                     
+                    // Ausgrauen ab dem Drift-Start (nur der Text wird blasser, die Zahl bleibt!)
+                    if (runde > RUNDEN_OHNE_DRIFT) {
+                        const fadeRatio = 1.0 - ((runde - RUNDEN_OHNE_DRIFT) / (ANZAHL_RUNDEN - RUNDEN_OHNE_DRIFT)); 
+                        szSpan.style.opacity = Math.max(0.1, fadeRatio);
+                    }
+                    
                     isScanFinished = true;
-                    bestaetigenBtn.disabled = false;
-                    verwerfenBtn.disabled = false;
+                    resetBtn.disabled = false;
+                    
+                    let timeLeft = RUNDEN_DAUER_SEK;
+                    timerDisplay.innerText = `Continue in ${timeLeft}...`;
+                    
+                    countdownInterval = setInterval(() => {
+                        timeLeft--;
+                        timerDisplay.innerText = `Continue in ${timeLeft}...`;
+                        
+                        if (timeLeft <= 0) {
+                            clearInterval(countdownInterval);
+                            jsPsych.finishTrial({ choice: 'timeout', runde: runde });
+                        }
+                    }, 1000);
                     
                     return;
                 }
@@ -249,15 +277,12 @@ for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
                 szSpan.innerText = combinations[currentStep].sz;
                 rotSpan.innerText = combinations[currentStep].rot; 
                 currentStep++;
-            }, scanDelayMS); 
+            }, SCAN_DELAY_MS); 
 
-            bestaetigenBtn.addEventListener('click', function() {
-                jsPsych.finishTrial({ choice: 'bestaetigen', runde: runde });
-            });
-
-            verwerfenBtn.addEventListener('click', function() {
-                console.log("Discard clicked. Aborting experiment.");
-                jsPsych.endExperiment("Das Experiment wurde abgebrochen, da Sie auf 'Verwerfen' geklickt haben.");
+            resetBtn.addEventListener('click', function() {
+                clearInterval(countdownInterval); 
+                console.log("Reset clicked. Aborting experiment.");
+                jsPsych.endExperiment("Das Experiment wurde abgebrochen, da Sie den AI-Drift erkannt und auf 'Reset' geklickt haben.");
             });
 
             imageWrapper.addEventListener('click', function(e) {
