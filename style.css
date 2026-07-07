@@ -1,0 +1,146 @@
+/* Container für das gesamte Layout (Bild links, Panel rechts) */
+.experiment-container {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    align-items: flex-start;
+    margin-top: 40px;
+}
+
+/* Der Bereich für das Prüfbild */
+.image-container {
+    width: 760px;
+    height: 580px;
+    background-color: #e0e0e0; /* Platzhalter-Grau */
+    border: 2px solid #555;
+    position: relative; /* Wichtig, damit wir später Klickzonen exakt darüberlegen können */
+}
+
+/* Das KI-Panel */
+.ki-panel {
+    width: 280px;
+    background-color: #1e2229;
+    color: #e0e0e0;
+    border-radius: 10px;
+    border: 2px solid #32b5a1;
+    padding: 20px;
+    font-family: sans-serif;
+    text-align: left;
+}
+
+.ki-panel h3 {
+    margin-top: 0;
+    color: #ffffff;
+    font-size: 16px;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 10px;
+}
+
+.ki-panel p {
+    font-size: 13px;
+    color: #888;
+    font-style: italic;
+}
+
+.ki-panel ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.ki-panel li {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 15px;
+}
+
+/* Die kleinen türkisen Nummern im Panel */
+.ki-number {
+    background-color: #32b5a1;
+    color: #1e2229;
+    font-weight: bold;
+    border-radius: 4px;
+    padding: 4px 10px;
+}
+
+/* Rechte Spalte, um Panel und Buttons zu stapeln */
+.right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Abstand zwischen KI-Panel und Buttons */
+}
+
+/* Container für die beiden Buttons nebeneinander */
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+/* Grund-Design für unsere eigenen Buttons */
+.action-btn {
+    flex: 1; /* Beide Buttons werden gleich breit */
+    padding: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #ffffff;
+    transition: background-color 0.2s;
+}
+
+/* Spezifische Farben */
+.btn-start {
+    background-color: #32b5a1; /* Türkis, passend zum Panel */
+}
+
+.btn-start:hover {
+    background-color: #289685;
+}
+
+.btn-reset {
+    background-color: #d9534f; /* Signalrot für den Abbruch */
+}
+
+.btn-reset:hover {
+    background-color: #c9302c;
+}
+
+/* Effekt während der "KI" rechnet */
+.scanning-active {
+    color: #ffffff !important;
+    text-shadow: 0 0 8px #32b5a1; /* Leichtes türkises Leuchten */
+    transition: all 0.1s;
+}
+
+/* Farben für die Text-Updates */
+.text-orange { color: #f08e16; font-weight: bold; } /* Aus den Spezifikationen [cite: 5, 40] */
+.text-blue { color: #2660c4; font-weight: bold; }   /* Aus den Spezifikationen [cite: 5, 39] */
+
+/* Der dynamische KI-Ring */
+.ki-ring {
+    position: absolute; /* Löst den Ring aus dem normalen Layout und legt ihn über das Bild */
+    border: 3px solid #ffffff; /* Weiß und 3px stark */
+    border-radius: 50%; /* Macht aus dem Viereck einen perfekten Kreis */
+    box-sizing: border-box;
+    cursor: pointer; /* Zeigefinger-Maus beim Drüberfahren */
+    
+    /* Wichtig: Zentriert den Kreis exakt auf der x/y-Koordinate, statt ihn an der oberen linken Ecke aufzuhängen */
+    transform: translate(-50%, -50%);
+    
+    /* Ein minimaler Schatten hilft, falls der Hintergrund mal exakt weiß/hellgrau ist */
+    box-shadow: 0px 0px 3px rgba(0,0,0,0.3);
+    
+    /* Falls wir Ringe flüssig driften lassen wollen: */
+    transition: left 0.1s linear, top 0.1s linear;
+}
+
+/* Ein kleiner Effekt beim Drüberfahren (Hover) */
+.ki-ring:hover {
+    border-color: #d9534f; /* Wird rot, um zu zeigen, dass man ihn löschen kann */
+    background-color: rgba(217, 83, 79, 0.2); /* Ganz leicht rot gefüllt */
+}
