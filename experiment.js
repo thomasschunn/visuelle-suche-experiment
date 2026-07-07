@@ -1,13 +1,12 @@
+// Generiert einen zufälligen Code für jeden Probanden (z.B. "proband_a1b2c3d4.csv")
+const subject_id = Math.random().toString(36).substring(2, 10);
+const dateiName = `proband_${subject_id}.csv`;
+
 // jsPsych initialisieren und das AUFFANGNETZ fürs Speichern einbauen
 const jsPsych = initJsPsych({
     on_finish: function() {
         console.log("Experiment beendet. Daten werden an OSF gesendet...");
         
-        // FEHLER BEHOBEN: Die ID wird jetzt erst hier generiert, da jsPsych jetzt existiert!
-        const subject_id = jsPsych.randomization.randomID(8);
-        const dateiName = `proband_${subject_id}.csv`;
-        
-        // Direkter Upload über DataPipe (funktioniert immer, auch bei Abbruch!)
         fetch("https://pipe.jspsych.org/api/data/", {
             method: "POST",
             headers: {
@@ -15,25 +14,23 @@ const jsPsych = initJsPsych({
                 Accept: "*/*",
             },
             body: JSON.stringify({
-                experimentID: "cCjHlcNaaWJr", // DEINE ID
+                experimentID: "cCjHlcNaaWJr", // DEINE OSF DATAPIPE ID
                 filename: dateiName,
                 data: jsPsych.data.get().csv()
             }),
         }).then(response => {
+            if (!response.ok) {
+                throw new Error(`Server antwortete mit Fehlercode: ${response.status}`);
+            }
             console.log("Daten erfolgreich auf OSF gespeichert!");
         }).catch(error => {
             console.error("Fehler beim Speichern der Daten:", error);
         });
 
-        // Zeigt dir die Daten nach dem Experiment (für dich zum Kontrollieren) im Browser an
         jsPsych.data.displayData(); 
     }
 });
 
-
-// ==========================================
-// CONFIGURATION VARIABLES
-// ... (ab hier bleibt dein Code exakt so, wie er vorher war!) ...
 let aktuelleZeichenDaten = [];
 var timeline = [];
 
@@ -47,6 +44,8 @@ const SCAN_DELAY_MS = 35;
 const RUNDEN_DAUER_SEK = 10;      
 const RUNDEN_OHNE_DRIFT = 40;     
 
+// ==========================================
+// FUNKTIONEN
 // ==========================================
 
 function berechneDrift(runde) {
@@ -151,6 +150,37 @@ function ladeTabelleUndZeichneRinge(csvDateiPfad, aktuelleRunde) {
 }
 
 // ==========================================
+// NEU: WELCOME SCREEN (STARTBILD SCHIRM)
+// ==========================================
+
+const welcome_html = `
+<div class="experiment-container" style="display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; height:100vh; background-color: #0f172a;">
+    <h1 style="color:#32b5a1; font-size:48px; font-family: sans-serif; margin-bottom: 20px;">AI ASSISTANT STUDY</h1>
+    <p style="max-width:600px; font-size:20px; line-height:1.6; color: #e0e0e0; font-family: sans-serif;">
+        Willkommen! In diesem Experiment verifizierst du die Arbeit eines automatischen Scanners.<br><br>
+        Deine Aufgabe: Prüfe, ob die AI alle <strong>blauen 'L's</strong> und <strong>orangen 'O's</strong> korrekt markiert hat. 
+        Klicke auf das Bild, um fehlende Ringe hinzuzufügen, oder klicke auf falsche Ringe, um sie zu entfernen.<br><br>
+        Du hast genau <strong>10 Sekunden</strong> pro Bild. Nutze den <strong>Reset</strong>-Button nur, wenn das System komplett unbrauchbar wird.
+    </p>
+    <button id="start-experiment-btn" class="action-btn btn-start" style="margin-top:40px; padding:20px 50px; font-size:24px; cursor: pointer;">EXPERIMENT STARTEN</button>
+</div>
+`;
+
+const welcome_trial = {
+    type: jsPsychHtmlButtonResponse,
+    stimulus: welcome_html,
+    choices: [],
+    on_load: function() {
+        document.getElementById('start-experiment-btn').addEventListener('click', function() {
+            jsPsych.finishTrial(); // Beendet den Startbildschirm und springt in die 80 Runden
+        });
+    }
+};
+
+// Startbildschirm als allererstes in die Zeitleiste schieben!
+timeline.push(welcome_trial);
+
+// ==========================================
 // LOOP: GENERATING EXPERIMENTAL ROUNDS
 // ==========================================
 
@@ -197,7 +227,6 @@ for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
         choices: [],
         
         on_finish: function(data) {
-            // Löst den sofortigen Abbruch inkl. Sprung zur Speichern-Funktion aus
             if (data.beendigungs_grund === 'reset') {
                 jsPsych.endExperiment("Das Experiment wurde abgebrochen, da Sie den AI-Drift erkannt und auf 'Reset' geklickt haben.");
             }
