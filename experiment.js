@@ -1,6 +1,32 @@
+// Generiert einen zufälligen Code für jeden Probanden (z.B. "proband_a1b2c3d4.csv")
+const subject_id = jsPsych.randomization.randomID(8);
+const dateiName = `proband_${subject_id}.csv`;
+
+// jsPsych initialisieren und das AUFFANGNETZ fürs Speichern einbauen
 const jsPsych = initJsPsych({
     on_finish: function() {
-        jsPsych.data.displayData();
+        console.log("Experiment beendet. Daten werden an OSF gesendet...");
+        
+        // Direkter Upload über DataPipe (funktioniert immer, auch bei Abbruch!)
+        fetch("https://pipe.jspsych.org/api/data/", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                Accept: "*/*",
+            },
+            body: JSON.stringify({
+                experimentID: "cCjHlcNaaWJr", // DEINE ID!
+                filename: dateiName,
+                data: jsPsych.data.get().csv()
+            }),
+        }).then(response => {
+            console.log("Daten erfolgreich auf OSF gespeichert!");
+        }).catch(error => {
+            console.error("Fehler beim Speichern der Daten:", error);
+        });
+
+        // Zeigt dir die Daten nach dem Experiment (für dich zum Kontrollieren) im Browser an
+        jsPsych.data.displayData(); 
     }
 });
 
@@ -8,7 +34,7 @@ let aktuelleZeichenDaten = [];
 var timeline = [];
 
 // ==========================================
-// CONFIGURATION VARIABLES (Hier alles anpassen!)
+// CONFIGURATION VARIABLES
 // ==========================================
 const ANZAHL_RUNDEN = 80; 
 const ANZAHL_DRIFT_RINGE = 3; 
@@ -23,12 +49,9 @@ function berechneDrift(runde) {
     if (runde <= RUNDEN_OHNE_DRIFT) {
         return 0.0;
     }
-    
     const startWert = 0.05; 
     const wachstumsRate = 0.1; 
-    
-    const drift = startWert * Math.exp(wachstumsRate * (runde - RUNDEN_OHNE_DRIFT));
-    return drift;
+    return startWert * Math.exp(wachstumsRate * (runde - RUNDEN_OHNE_DRIFT));
 }
 
 function renderRing(containerId, originalX, originalY, elementSize, driftRatio, zeichenObjekt = null) {
@@ -78,46 +101,38 @@ function ladeTabelleUndZeichneRinge(csvDateiPfad, aktuelleRunde) {
                 const isBlueL = (z.shape === 'L' && z.color_hex === '#0064FF');
                 const isOrangeO = (z.shape === 'O' && z.color_hex === '#FF8C00');
                 
-                if (isBlueL || isOrangeO) {
-                    z.soll_ring_haben = true;
-                } else {
-                    z.soll_ring_haben = false;
-                }
+                z.ist_ziel = (isBlueL || isOrangeO);
+                z.ki_setzt_ring = z.ist_ziel; 
             });
 
-            let targets = aktuelleZeichenDaten.filter(z => z.soll_ring_haben);
+            let targets = aktuelleZeichenDaten.filter(z => z.ist_ziel);
             targets.sort(() => 0.5 - Math.random());
-            
             for (let i = 0; i < 4 && i < targets.length; i++) {
-                targets[i].soll_ring_haben = false;
+                targets[i].ki_setzt_ring = false; 
             }
 
-            let nonTargets = aktuelleZeichenDaten.filter(z => !z.soll_ring_haben);
+            let nonTargets = aktuelleZeichenDaten.filter(z => !z.ist_ziel);
             nonTargets.sort(() => 0.5 - Math.random());
-            
             for (let i = 0; i < 4 && i < nonTargets.length; i++) {
-                nonTargets[i].soll_ring_haben = true;
+                nonTargets[i].ki_setzt_ring = true; 
             }
 
             const aktuellerDrift = berechneDrift(aktuelleRunde);
-            
             if (aktuellerDrift > 0) {
                 let moeglicheDriftKandidaten = aktuelleZeichenDaten.filter(z => 
-                    z.soll_ring_haben && (z.is_small === true || z.is_small === "True")
+                    z.ki_setzt_ring && (z.is_small === true || z.is_small === "True")
                 );
                 
                 moeglicheDriftKandidaten.sort(() => 0.5 - Math.random());
                 let ausgewaehlteDrifter = moeglicheDriftKandidaten.slice(0, ANZAHL_DRIFT_RINGE);
-                
                 ausgewaehlteDrifter.forEach(z => z.wird_verschoben = true);
             }
 
             aktuelleZeichenDaten.forEach(zeichen => {
-                if (zeichen.soll_ring_haben) {
+                if (zeichen.ki_setzt_ring) {
                     const x = zeichen.center_x;
                     const y = zeichen.center_y;
                     const groesse = (zeichen.is_small === true || zeichen.is_small === "True") ? 'klein' : 'groß';
-                    
                     const ringDrift = zeichen.wird_verschoben ? aktuellerDrift : 0.0;
                     
                     renderRing('image-wrapper', x, y, groesse, ringDrift, zeichen);
@@ -143,19 +158,13 @@ for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
 
     const trial_html = `
     <style>
-        .scanning-active #ki-val-size {
-            opacity: 0.4 !important; /* Schwächeres Aufleuchten während des Scans */
-        }
-        #ki-val-size {
-            transition: opacity 0.5s ease; /* Weicher Übergang beim Ausgrauen */
-        }
+        .scanning-active #ki-val-size { opacity: 0.4 !important; }
+        #ki-val-size { transition: opacity 0.5s ease; }
     </style>
-
     <div class="experiment-container">
         <div id="image-wrapper" class="image-container">
             <img src="${bildPfad}" alt="Prüfbild" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;" />
         </div>
-        
         <div class="right-column">
             <div class="ki-panel">
                 <h3>AI ASSISTANT <span style="float:right; font-size:10px; color:#32b5a1;" id="scan-status">STANDBY</span></h3>
@@ -168,7 +177,6 @@ for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
                     <li><span class="ki-number">5</span> <span id="ki-val-rot">0° rotation</span></li>
                 </ul>
             </div>
-            
             <div class="button-container" style="flex-direction: column; text-align: center; margin-top: 20px;">
                 <div id="countdown-timer" style="font-size: 16px; color: #e0e0e0; margin-bottom: 12px; font-weight: bold;">
                     Continue in ${RUNDEN_DAUER_SEK}...
@@ -184,14 +192,19 @@ for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
         stimulus: trial_html,
         choices: [],
         
+        on_finish: function(data) {
+            // Löst den sofortigen Abbruch inkl. Sprung zur Speichern-Funktion aus
+            if (data.beendigungs_grund === 'reset') {
+                jsPsych.endExperiment("Das Experiment wurde abgebrochen, da Sie den AI-Drift erkannt und auf 'Reset' geklickt haben.");
+            }
+        },
+        
         on_load: function() {
             const resetBtn = document.getElementById('custom-reset-btn');
             const listItems = document.querySelectorAll('#ki-list li');
             const statusText = document.getElementById('scan-status');
             const imageWrapper = document.getElementById('image-wrapper'); 
             const timerDisplay = document.getElementById('countdown-timer');
-            
-            // Greifen uns explizit nur den Text, um ihn später auszugrauen
             const szSpan = document.getElementById('ki-val-size');
             
             let isScanFinished = false;
@@ -229,6 +242,28 @@ for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
 
             let currentStep = 0;
 
+            function beendeRunde(grund) {
+                clearInterval(countdownInterval);
+                
+                let ki_falsch_korrigiert = 0;  
+                let ki_vergessen_gefunden = 0; 
+                let proband_neu_falsch = 0;    
+                
+                aktuelleZeichenDaten.forEach(z => {
+                    if (!z.ist_ziel && z.ki_setzt_ring && !z.hat_ring) ki_falsch_korrigiert++;
+                    if (z.ist_ziel && !z.ki_setzt_ring && z.hat_ring) ki_vergessen_gefunden++;
+                    if (!z.ist_ziel && !z.ki_setzt_ring && z.hat_ring) proband_neu_falsch++;
+                });
+
+                jsPsych.finishTrial({
+                    runde: runde,
+                    beendigungs_grund: grund, 
+                    korrigierte_falsche_ki_ringe: ki_falsch_korrigiert,
+                    gefundene_vergessene_ki_ringe: ki_vergessen_gefunden,
+                    proband_falsch_markiert: proband_neu_falsch
+                });
+            }
+
             let scanInterval = setInterval(() => {
                 if (currentStep >= combinations.length) {
                     clearInterval(scanInterval);
@@ -245,7 +280,6 @@ for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
                     szSpan.innerText = "large elements";
                     rotSpan.innerText = "0° rotation";
                     
-                    // Ausgrauen ab dem Drift-Start (nur der Text wird blasser, die Zahl bleibt!)
                     if (runde > RUNDEN_OHNE_DRIFT) {
                         const fadeRatio = 1.0 - ((runde - RUNDEN_OHNE_DRIFT) / (ANZAHL_RUNDEN - RUNDEN_OHNE_DRIFT)); 
                         szSpan.style.opacity = Math.max(0.1, fadeRatio);
@@ -262,8 +296,7 @@ for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
                         timerDisplay.innerText = `Continue in ${timeLeft}...`;
                         
                         if (timeLeft <= 0) {
-                            clearInterval(countdownInterval);
-                            jsPsych.finishTrial({ choice: 'timeout', runde: runde });
+                            beendeRunde('timeout'); 
                         }
                     }, 1000);
                     
@@ -280,9 +313,7 @@ for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
             }, SCAN_DELAY_MS); 
 
             resetBtn.addEventListener('click', function() {
-                clearInterval(countdownInterval); 
-                console.log("Reset clicked. Aborting experiment.");
-                jsPsych.endExperiment("Das Experiment wurde abgebrochen, da Sie den AI-Drift erkannt und auf 'Reset' geklickt haben.");
+                beendeRunde('reset'); 
             });
 
             imageWrapper.addEventListener('click', function(e) {
