@@ -1,11 +1,11 @@
-// Generiert einen zufälligen Code für jeden Probanden (z.B. "proband_a1b2c3d4.csv")
-const subject_id = jsPsych.randomization.randomID(8);
-const dateiName = `proband_${subject_id}.csv`;
-
 // jsPsych initialisieren und das AUFFANGNETZ fürs Speichern einbauen
 const jsPsych = initJsPsych({
     on_finish: function() {
         console.log("Experiment beendet. Daten werden an OSF gesendet...");
+        
+        // FEHLER BEHOBEN: Die ID wird jetzt erst hier generiert, da jsPsych jetzt existiert!
+        const subject_id = jsPsych.randomization.randomID(8);
+        const dateiName = `proband_${subject_id}.csv`;
         
         // Direkter Upload über DataPipe (funktioniert immer, auch bei Abbruch!)
         fetch("https://pipe.jspsych.org/api/data/", {
@@ -15,7 +15,7 @@ const jsPsych = initJsPsych({
                 Accept: "*/*",
             },
             body: JSON.stringify({
-                experimentID: "cCjHlcNaaWJr", // DEINE ID!
+                experimentID: "cCjHlcNaaWJr", // DEINE ID
                 filename: dateiName,
                 data: jsPsych.data.get().csv()
             }),
@@ -30,6 +30,10 @@ const jsPsych = initJsPsych({
     }
 });
 
+
+// ==========================================
+// CONFIGURATION VARIABLES
+// ... (ab hier bleibt dein Code exakt so, wie er vorher war!) ...
 let aktuelleZeichenDaten = [];
 var timeline = [];
 
