@@ -1,7 +1,7 @@
 /**
  * HAUPTABLAUF DES EXPERIMENTS
  * Steuert die jsPsych-Timeline und den Datenexport.
- */
+ */ 
 
 const jsPsych = initJsPsych({
     on_finish: function() {
