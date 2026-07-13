@@ -1,25 +1,10 @@
-/**
- * Berechnet den exponentiellen Drift für eine gegebene Runde.
- * @param {number} runde - Die aktuelle Runden-Nummer.
- * @returns {number} Der berechnete Drift-Faktor (0.0 in Runden ohne Drift).
- */
 function berechneDrift(runde) {
     if (runde <= RUNDEN_OHNE_DRIFT) return 0.0;
-    
     const startWert = 0.05; 
     const wachstumsRate = 0.1; 
     return startWert * Math.exp(wachstumsRate * (runde - RUNDEN_OHNE_DRIFT));
 }
 
-/**
- * Zeichnet einen Ring über das Bild.
- * @param {string} containerId - HTML-ID des Bild-Containers.
- * @param {number} originalX - X-Koordinate des Zeichens.
- * @param {number} originalY - Y-Koordinate des Zeichens.
- * @param {string} elementSize - 'groß' oder 'klein'.
- * @param {number} driftRatio - Stärke des Versatzes (0.0 = zentriert).
- * @param {Object} [zeichenObjekt=null] - Referenz auf das Datenobjekt im Array.
- */
 function renderRing(containerId, originalX, originalY, elementSize, driftRatio, zeichenObjekt = null) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -49,11 +34,9 @@ function renderRing(containerId, originalX, originalY, elementSize, driftRatio, 
 }
 
 /**
- * Lädt die CSV-Daten, berechnet KI-Fehler/Drift und zeichnet die finalen Ringe.
- * @param {string} csvDateiPfad - Pfad zur CSV-Datei der aktuellen Runde.
- * @param {number} aktuelleRunde - Die Runden-Nummer.
+ * Bereitet die Daten vor. Nutzt jetzt feste Fehler aus der CSV und die User-Config.
  */
-function ladeTabelleUndZeichneRinge(csvDateiPfad, aktuelleRunde) {
+function ladeTabelleUndBereiteVor(csvDateiPfad, aktuelleRunde, isTraining, callback) {
     Papa.parse(csvDateiPfad, {
         download: true,
         header: true,
@@ -61,44 +44,61 @@ function ladeTabelleUndZeichneRinge(csvDateiPfad, aktuelleRunde) {
         complete: function(results) {
             aktuelleZeichenDaten = results.data.filter(z => z.shape);
             
-            // Grundwahrheit festlegen
+            // 1. Grundzustand & feste Fehler aus der CSV übernehmen
             aktuelleZeichenDaten.forEach(z => {
                 z.hat_ring = false; 
                 z.wird_verschoben = false; 
                 
                 const isBlueL = (z.shape === 'L' && z.color_hex === '#0064FF');
                 const isOrangeO = (z.shape === 'O' && z.color_hex === '#FF8C00');
-                
                 z.ist_ziel = (isBlueL || isOrangeO);
-                z.ki_setzt_ring = z.ist_ziel; 
+                
+                // Im Training: Nichts markiert. In der Hauptrunde: Exakt das, was die CSV sagt!
+                // Wenn die Spalte 'ki_markiert' fehlt, fällt er auf z.ist_ziel zurück (für alte CSVs)
+                z.ki_setzt_ring = isTraining ? false : (z.ki_markiert !== undefined ? z.ki_markiert : z.ist_ziel); 
             });
 
-            // Exakt 8 KI-Fehler generieren (4 False Negatives, 4 False Positives)
-            let targets = aktuelleZeichenDaten.filter(z => z.ist_ziel).sort(() => 0.5 - Math.random());
-            for (let i = 0; i < 4 && i < targets.length; i++) targets[i].ki_setzt_ring = false; 
+            // 2. Logik anwenden (Nur für Hauptrunden)
+            if (!isTraining) {
+                const aktuellerDrift = berechneDrift(aktuelleRunde);
+                let ausgewaehlteDrifter = [];
+                
+                // Drift-Elemente bestimmen (aus kleinen Ringen)
+                if (aktuellerDrift > 0) {
+                    let kandidaten = aktuelleZeichenDaten.filter(z => z.ki_setzt_ring && (z.is_small === true || z.is_small === "True"));
+                    ausgewaehlteDrifter = kandidaten.sort(() => 0.5 - Math.random()).slice(0, ANZAHL_DRIFT_RINGE);
+                    ausgewaehlteDrifter.forEach(z => z.wird_verschoben = true);
+                }
 
-            let nonTargets = aktuelleZeichenDaten.filter(z => !z.ist_ziel).sort(() => 0.5 - Math.random());
-            for (let i = 0; i < 4 && i < nonTargets.length; i++) nonTargets[i].ki_setzt_ring = true; 
+                // Einordnung in Render-Gruppen (1-5) basierend auf der Probanden-Config
+                aktuelleZeichenDaten.forEach(z => {
+                    if (ausgewaehlteDrifter.includes(z)) {
+                        z.render_gruppe = 5; // Drifter IMMER im letzten Schritt!
+                    } else if (z.ki_setzt_ring) {
+                        // Die Kaskaden-Logik für die Illusion:
+                        const isBgMatch = (probandenConfig.bg === 'dark' && z.bg_dark) || (probandenConfig.bg === 'light' && !z.bg_dark);
+                        const isColorMatch = (probandenConfig.color === 'orange' && z.color_hex === '#FF8C00') || (probandenConfig.color === 'blue' && z.color_hex === '#0064FF');
+                        const isShapeMatch = (probandenConfig.shape === 'round' && (z.shape === 'O' || z.shape === 'Q')) || (probandenConfig.shape === 'angular' && (z.shape === 'L' || z.shape === 'T'));
+                        const isSizeMatch = (probandenConfig.size === 'small' && (z.is_small === true || z.is_small === "True")) || (probandenConfig.size === 'large' && (z.is_small === false || z.is_small === "False"));
 
-            // Drift-Elemente bestimmen
-            const aktuellerDrift = berechneDrift(aktuelleRunde);
-            if (aktuellerDrift > 0) {
-                let kandidaten = aktuelleZeichenDaten.filter(z => z.ki_setzt_ring && (z.is_small === true || z.is_small === "True"));
-                kandidaten.sort(() => 0.5 - Math.random()).slice(0, ANZAHL_DRIFT_RINGE).forEach(z => z.wird_verschoben = true);
+                        if (isBgMatch) {
+                            z.render_gruppe = 1;
+                        } else if (isColorMatch) {
+                            z.render_gruppe = 2;
+                        } else if (isShapeMatch) {
+                            z.render_gruppe = 3;
+                        } else if (isSizeMatch) {
+                            z.render_gruppe = 4;
+                        } else {
+                            // Wenn gar nichts passt -> Sammelbecken
+                            z.render_gruppe = 5; 
+                        }
+                    }
+                });
             }
 
-            // Ringe rendern
-            aktuelleZeichenDaten.forEach(zeichen => {
-                if (zeichen.ki_setzt_ring) {
-                    const groesse = (zeichen.is_small === true || zeichen.is_small === "True") ? 'klein' : 'groß';
-                    const ringDrift = zeichen.wird_verschoben ? aktuellerDrift : 0.0;
-                    renderRing('image-wrapper', zeichen.center_x, zeichen.center_y, groesse, ringDrift, zeichen);
-                    zeichen.hat_ring = true;
-                }
-            });
+            if (callback) callback();
         },
-        error: function(err) {
-            console.error("Fehler beim Laden der CSV:", err);
-        }
+        error: function(err) { console.error("Fehler beim Laden:", err); }
     });
 }
