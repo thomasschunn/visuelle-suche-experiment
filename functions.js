@@ -1,3 +1,6 @@
+/**
+ * BERECHNUNG DES DRIFTS
+ */
 function berechneDrift(runde) {
     if (runde <= RUNDEN_OHNE_DRIFT) return 0.0;
     const startWert = 0.05; 
@@ -5,6 +8,9 @@ function berechneDrift(runde) {
     return startWert * Math.exp(wachstumsRate * (runde - RUNDEN_OHNE_DRIFT));
 }
 
+/**
+ * ZEICHNEN DER RINGE (inkl. Versatz für den Drift)
+ */
 function renderRing(containerId, originalX, originalY, elementSize, driftRatio, zeichenObjekt = null) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -33,6 +39,9 @@ function renderRing(containerId, originalX, originalY, elementSize, driftRatio, 
     container.appendChild(ringElement);
 }
 
+/**
+ * LADEN DER CSV UND ZUWEISEN DER LOGIK
+ */
 function ladeTabelleUndBereiteVor(csvDateiPfad, aktuelleRunde, isTraining, callback) {
     Papa.parse(csvDateiPfad, {
         download: true,
@@ -41,7 +50,15 @@ function ladeTabelleUndBereiteVor(csvDateiPfad, aktuelleRunde, isTraining, callb
         complete: function(results) {
             aktuelleZeichenDaten = results.data.filter(z => z.shape);
             
+            // HILFSFUNKTION: JS liest das Wort "False" aus Excel oft als Text. Text = immer wahr!
+            // Diese Funktion macht aus dem Text echte Wahrheitswerte.
+            const isTrue = (val) => val === true || val === "True" || val === "true" || val === 1;
+
             aktuelleZeichenDaten.forEach(z => {
+                // 1. Variablen bereinigen! 
+                z.is_small = isTrue(z.is_small);
+                z.bg_dark = isTrue(z.bg_dark);
+
                 z.hat_ring = false; 
                 z.wird_verschoben = false; 
                 
@@ -49,8 +66,13 @@ function ladeTabelleUndBereiteVor(csvDateiPfad, aktuelleRunde, isTraining, callb
                 const isOrangeO = (z.shape === 'O' && z.color_hex === '#FF8C00');
                 z.ist_ziel = (isBlueL || isOrangeO);
                 
-                // NEU: Hier lesen wir jetzt "bekommt_kreis" aus der Tabelle deines Kollegen!
-                z.ki_setzt_ring = isTraining ? false : (z.bekommt_kreis !== undefined ? z.bekommt_kreis : z.ist_ziel); 
+                // 2. Auslesen der Spalte "bekommt_kreis" von deinem Kollegen
+                let markiert = z.ist_ziel; // Fallback, falls die Spalte mal fehlt
+                if (z.bekommt_kreis !== undefined) {
+                    markiert = isTrue(z.bekommt_kreis);
+                }
+                
+                z.ki_setzt_ring = isTraining ? false : markiert; 
             });
 
             if (!isTraining) {
@@ -58,16 +80,17 @@ function ladeTabelleUndBereiteVor(csvDateiPfad, aktuelleRunde, isTraining, callb
                 let ausgewaehlteDrifter = [];
                 
                 if (aktuellerDrift > 0) {
-                    let kandidaten = aktuelleZeichenDaten.filter(z => z.ki_setzt_ring && (z.is_small === true || z.is_small === "True"));
+                    let kandidaten = aktuelleZeichenDaten.filter(z => z.ki_setzt_ring && z.is_small);
                     ausgewaehlteDrifter = kandidaten.sort(() => 0.5 - Math.random()).slice(0, ANZAHL_DRIFT_RINGE);
                     ausgewaehlteDrifter.forEach(z => z.wird_verschoben = true);
                 }
 
                 aktuelleZeichenDaten.forEach(z => {
                     if (ausgewaehlteDrifter.includes(z)) {
-                        z.render_gruppe = 5; 
+                        z.render_gruppe = 5; // Drifter IMMER im letzten Schritt
                     } else if (z.ki_setzt_ring) {
                         
+                        // DYNAMISCHE PRÜFUNG: Gehe die Probanden-Logik von 1 bis 4 durch
                         let zugewiesen = false;
                         for (let i = 0; i < probandenConfig.length; i++) {
                             const conf = probandenConfig[i];
@@ -80,7 +103,7 @@ function ladeTabelleUndBereiteVor(csvDateiPfad, aktuelleRunde, isTraining, callb
                             } else if (conf.category === 'shape') {
                                 isMatch = (conf.value === 'round' && (z.shape === 'O' || z.shape === 'Q')) || (conf.value === 'angular' && (z.shape === 'L' || z.shape === 'T'));
                             } else if (conf.category === 'size') {
-                                isMatch = (conf.value === 'small' && (z.is_small === true || z.is_small === "True")) || (conf.value === 'large' && (z.is_small === false || z.is_small === "False"));
+                                isMatch = (conf.value === 'small' && z.is_small) || (conf.value === 'large' && !z.is_small);
                             }
 
                             if (isMatch) {
@@ -90,6 +113,7 @@ function ladeTabelleUndBereiteVor(csvDateiPfad, aktuelleRunde, isTraining, callb
                             }
                         }
                         
+                        // Wenn der Ring zu GAR KEINER Auswahl passt (forced Error), kommt er in den Final Anomaly Scan
                         if (!zugewiesen) {
                             z.render_gruppe = 5; 
                         }
