@@ -3,6 +3,7 @@
  */
 
 let aiName = "AI ASSISTANT";
+let experimentAborted = false; 
 
 const jsPsych = initJsPsych({
     on_finish: function() {
@@ -20,7 +21,8 @@ const jsPsych = initJsPsych({
                 data: jsPsych.data.get().csv()
             }),
         }).catch(err => console.error(err));
-        jsPsych.data.displayData(); 
+        
+        document.body.innerHTML = '<div style="text-align:center; margin-top:20vh; color:white; font-family:sans-serif;"><h1>Data Saved!</h1><p>You may close this window now.</p></div>';
     }
 });
 
@@ -41,7 +43,7 @@ function createInfoScreen(title, contentHtml, btnText = "Next") {
 }
 
 // ==========================================
-// 1. HAUPTMENÜ
+// 1. HAUPTMENÜ & ADMIN CONFIG
 // ==========================================
 const main_menu = {
     type: jsPsychHtmlButtonResponse,
@@ -56,9 +58,6 @@ const main_menu = {
 };
 timeline.push(main_menu);
 
-// ==========================================
-// 1b. ADMIN EINSTELLUNGEN (NUR GRUPPE 3)
-// ==========================================
 const admin_config_trial = {
     type: jsPsychHtmlButtonResponse,
     stimulus: `
@@ -86,7 +85,6 @@ const admin_config_trial = {
     choices: [],
     on_load: function() {
         document.getElementById('save-admin-btn').addEventListener('click', function() {
-            // Werte auslesen und in der config überschreiben
             RUNDEN_DAUER_SEK = parseInt(document.getElementById('admin-time').value) || 15;
             ANZAHL_DRIFT_RINGE = parseInt(document.getElementById('admin-drift').value) || 3;
             SEQUENZ_SCHRITT_MS = parseInt(document.getElementById('admin-seq').value) || 600;
@@ -100,14 +98,13 @@ timeline.push({
     conditional_function: function() { return aktuelleVersuchsGruppe === 3; }
 });
 
-
 // ==========================================
 // 2. STORY INTRO (VOR DEM TRAINING)
 // ==========================================
 let intro_timeline = [
     {
         type: jsPsychHtmlButtonResponse,
-        stimulus: createInfoScreen("Context", "<p>Imagine you are working for a company that manufactures and maintains metal components.</p><p>Your task is image-based components inspection. You will examine radiographic images of parts and mark indications that may signal a material defect.</p>"),
+        stimulus: createInfoScreen("Context", "<p>Imagine you are working for a company that manufactures and maintains metal components.</p><p>Your task is image-based components inspection. You will examine radiographic images of parts and mark indications that may signal a material defect.</p><p>This kind of inspection is safety-relevant: if a defect is missed, the part can fail in service; if a sound part is flagged in error, it causes unnecessary cost and delay. Both kinds of error should be avoided.</p>"),
         choices: [], on_load: () => document.getElementById('custom-next-btn').addEventListener('click', () => jsPsych.finishTrial())
     },
     {
@@ -196,7 +193,7 @@ timeline.push({
 });
 
 // ==========================================
-// 4a. KI INTRO (NUR GRUPPE 1)
+// 4. KI INTRO & CUSTOMIZATION
 // ==========================================
 timeline.push({
     timeline: [{
@@ -207,9 +204,6 @@ timeline.push({
     conditional_function: function() { return aktuelleVersuchsGruppe === 1; }
 });
 
-// ==========================================
-// 4b. CUSTOMIZATION (NUR GRUPPE 2)
-// ==========================================
 timeline.push({
     timeline: [{
         type: jsPsychHtmlButtonResponse,
@@ -262,16 +256,13 @@ const customization_settings_trial = {
         <div style="background:#0f172a; padding:40px; color:white; font-family:sans-serif; text-align:left; border-radius: 8px; max-width: 800px; margin: 40px auto; border: 1px solid #334155;">
             <h2 style="color:#deff9a; margin-top:0; text-align:center;">Configure ${aiName}</h2>
             <p style="text-align:center; margin-bottom:30px; font-size: 18px;">According to your own strategy, rank the categories and select what to look for.</p>
-            
             <div id="error-msg" style="color:#d9534f; display:none; text-align:center; margin-bottom:15px; font-weight:bold; padding: 10px; background: rgba(217, 83, 79, 0.1); border-radius: 4px;">
                 Please select each category exactly once! (Do not use a category twice)
             </div>
-
             ${makeSelectRow(1, 'bg')}
             ${makeSelectRow(2, 'color')}
             ${makeSelectRow(3, 'shape')}
             ${makeSelectRow(4, 'size')}
-            
             <div style="text-align: center; margin-top: 30px;">
                 <button id="save-config-btn" class="action-btn btn-start" style="padding: 12px 30px;">Submit Settings</button>
             </div>
@@ -305,25 +296,20 @@ const customization_settings_trial = {
             let selectedCats = [];
             for(let i=1; i<=4; i++) selectedCats.push(document.getElementById('cat-'+i).value);
             const uniqueCats = new Set(selectedCats);
-            
             if(uniqueCats.size !== 4) {
                 document.getElementById('error-msg').style.display = 'block';
                 return; 
             }
-            
             probandenConfig = [];
             for(let i=1; i<=4; i++) {
                 let catEl = document.getElementById('cat-'+i);
                 let valEl = document.getElementById('val-'+i);
-                
                 let c = catEl.value;
                 let v = valEl.value;
                 let cLabel = catEl.options[catEl.selectedIndex].text;
                 let vLabel = valEl.options[valEl.selectedIndex].text;
-                
                 if(c === 'color' && v === 'orange') vLabel = '<span class="text-orange">Orange</span>';
                 if(c === 'color' && v === 'blue') vLabel = '<span class="text-blue">Blue</span>';
-
                 probandenConfig.push({ category: c, value: v, label: cLabel, valueLabel: vLabel });
             }
             jsPsych.finishTrial(); 
@@ -352,9 +338,8 @@ timeline.push({
 
 
 // ==========================================
-// 7. HAUPT-RUNDEN SCHLEIFE
+// 5. HAUPT-RUNDEN SCHLEIFE
 // ==========================================
-
 for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
     const formatierteNummer = String(runde).padStart(3, '0');
     const bildPfad = `bilder/stimulus_${formatierteNummer}.jpg`;
@@ -434,7 +419,9 @@ for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
         },
         choices: [],
         on_finish: function(data) {
-            if (data.beendigungs_grund === 'reset') jsPsych.endExperiment("Das System wird rekalibriert. Das Experiment wurde beendet.");
+            if (data.beendigungs_grund === 'reset') {
+                experimentAborted = true; // Bricht alle restlichen Runden ab!
+            }
         },
         on_load: function() {
             const resetBtn = document.getElementById('custom-reset-btn');
@@ -461,7 +448,6 @@ for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
                             zeichen.hat_ring = true;
                         }
                     });
-
                     currentStep++;
 
                     if (currentStep > 5) {
@@ -472,7 +458,6 @@ for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
                         if (adminNextBtn) adminNextBtn.disabled = false; 
                         isScanFinished = true;
                         
-                        // Timer Logik (Jetzt für alle!)
                         let timeLeft = RUNDEN_DAUER_SEK;
                         timerDisplay.innerText = `Continue in ${timeLeft}...`;
                         countdownInterval = setInterval(() => {
@@ -480,7 +465,6 @@ for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
                             timerDisplay.innerText = `Continue in ${timeLeft}...`;
                             if (timeLeft <= 0) beendeRunde('timeout');
                         }, 1000);
-                        
                     }
                 }, SEQUENZ_SCHRITT_MS);
             });
@@ -527,10 +511,87 @@ for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
     timeline.push({
         timeline: runde_timeline,
         conditional_function: function() {
+            if (experimentAborted) return false;
             if (aktuelleVersuchsGruppe === 3 && runde < RUNDEN_OHNE_DRIFT + 1) return false;
             return true;
         }
     });
 }
+
+// ==========================================
+// 6. ABSCHLUSS-FRAGEBÖGEN (NACH DEM EXPERIMENT)
+// ==========================================
+
+const likert_scale = ["1 - Strongly Disagree", "2", "3", "4", "5", "6", "7 - Strongly Agree"];
+const preamble_text = `<div style="max-width: 800px; margin: 0 auto; text-align: left; margin-bottom: 20px;"><p>We are interested in your perceptions of the agent.<br>Please take your time to answer the following questions based on your experiences so far. There are no right or wrong answers.<br><br>Please indicate the degree to which you personally agree or disagree with the following statements.</p></div>`;
+const short_preamble = `<div style="max-width: 800px; margin: 0 auto; text-align: left; margin-bottom: 20px;"><p>Please indicate the degree to which you personally agree or disagree with the following statements.</p></div>`;
+
+// 6.1 Recalibrate Frage (Nur wenn abgebrochen wurde)
+const recalibrate_survey = {
+    type: jsPsychSurveyText,
+    preamble: '<div style="max-width: 800px; margin: 0 auto; text-align: left;"><h3>Recalibration</h3></div>',
+    questions: [
+        {prompt: "Why did you click on „Recalibrate“?<br>Please type your answer…", rows: 5, name: 'recalibrate_reason'}
+    ],
+    conditional_function: function() { return experimentAborted; }
+};
+timeline.push(recalibrate_survey);
+
+// 6.2 Paket 1: Customization (Die ersten 3)
+const customization_survey = {
+    type: jsPsychSurveyLikert,
+    preamble: preamble_text, // Hat jetzt das lange Intro bekommen!
+    questions: [
+        {prompt: "I customized the agent before using it for the task.", name: 'cust_1', labels: likert_scale, required: true},
+        {prompt: "The agent I worked with was customized based on my instructions.", name: 'cust_2', labels: likert_scale, required: true},
+        {prompt: "The agent I worked with was customized based on my search strategy.", name: 'cust_3', labels: likert_scale, required: true}
+    ]
+};
+timeline.push(customization_survey);
+
+// 6.3 Paket 2: Trust (Die nächsten 2)
+const trust_survey = {
+    type: jsPsychSurveyLikert,
+    preamble: short_preamble,
+    questions: [
+        {prompt: "I trust the agent.", name: 'trust_1', labels: likert_scale, required: true},
+        {prompt: "I can rely on the agent.", name: 'trust_2', labels: likert_scale, required: true}
+    ]
+};
+timeline.push(trust_survey);
+
+// 6.4 Paket 3: Szenario-Text + Responsibility (Die letzten 2)
+const responsibility_survey = {
+    type: jsPsychSurveyLikert,
+    preamble: `
+        <div style="text-align: left; max-width: 800px; margin: 0 auto; line-height: 1.6; margin-bottom: 30px;">
+            <p>Now, imagine that you have reported the detected component defects to your company. During further processing of a component you inspected before the break, high porosity was detected.</p>
+            <p>An experienced engineer has raised concerns that serious errors were made in defect detection for this component, and that it was consequently misclassified. In short, they gave the classifications on this component a negative evaluation.</p>
+            <p style="margin-top: 20px;"><strong>Please indicate the degree to which you personally agree or disagree with the following statements.</strong></p>
+        </div>`,
+    questions: [
+        {prompt: "I am personally responsible for the misclassified component.", name: 'resp_1', labels: likert_scale, required: true},
+        {prompt: "The AI system is responsible for the misclassified component.", name: 'resp_2', labels: likert_scale, required: true}
+    ]
+};
+timeline.push(responsibility_survey);
+
+// 6.5 Outro
+const outro_trial = {
+    type: jsPsychHtmlButtonResponse,
+    stimulus: `
+        <div style="background:#0f172a; padding:40px; color:white; font-family:sans-serif; text-align:center; border-radius: 8px; max-width: 600px; margin: 40px auto; border: 1px solid #334155;">
+            <h2 style="color:#deff9a; margin-top:0;">Thank you!</h2>
+            <p style="font-size: 18px; line-height: 1.6; margin-bottom: 20px;">
+                We were interested in your interaction with the agent and whether you were interested in recalibrating, so there is no need for further recalibration.
+            </p>
+            <p style="font-size: 18px; line-height: 1.6; margin-bottom: 30px;">
+                Thank you for participating.<br>You may close this window now.
+            </p>
+        </div>
+    `,
+    choices: ['Finish & Save Data']
+};
+timeline.push(outro_trial);
 
 jsPsych.run(timeline);
