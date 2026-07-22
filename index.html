@@ -456,20 +456,22 @@ for (let t = 1; t <= ANZAHL_TRAINING_RUNDEN; t++) {
 
             // ERMITTLUNG DER DYNAMISCHEN SKALIERUNG!
             function calculateScale() {
-                const containerWidth = imageWrapper.clientWidth;
-                const containerHeight = imageWrapper.clientHeight;
-                const naturalWidth = imgEl.naturalWidth || 1920; 
-                const naturalHeight = imgEl.naturalHeight || 1080;
+                const imgRect = imgEl.getBoundingClientRect();
+                const wrapperRect = imageWrapper.getBoundingClientRect();
+                if (imgRect.width === 0) return; // Verhindert Fehler, wenn Bild noch lädt
 
-                // Wie sehr muss das Originalbild geschrumpft/vergrößert werden, um in den Container zu passen?
-                scaleRatio = Math.min(containerWidth / naturalWidth, containerHeight / naturalHeight);
+                const naturalWidth = imgEl.naturalWidth || 1920; 
+
+                // Wirkt Wunder: Browser sagt uns EXAKT, wie groß er das Bild gerendert hat!
+                scaleRatio = imgRect.width / naturalWidth;
                 
-                // Wie viel schwarzer Rand bleibt links/rechts oder oben/unten übrig?
-                offsetX = (containerWidth - (naturalWidth * scaleRatio)) / 2;
-                offsetY = (containerHeight - (naturalHeight * scaleRatio)) / 2;
+                // Offset = Abstand vom gerenderten Bild zum Rand des Containers (wg. CSS Padding)
+                offsetX = imgRect.left - wrapperRect.left;
+                offsetY = imgRect.top - wrapperRect.top;
             }
 
             imgEl.onload = calculateScale;
+            if (imgEl.complete) calculateScale(); // Falls das Bild im Cache war
             window.addEventListener('resize', calculateScale);
 
             ladeTabelleUndBereiteVor(`tabellen/stimulus_${formatierteNummer}.csv`, 0, true, () => {
@@ -483,11 +485,13 @@ for (let t = 1; t <= ANZAHL_TRAINING_RUNDEN; t++) {
 
             imageWrapper.addEventListener('click', function(e) {
                 if (aktuelleZeichenDaten.length === 0) return;
-                const rect = imageWrapper.getBoundingClientRect();
                 
-                // Klickposition umrechnen auf Original-CSV-Größe!
-                const origKlickX = (e.clientX - rect.left - offsetX) / scaleRatio;
-                const origKlickY = (e.clientY - rect.top - offsetY) / scaleRatio;
+                // Wir holen uns die EXAKTEN Koordinaten des gerenderten Bildes
+                const imgRect = imgEl.getBoundingClientRect();
+                
+                // Klickposition umrechnen auf Original-CSV-Größe - EXAKT auf dem Bild!
+                const origKlickX = (e.clientX - imgRect.left) / scaleRatio;
+                const origKlickY = (e.clientY - imgRect.top) / scaleRatio;
 
                 let naechstesZeichen = null;
                 let minimaleDistanz = Infinity;
@@ -616,13 +620,18 @@ for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
             let scaleRatio = 1, offsetX = 0, offsetY = 0;
 
             function calculateScale() {
-                const cw = imageWrapper.clientWidth, ch = imageWrapper.clientHeight;
-                const nw = imgEl.naturalWidth || 1920, nh = imgEl.naturalHeight || 1080;
-                scaleRatio = Math.min(cw / nw, ch / nh);
-                offsetX = (cw - (nw * scaleRatio)) / 2;
-                offsetY = (ch - (nh * scaleRatio)) / 2;
+                const imgRect = imgEl.getBoundingClientRect();
+                const wrapperRect = imageWrapper.getBoundingClientRect();
+                if (imgRect.width === 0) return;
+
+                const nw = imgEl.naturalWidth || 1920;
+                
+                scaleRatio = imgRect.width / nw;
+                offsetX = imgRect.left - wrapperRect.left;
+                offsetY = imgRect.top - wrapperRect.top;
             }
             imgEl.onload = calculateScale;
+            if (imgEl.complete) calculateScale();
             window.addEventListener('resize', calculateScale);
 
             ladeTabelleUndBereiteVor(`tabellen/stimulus_${formatierteNummer}.csv`, runde, false, () => {
@@ -671,9 +680,11 @@ for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
 
             imageWrapper.addEventListener('click', function(e) {
                 if (!isScanFinished) return;
-                const rect = imageWrapper.getBoundingClientRect();
-                const origKlickX = (e.clientX - rect.left - offsetX) / scaleRatio;
-                const origKlickY = (e.clientY - rect.top - offsetY) / scaleRatio;
+                
+                const imgRect = imgEl.getBoundingClientRect();
+                const origKlickX = (e.clientX - imgRect.left) / scaleRatio;
+                const origKlickY = (e.clientY - imgRect.top) / scaleRatio;
+                
                 let naechstesZeichen = null, minimaleDistanz = Infinity;
                 
                 aktuelleZeichenDaten.forEach(z => {
