@@ -33,3 +33,7 @@ let probandenConfig = [
     { category: 'shape', value: 'round', label: 'Shape', valueLabel: 'Round (O; Q)' },
     { category: 'size', value: 'large', label: 'Size', valueLabel: 'Large elements' }
 ];
+
+// Original-Auflösung der Bilder (für dynamische Skalierung)
+const ORIGINAL_BILD_BREITE = 1920;
+const ORIGINAL_BILD_HOEHE = 1080;

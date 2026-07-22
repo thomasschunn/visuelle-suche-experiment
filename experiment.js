@@ -45,6 +45,8 @@ function createInfoScreen(title, contentHtml, btnText = "Next") {
 // ==========================================
 // 1. HAUPTMENÜ & ADMIN CONFIG
 // ==========================================
+let chose_calibration = false;
+
 const main_menu = {
     type: jsPsychHtmlButtonResponse,
     stimulus: `
@@ -53,10 +55,56 @@ const main_menu = {
             <p>Wähle den Modus für diesen Probanden:</p>
         </div>
     `,
-    choices: ['1. Standard (Ohne Konfig)', '2. Interaktiv (Mit Konfig)', '3. Admin Skip (Runde 10)'],
-    on_finish: function(data) { aktuelleVersuchsGruppe = data.response + 1; }
+    choices: ['1. Standard (Ohne Konfig)', '2. Interaktiv (Mit Konfig)', '3. Admin Skip (Runde 10)', '4. Eyetracker Kalibrierung'],
+    on_finish: function(data) { 
+        if (data.response === 3) {
+            chose_calibration = true; // Startet die Schleife für Kalibrierung neu
+        } else {
+            chose_calibration = false;
+            aktuelleVersuchsGruppe = data.response + 1; 
+        }
+    }
 };
-timeline.push(main_menu);
+
+const calibration_screen = {
+    type: jsPsychHtmlButtonResponse,
+    stimulus: `
+        <div style="position: relative; width: 90vw; max-width: 1200px; aspect-ratio: 1920/1080; background: #222; margin: 0 auto; border: 2px solid #555;">
+            <!-- 9 Rote Punkte -->
+            <div style="position:absolute; top:5%; left:5%; width:24px; height:24px; background:red; border-radius:50%; transform:translate(-50%, -50%);"></div>
+            <div style="position:absolute; top:5%; left:50%; width:24px; height:24px; background:red; border-radius:50%; transform:translate(-50%, -50%);"></div>
+            <div style="position:absolute; top:5%; left:95%; width:24px; height:24px; background:red; border-radius:50%; transform:translate(-50%, -50%);"></div>
+            
+            <div style="position:absolute; top:50%; left:5%; width:24px; height:24px; background:red; border-radius:50%; transform:translate(-50%, -50%);"></div>
+            <div style="position:absolute; top:50%; left:50%; width:24px; height:24px; background:red; border-radius:50%; transform:translate(-50%, -50%);"></div>
+            <div style="position:absolute; top:50%; left:95%; width:24px; height:24px; background:red; border-radius:50%; transform:translate(-50%, -50%);"></div>
+            
+            <div style="position:absolute; top:95%; left:5%; width:24px; height:24px; background:red; border-radius:50%; transform:translate(-50%, -50%);"></div>
+            <div style="position:absolute; top:95%; left:50%; width:24px; height:24px; background:red; border-radius:50%; transform:translate(-50%, -50%);"></div>
+            <div style="position:absolute; top:95%; left:95%; width:24px; height:24px; background:red; border-radius:50%; transform:translate(-50%, -50%);"></div>
+            
+            <!-- Ausgelagerter Text -->
+            <p style="position: absolute; bottom: -60px; left: 50%; transform: translateX(-50%); width: 100%; color: white; text-align: center; font-family: sans-serif; font-size: 18px; margin: 0;">Eyetracker-Kalibrierung (9-Punkt). Bitte Punkte fixieren.</p>
+        </div>
+    `,
+    choices: ['Kalibrierung beendet (Zurück zum Menü)']
+    // HIER wurde die conditional_function entfernt!
+};
+
+// Schleife, die so lange läuft, wie "Eyetracker" ausgewählt wird
+timeline.push({
+    timeline: [
+        main_menu, 
+        {
+            // HIER wird der Screen jetzt als Unter-Timeline geprüft
+            timeline: [calibration_screen],
+            conditional_function: function() { 
+                return chose_calibration; 
+            }
+        }
+    ],
+    loop_function: function() { return chose_calibration; }
+});
 
 const admin_config_trial = {
     type: jsPsychHtmlButtonResponse,
@@ -142,8 +190,8 @@ for (let t = 1; t <= ANZAHL_TRAINING_RUNDEN; t++) {
         type: jsPsychHtmlButtonResponse,
         stimulus: `
         <div class="experiment-container">
-            <div id="image-wrapper" class="image-container">
-                <img src="${bildPfad}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;" />
+            <div id="image-wrapper" class="image-container" style="position:relative; width:100%; aspect-ratio: 1920/1080;">
+                <img src="${bildPfad}" style="position:absolute; top:0; left:0; width: 100%; height: 100%; object-fit: contain; border-radius: 4px;" />
             </div>
             <div class="right-column">
                 <div style="background:#1e2229; padding:20px; border-radius:10px; color:white; font-family:sans-serif; border: 2px solid #555;">
@@ -166,13 +214,23 @@ for (let t = 1; t <= ANZAHL_TRAINING_RUNDEN; t++) {
 
             imageWrapper.addEventListener('click', function(e) {
                 if (aktuelleZeichenDaten.length === 0) return;
+                
                 const rect = imageWrapper.getBoundingClientRect();
-                const klickX = e.clientX - rect.left, klickY = e.clientY - rect.top;
+                const scale = rect.width / ORIGINAL_BILD_BREITE; 
+
+                // 1. Bildschirm-Klick berechnen
+                const screenKlickX = e.clientX - rect.left;
+                const screenKlickY = e.clientY - rect.top;
+
+                // 2. Zurückrechnen in die Original-Welt (Tabelle)
+                const originalKlickX = screenKlickX / scale;
+                const originalKlickY = screenKlickY / scale;
+
                 let naechstesZeichen = null;
                 let minimaleDistanz = Infinity;
                 
                 aktuelleZeichenDaten.forEach(zeichen => {
-                    const distanz = Math.sqrt(Math.pow(klickX - zeichen.center_x, 2) + Math.pow(klickY - zeichen.center_y, 2));
+                    const distanz = Math.sqrt(Math.pow(originalKlickX - zeichen.center_x, 2) + Math.pow(originalKlickY - zeichen.center_y, 2));
                     if (distanz < minimaleDistanz) { minimaleDistanz = distanz; naechstesZeichen = zeichen; }
                 });
 
@@ -398,8 +456,8 @@ for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
                 .scan-active { opacity: 1.0; color: #deff9a; font-weight: bold; }
             </style>
             <div class="experiment-container">
-                <div id="image-wrapper" class="image-container">
-                    <img src="${bildPfad}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;" />
+                <div id="image-wrapper" class="image-container" style="position:relative; width:100%; aspect-ratio: 1920/1080;">
+                    <img src="${bildPfad}" style="position:absolute; top:0; left:0; width: 100%; height: 100%; object-fit: contain; border-radius: 4px;" />
                 </div>
                 <div class="right-column">
                     <div class="ki-panel">
@@ -420,7 +478,7 @@ for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
         choices: [],
         on_finish: function(data) {
             if (data.beendigungs_grund === 'reset') {
-                experimentAborted = true; // Bricht alle restlichen Runden ab!
+                experimentAborted = true; 
             }
         },
         on_load: function() {
@@ -485,13 +543,23 @@ for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
 
             imageWrapper.addEventListener('click', function(e) {
                 if (!isScanFinished) return;
+                
                 const rect = imageWrapper.getBoundingClientRect();
-                const klickX = e.clientX - rect.left, klickY = e.clientY - rect.top;
+                const scale = rect.width / ORIGINAL_BILD_BREITE; 
+
+                // 1. Bildschirm-Klick berechnen
+                const screenKlickX = e.clientX - rect.left;
+                const screenKlickY = e.clientY - rect.top;
+
+                // 2. Zurückrechnen in die Original-Welt (Tabelle)
+                const originalKlickX = screenKlickX / scale;
+                const originalKlickY = screenKlickY / scale;
+
                 let naechstesZeichen = null;
                 let minimaleDistanz = Infinity;
                 
                 aktuelleZeichenDaten.forEach(zeichen => {
-                    const distanz = Math.sqrt(Math.pow(klickX - zeichen.center_x, 2) + Math.pow(klickY - zeichen.center_y, 2));
+                    const distanz = Math.sqrt(Math.pow(originalKlickX - zeichen.center_x, 2) + Math.pow(originalKlickY - zeichen.center_y, 2));
                     if (distanz < minimaleDistanz) { minimaleDistanz = distanz; naechstesZeichen = zeichen; }
                 });
 
@@ -540,7 +608,7 @@ timeline.push(recalibrate_survey);
 // 6.2 Paket 1: Customization (Die ersten 3)
 const customization_survey = {
     type: jsPsychSurveyLikert,
-    preamble: preamble_text, // Hat jetzt das lange Intro bekommen!
+    preamble: preamble_text,
     questions: [
         {prompt: "I customized the agent before using it for the task.", name: 'cust_1', labels: likert_scale, required: true},
         {prompt: "The agent I worked with was customized based on my instructions.", name: 'cust_2', labels: likert_scale, required: true},

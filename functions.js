@@ -9,24 +9,36 @@ function berechneDrift(runde) {
 }
 
 /**
- * ZEICHNEN DER RINGE (inkl. Versatz für den Drift)
+ * ZEICHNEN DER RINGE (inkl. Skalierung und Versatz für den Drift)
  */
 function renderRing(containerId, originalX, originalY, elementSize, driftRatio, zeichenObjekt = null) {
     const container = document.getElementById(containerId);
     if (!container) return;
 
-    const radius = (elementSize === 'groß') ? (19 * 1.6) : (12 * 1.6);
-    const diameter = radius * 2;
+    // 1. Skalierungsfaktor des aktuellen Bildschirms berechnen
+    const rect = container.getBoundingClientRect();
+    const scale = rect.width ? (rect.width / ORIGINAL_BILD_BREITE) : 1;
+
+    // 2. Originalgrößen berechnen
+    const originalRadius = (elementSize === 'groß') ? (19 * 1.6 * 2) : (12 * 1.6 * 2);
+    const originalDiameter = originalRadius * 2;
     const driftAngle = Math.PI / 4; 
-    const offsetPixels = radius * driftRatio; 
+    const originalOffset = originalRadius * driftRatio; 
     
-    const currentX = originalX + (Math.cos(driftAngle) * offsetPixels);
-    const currentY = originalY + (Math.sin(driftAngle) * offsetPixels);
+    // 3. Position mit Drift im Original berechnen
+    const originX_withDrift = originalX + (Math.cos(driftAngle) * originalOffset);
+    const originY_withDrift = originalY + (Math.sin(driftAngle) * originalOffset);
+
+    // 4. Alles für die finale Bildschirmdarstellung skalieren
+    const currentX = originX_withDrift * scale;
+    const currentY = originY_withDrift * scale;
+    const currentDiameter = originalDiameter * scale;
 
     const ringElement = document.createElement('div');
     ringElement.classList.add('ki-ring'); 
-    ringElement.style.width = diameter + 'px';
-    ringElement.style.height = diameter + 'px';
+    ringElement.style.position = 'absolute'; // Wichtig für Skalierung
+    ringElement.style.width = currentDiameter + 'px';
+    ringElement.style.height = currentDiameter + 'px';
     ringElement.style.left = currentX + 'px';
     ringElement.style.top = currentY + 'px';
 
