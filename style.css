@@ -31,6 +31,13 @@
     flex-shrink: 0; 
 }
 
+/* Verhindert das Markieren und Ziehen der Stimulus-Bilder */
+.image-container img {
+    user-select: none;
+    -webkit-user-drag: none;
+    pointer-events: none; /* Klicks gehen direkt durch an das Wrapper-Element */
+}
+
 /* Das KI-Panel */
 .ki-panel {
     width: 100%; 
