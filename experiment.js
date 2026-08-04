@@ -234,7 +234,7 @@ for (let t = 1; t <= ANZAHL_TRAINING_RUNDEN; t++) {
                     if (distanz < minimaleDistanz) { minimaleDistanz = distanz; naechstesZeichen = zeichen; }
                 });
 
-                if (naechstesZeichen && minimaleDistanz <= 40 && !naechstesZeichen.hat_ring) {
+                if (naechstesZeichen && minimaleDistanz <= 60 && !naechstesZeichen.hat_ring) {
                     const groesse = (naechstesZeichen.is_small === true || naechstesZeichen.is_small === "True") ? 'klein' : 'groß';
                     renderRing('image-wrapper', naechstesZeichen.center_x, naechstesZeichen.center_y, groesse, 0.0, naechstesZeichen);
                     naechstesZeichen.hat_ring = true;
