@@ -28,10 +28,10 @@ let aktuelleVersuchsGruppe = 0;
 
 // Die dynamische Konfiguration (Standard für Gruppe 1)
 let probandenConfig = [
-    { category: 'bg', value: 'dark', label: 'Background', valueLabel: 'Dark areas' },
-    { category: 'color', value: 'orange', label: 'Color', valueLabel: '<span class="text-orange">Orange</span>' },
-    { category: 'shape', value: 'round', label: 'Shape', valueLabel: 'Round (O; Q)' },
-    { category: 'size', value: 'large', label: 'Size', valueLabel: 'Large elements' }
+    { category: 'direction', value: 'top_left', label: 'Direction', valueLabel: 'top left' },
+    { category: 'bg', value: 'dark', label: 'Background', valueLabel: 'dark areas' },
+    { category: 'size', value: 'large', label: 'Size', valueLabel: 'large' },
+    { category: 'type', value: 'L', label: 'Type', valueLabel: 'L' }
 ];
 
 // Original-Auflösung der Bilder (für dynamische Skalierung)

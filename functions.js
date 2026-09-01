@@ -108,14 +108,34 @@ function ladeTabelleUndBereiteVor(csvDateiPfad, aktuelleRunde, isTraining, callb
                             const conf = probandenConfig[i];
                             let isMatch = false;
                             
+                            // 1. Background (dunkel / hell)
                             if (conf.category === 'bg') {
                                 isMatch = (conf.value === 'dark' && z.bg_dark) || (conf.value === 'light' && !z.bg_dark);
+                            
+                            // 2. Size (groß / klein)
+                            } else if (conf.category === 'size') {
+                                isMatch = (conf.value === 'small' && z.is_small) || (conf.value === 'large' && !z.is_small);
+                            
+                            // 3. Type (L / O) - NEU
+                            } else if (conf.category === 'type') {
+                                isMatch = (conf.value === 'L' && z.shape === 'L') || (conf.value === 'O' && z.shape === 'O');
+                            
+                            // 4. Direction (Quadranten) - NEU
+                            } else if (conf.category === 'direction') {
+                                // Bild ist 1920x1080, also ist die Mitte bei X=960 und Y=540
+                                const isLeft = z.center_x <= 960;
+                                const isTop = z.center_y <= 540;
+                                
+                                if (conf.value === 'top_left' && isLeft && isTop) isMatch = true;
+                                else if (conf.value === 'top_right' && !isLeft && isTop) isMatch = true;
+                                else if (conf.value === 'bottom_left' && isLeft && !isTop) isMatch = true;
+                                else if (conf.value === 'bottom_right' && !isLeft && !isTop) isMatch = true;
+                            
+                            // 5. & 6. Alte Logiken (Color und Shape) - Zur Sicherheit behalten
                             } else if (conf.category === 'color') {
                                 isMatch = (conf.value === 'orange' && z.color_hex === '#FF8C00') || (conf.value === 'blue' && z.color_hex === '#0064FF');
                             } else if (conf.category === 'shape') {
                                 isMatch = (conf.value === 'round' && (z.shape === 'O' || z.shape === 'Q')) || (conf.value === 'angular' && (z.shape === 'L' || z.shape === 'T'));
-                            } else if (conf.category === 'size') {
-                                isMatch = (conf.value === 'small' && z.is_small) || (conf.value === 'large' && !z.is_small);
                             }
 
                             if (isMatch) {
@@ -124,7 +144,6 @@ function ladeTabelleUndBereiteVor(csvDateiPfad, aktuelleRunde, isTraining, callb
                                 break; 
                             }
                         }
-                        
                         // Wenn der Ring zu GAR KEINER Auswahl passt (forced Error), kommt er in den Final Anomaly Scan
                         if (!zugewiesen) {
                             z.render_gruppe = 5; 

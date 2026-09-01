@@ -319,8 +319,14 @@ const customization_name_trial = {
     stimulus: `
         <div style="background:#0f172a; padding:40px; color:white; font-family:sans-serif; text-align:center; border-radius: 8px; max-width: 600px; margin: 40px auto; border: 1px solid #334155;">
             <h2 style="color:#deff9a; margin-top:0;">Agent Identification</h2>
-            <p style="margin-bottom: 20px; font-size: 18px; line-height: 1.5; text-align: left;">Before working together with your AI agent, please take some time to customize it using the customization interface on the next page to suit your role as a defect inspector.</p>
+            <p style="margin-bottom: 20px; font-size: 18px; line-height: 1.5; text-align: left;">Before working with your AI agent, please take some time to customize it, based on your job as a defect inspector.</p>
             <p style="margin-bottom: 20px; font-size: 18px; line-height: 1.5; text-align: left;">First, give your AI agent an identification so that your settings can be saved. Identifications consist of 2 letters and 2 numbers (e.g. AI01).</p>
+            
+            <!-- NEU: Versteckte Fehlermeldung, falls die Eingabe falsch ist -->
+            <div id="name-error-msg" style="color:#d9534f; display:none; margin-bottom:15px; font-weight:bold; background: rgba(217, 83, 79, 0.1); padding: 10px; border-radius: 4px;">
+                Please enter exactly 2 letters followed by 2 numbers (e.g., AI01).
+            </div>
+            
             <input type="text" id="ai-name-input" style="padding:10px; font-size:20px; margin-bottom:30px; border-radius: 4px; border: none; text-align: center; width: 100%; max-width: 200px;" placeholder="AI01" maxlength="4"><br>
             <button id="save-name-btn" class="action-btn btn-start" style="padding: 12px 30px;">Next</button>
         </div>
@@ -329,8 +335,18 @@ const customization_name_trial = {
     on_load: function() {
         document.getElementById('save-name-btn').addEventListener('click', function() {
             const inputVal = document.getElementById('ai-name-input').value.trim();
-            if(inputVal !== "") aiName = inputVal.toUpperCase(); 
-            jsPsych.finishTrial(); 
+            const errorMsg = document.getElementById('name-error-msg');
+            
+            // NEU: Regex-Prüfung - ^[a-zA-Z]{2} = 2 Buchstaben, \d{2}$ = 2 Zahlen am Ende
+            const namePattern = /^[a-zA-Z]{2}\d{2}$/;
+            
+            if(namePattern.test(inputVal)) {
+                errorMsg.style.display = 'none'; // Fehler verstecken
+                aiName = inputVal.toUpperCase(); 
+                jsPsych.finishTrial(); // Nur weitergehen, wenn Eingabe korrekt ist
+            } else {
+                errorMsg.style.display = 'block'; // Fehler anzeigen
+            }
         });
     }
 };
@@ -343,10 +359,10 @@ const customization_settings_trial = {
             <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;">
                 <strong style="color:#32b5a1; font-size: 18px; width: 100px;">Priority ${priorityNum}:</strong>
                 <select id="cat-${priorityNum}" style="padding: 8px; font-size: 16px; border-radius: 4px; border: 1px solid #555; background: #1e2229; color: white;">
+                    <option value="direction" ${defaultCat === 'direction' ? 'selected' : ''}>Direction</option>
                     <option value="bg" ${defaultCat === 'bg' ? 'selected' : ''}>Background</option>
-                    <option value="color" ${defaultCat === 'color' ? 'selected' : ''}>Color</option>
-                    <option value="shape" ${defaultCat === 'shape' ? 'selected' : ''}>Shape</option>
                     <option value="size" ${defaultCat === 'size' ? 'selected' : ''}>Size</option>
+                    <option value="type" ${defaultCat === 'type' ? 'selected' : ''}>Type</option>
                 </select>
                 <select id="val-${priorityNum}" style="padding: 8px; font-size: 16px; border-radius: 4px; border: 1px solid #555; background: #1e2229; color: white; width: 200px;">
                 </select>
@@ -360,10 +376,10 @@ const customization_settings_trial = {
             <div id="error-msg" style="color:#d9534f; display:none; text-align:center; margin-bottom:15px; font-weight:bold; padding: 10px; background: rgba(217, 83, 79, 0.1); border-radius: 4px;">
                 Please select each category exactly once! (Do not use a category twice)
             </div>
-            ${makeSelectRow(1, 'bg')}
-            ${makeSelectRow(2, 'color')}
-            ${makeSelectRow(3, 'shape')}
-            ${makeSelectRow(4, 'size')}
+            ${makeSelectRow(1, 'direction')}
+            ${makeSelectRow(2, 'bg')}
+            ${makeSelectRow(3, 'size')}
+            ${makeSelectRow(4, 'type')}
             <div style="text-align: center; margin-top: 30px;">
                 <button id="save-config-btn" class="action-btn btn-start" style="padding: 12px 30px;">Submit Settings</button>
             </div>
@@ -373,10 +389,10 @@ const customization_settings_trial = {
     choices: [],
     on_load: function() {
         const catData = {
-            bg: [{v:'dark', t:'Dark areas'}, {v:'light', t:'Light areas'}],
-            color: [{v:'orange', t:'Orange'}, {v:'blue', t:'Blue'}],
-            shape: [{v:'round', t:'Round (O; Q)'}, {v:'angular', t:'Angular (L; T)'}],
-            size: [{v:'large', t:'Large elements'}, {v:'small', t:'Small elements'}]
+            direction: [{v:'top_left', t:'top left'}, {v:'top_right', t:'top right'}, {v:'bottom_right', t:'bottom right'}, {v:'bottom_left', t:'bottom left'}],
+            bg: [{v:'dark', t:'dark areas'}, {v:'light', t:'light areas'}],
+            size: [{v:'large', t:'large'}, {v:'small', t:'small'}],
+            type: [{v:'L', t:'L'}, {v:'O', t:'O'}]
         };
 
         function updateSubSelect(rowNum) {
@@ -409,8 +425,7 @@ const customization_settings_trial = {
                 let v = valEl.value;
                 let cLabel = catEl.options[catEl.selectedIndex].text;
                 let vLabel = valEl.options[valEl.selectedIndex].text;
-                if(c === 'color' && v === 'orange') vLabel = '<span class="text-orange">Orange</span>';
-                if(c === 'color' && v === 'blue') vLabel = '<span class="text-blue">Blue</span>';
+                
                 probandenConfig.push({ category: c, value: v, label: cLabel, valueLabel: vLabel });
             }
             jsPsych.finishTrial(); 
