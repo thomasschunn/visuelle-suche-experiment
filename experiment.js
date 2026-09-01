@@ -151,24 +151,48 @@ timeline.push({
 // ==========================================
 let intro_timeline = [
     {
+        // Text 1
         type: jsPsychHtmlButtonResponse,
-        stimulus: createInfoScreen("Context", "<p>Imagine you are working for a company that manufactures and maintains metal components.</p><p>Your task is image-based components inspection. You will examine radiographic images of parts and mark indications that may signal a material defect.</p><p>This kind of inspection is safety-relevant: if a defect is missed, the part can fail in service; if a sound part is flagged in error, it causes unnecessary cost and delay. Both kinds of error should be avoided.</p>"),
-        choices: [], on_load: () => document.getElementById('custom-next-btn').addEventListener('click', () => jsPsych.finishTrial())
+        stimulus: createInfoScreen(
+            "Context", 
+            `<p>Imagine you work for a company that manufactures and maintains metal components.</p>
+             <p>You will examine simplified radiographic images to identify material defects. If a component exceeds a specific threshold of defects, it is considered unsafe and must be rejected.</p>
+             <p>This task is safety-critical: missing a defect risks failure in service, while falsely rejecting a good part causes unnecessary cost and delay. Avoid both types of errors.</p>`
+        ),
+        choices: [], 
+        on_load: () => document.getElementById('custom-next-btn').addEventListener('click', () => jsPsych.finishTrial())
     },
     {
+        // Text 2
         type: jsPsychHtmlButtonResponse,
-        stimulus: createInfoScreen("The Task", "<p>You will be shown abstracted images of components one after another.</p><p>Your task is to find defects and mark them by clicking on them, so that the component can be repaired.</p>"),
-        choices: [], on_load: () => document.getElementById('custom-next-btn').addEventListener('click', () => jsPsych.finishTrial())
+        stimulus: createInfoScreen(
+            "The Task", 
+            `<p>You will view component images one by one. Your task is to classify each part based on its defects.</p>
+             <p>An <strong>L</strong> or an <strong>O</strong> is a defect. Ignore all other letters. Orange and blue letters as well as large and small ones are equally important.</p>
+             <p>Flag a component as <i style="color: #d9534f;">reject</i> if it contains <strong style="color: #d9534f;">more than 10</strong> defects. Otherwise, flag it as <i style="color: #5cb85c;">pass</i>.</p>
+             <p>You can click on defects to mark them for easier counting. Click again to deselect.</p>`
+        ),
+        choices: [], 
+        on_load: () => document.getElementById('custom-next-btn').addEventListener('click', () => jsPsych.finishTrial())
     },
     {
+        // Text 3
         type: jsPsychHtmlButtonResponse,
-        stimulus: createInfoScreen("Rules", "<p>A defect is always indicated by a <strong style='color:#2660c4;'>blue L</strong> or an <strong style='color:#f08e16;'>orange O</strong>.</p><p>All other colour-letter combinations do not represent defects.</p><p>You can undo your selection by clicking on a marked item again.</p>"),
-        choices: [], on_load: () => document.getElementById('custom-next-btn').addEventListener('click', () => jsPsych.finishTrial())
-    },
-    {
-        type: jsPsychHtmlButtonResponse,
-        stimulus: createInfoScreen("Practice", "<p>Next, you will practise the task.</p><p><strong>Remember:</strong> Your task is to find blue Ls and orange Os by clicking on them, as they represent defects.</p>", "Start Training"),
-        choices: [], on_load: () => document.getElementById('custom-next-btn').addEventListener('click', () => jsPsych.finishTrial())
+        stimulus: createInfoScreen(
+            "Practice", 
+            `<div style="text-align: center;">
+                 <p>Next, you will practice the task.</p>
+                 <p>Use the buttons below to classify each component:</p>
+                 <ul style="display: inline-block; text-align: left; margin: 10px auto;">
+                     <li><i style="color: #d9534f;">reject</i>: more than 10 defects</li>
+                     <li><i style="color: #5cb85c;">pass</i>: 10 or less defects</li>
+                 </ul>
+                 <p>Defects are <strong>Ls</strong> and <strong>Os</strong>.</p>
+             </div>`, 
+            "Start Training"
+        ),
+        choices: [], 
+        on_load: () => document.getElementById('custom-next-btn').addEventListener('click', () => jsPsych.finishTrial())
     }
 ];
 
@@ -183,65 +207,84 @@ timeline.push({
 let training_timeline = []; 
 for (let t = 1; t <= ANZAHL_TRAINING_RUNDEN; t++) {
     const formatierteNummer = String(t).padStart(3, '0');
-    const bildPfad = `bilder/stimulus_${formatierteNummer}.jpg`;
-    const csvPfad = `tabellen/stimulus_${formatierteNummer}.csv`;
+    // Das Array mit den Bildern passen wir später an, 
+    // solange greift hier noch deine bestehende Namenskonvention.
+    const bildPfad = `bilder/stimulus_training_${formatierteNummer}.jpg`;
+
+    // Den CSV-Pfad bereiten wir hier schon vor, auch wenn er aktuell nicht geladen wird.
+    // So können wir ihn in Zukunft in wenigen Sekunden aktivieren, falls du Logs brauchst.
+    const csvPfad = `tabellen/stimulus_training_${formatierteNummer}.csv`;
 
     const training_trial = {
         type: jsPsychHtmlButtonResponse,
         stimulus: `
         <div class="experiment-container">
-            <div id="image-wrapper" class="image-container" style="position:relative; width:100%; aspect-ratio: 1920/1080;">
+            <div id="image-wrapper" class="image-container" style="position:relative; width:100%; aspect-ratio: 1920/1080; cursor: crosshair;">
                 <img src="${bildPfad}" style="position:absolute; top:0; left:0; width: 100%; height: 100%; object-fit: contain; border-radius: 4px;" />
             </div>
             <div class="right-column">
                 <div style="background:#1e2229; padding:20px; border-radius:10px; color:white; font-family:sans-serif; border: 2px solid #555;">
                     <h3 style="margin-top:0; border-bottom:1px solid #333; padding-bottom:10px;">TRAINING (${t}/${ANZAHL_TRAINING_RUNDEN})</h3>
-                    <p style="color:#e0e0e0; line-height:1.5;">Markiere alle <strong style="color:#2660c4;">blauen Ls</strong> und <strong style="color:#f08e16;">orangen Os</strong>.</p>
-                    <p style="color:#e0e0e0; font-size: 13px; font-style: italic;">Klicke auf 'Weiter', wenn du alle gefunden hast.</p>
+                    <p style="color:#e0e0e0; line-height:1.5;">Klicke auf eine beliebige Stelle im Bild, um einen Marker als Zählhilfe zu setzen.</p>
+                    <p style="color:#e0e0e0; line-height:1.5;">Klicke auf einen bestehenden Marker, um ihn wieder zu entfernen.</p>
                 </div>
                 <div class="button-container" style="margin-top: 20px;">
-                    <button id="finish-training-btn" class="action-btn btn-start">Weiter</button>
+                    <!-- Neue Pass/Reject Buttons -->
+                    <button id="btn-pass" class="action-btn" style="background-color: #5cb85c;">Pass</button>
+                    <button id="btn-reject" class="action-btn btn-reset">Reject</button>
                 </div>
             </div>
         </div>
         `,
         choices: [],
         on_load: function() {
-            const finishBtn = document.getElementById('finish-training-btn');
             const imageWrapper = document.getElementById('image-wrapper');
-            ladeTabelleUndBereiteVor(csvPfad, 0, true, () => {});
-            finishBtn.addEventListener('click', () => { jsPsych.finishTrial({ runde: t, is_training: true }); });
-
+            const passBtn = document.getElementById('btn-pass');
+            const rejectBtn = document.getElementById('btn-reject');
+            
+            // 1. Interaktion: Freien Marker setzen
             imageWrapper.addEventListener('click', function(e) {
-                if (aktuelleZeichenDaten.length === 0) return;
-                
+                // Verhindern, dass ein Marker gesetzt wird, wenn man auf einen bereits bestehenden klickt
+                if(e.target.classList.contains('ki-ring')) return;
+
+                // X/Y Koordinaten des Klicks relativ zum Bild berechnen
                 const rect = imageWrapper.getBoundingClientRect();
-                const scale = rect.width / ORIGINAL_BILD_BREITE; 
+                const clickX = e.clientX - rect.left;
+                const clickY = e.clientY - rect.top;
 
-                // 1. Bildschirm-Klick berechnen
-                const screenKlickX = e.clientX - rect.left;
-                const screenKlickY = e.clientY - rect.top;
-
-                // 2. Zurückrechnen in die Original-Welt (Tabelle)
-                const originalKlickX = screenKlickX / scale;
-                const originalKlickY = screenKlickY / scale;
-
-                let naechstesZeichen = null;
-                let minimaleDistanz = Infinity;
+                // Marker-Element erstellen (nutzt deine bestehende CSS Klasse aus style.css)
+                const marker = document.createElement('div');
+                marker.classList.add('ki-ring'); 
+                marker.style.width = '40px'; 
+                marker.style.height = '40px';
+                marker.style.left = clickX + 'px';
+                marker.style.top = clickY + 'px';
                 
-                aktuelleZeichenDaten.forEach(zeichen => {
-                    const distanz = Math.sqrt(Math.pow(originalKlickX - zeichen.center_x, 2) + Math.pow(originalKlickY - zeichen.center_y, 2));
-                    if (distanz < minimaleDistanz) { minimaleDistanz = distanz; naechstesZeichen = zeichen; }
+                // 2. Interaktion: Marker löschen (Toggle)
+                marker.addEventListener('click', function(markerEvent) {
+                    markerEvent.stopPropagation(); // Verhindert, dass das Bild erneut das Klick-Event feuert
+                    marker.remove();
                 });
 
-                if (naechstesZeichen && minimaleDistanz <= 60 && !naechstesZeichen.hat_ring) {
-                    const groesse = (naechstesZeichen.is_small === true || naechstesZeichen.is_small === "True") ? 'klein' : 'groß';
-                    renderRing('image-wrapper', naechstesZeichen.center_x, naechstesZeichen.center_y, groesse, 0.0, naechstesZeichen);
-                    naechstesZeichen.hat_ring = true;
-                }
+                imageWrapper.appendChild(marker);
             });
+
+            // 3. Navigation & Datenspeicherung
+            function endTrial(decision) {
+                // jsPsych.finishTrial() beendet den Screen sofort. Alle Marker werden 
+                // durch das Laden des nächsten HTML-Blocks restlos gelöscht.
+                jsPsych.finishTrial({ 
+                    runde: t, 
+                    is_training: true, 
+                    entscheidung: decision
+                });
+            }
+
+            passBtn.addEventListener('click', () => endTrial('Pass'));
+            rejectBtn.addEventListener('click', () => endTrial('Reject'));
         }
     };
+    
     training_timeline.push(training_trial);
 }
 
@@ -256,7 +299,7 @@ timeline.push({
 timeline.push({
     timeline: [{
         type: jsPsychHtmlButtonResponse,
-        stimulus: createInfoScreen("AI Assistance Enabled", "<p>For on-site defect detection, your company decided to use intelligent (AI) assistance systems.</p><p>In the next phase, an AI agent will be available to you during the detection task.</p><p>The AI will assist you by marking defects. You have 15 seconds per component. Together with the AI's assistance, find as many defects as possible while avoiding false alarms.</p>", "Start Main Task"),
+        stimulus: createInfoScreen("You have finished the practice.", "<p>Your company has introduced an intelligent assistance system for defect detection. In this next phase, an AI agent will assist you during the task</p>", "Start Main Task"),
         choices: [], on_load: () => document.getElementById('custom-next-btn').addEventListener('click', () => jsPsych.finishTrial())
     }],
     conditional_function: function() { return aktuelleVersuchsGruppe === 1; }
@@ -265,7 +308,7 @@ timeline.push({
 timeline.push({
     timeline: [{
         type: jsPsychHtmlButtonResponse,
-        stimulus: createInfoScreen("Well done!", "<p>For on-site defect detection, your company decided to use intelligent (AI) assistance systems.</p><p>In the next phase, an AI agent will be available to you during the detection task.</p>"),
+        stimulus: createInfoScreen("Well done!", "<p>The AI will assist by marking defects and providing a reject or pass recommendation for each component.</p><p>Your task remains to classify each part as ready to proceed (pass) or defective (reject).</p>"),
         choices: [], on_load: () => document.getElementById('custom-next-btn').addEventListener('click', () => jsPsych.finishTrial())
     }],
     conditional_function: function() { return aktuelleVersuchsGruppe === 2; }
@@ -276,7 +319,7 @@ const customization_name_trial = {
     stimulus: `
         <div style="background:#0f172a; padding:40px; color:white; font-family:sans-serif; text-align:center; border-radius: 8px; max-width: 600px; margin: 40px auto; border: 1px solid #334155;">
             <h2 style="color:#deff9a; margin-top:0;">Agent Identification</h2>
-            <p style="margin-bottom: 20px; font-size: 18px; line-height: 1.5; text-align: left;">Before working with your AI agent, please take some time to customize it, based on your job as a defect inspector.</p>
+            <p style="margin-bottom: 20px; font-size: 18px; line-height: 1.5; text-align: left;">Before working together with your AI agent, please take some time to customize it using the customization interface on the next page to suit your role as a defect inspector.</p>
             <p style="margin-bottom: 20px; font-size: 18px; line-height: 1.5; text-align: left;">First, give your AI agent an identification so that your settings can be saved. Identifications consist of 2 letters and 2 numbers (e.g. AI01).</p>
             <input type="text" id="ai-name-input" style="padding:10px; font-size:20px; margin-bottom:30px; border-radius: 4px; border: none; text-align: center; width: 100%; max-width: 200px;" placeholder="AI01" maxlength="4"><br>
             <button id="save-name-btn" class="action-btn btn-start" style="padding: 12px 30px;">Next</button>
