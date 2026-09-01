@@ -356,32 +356,52 @@ const customization_settings_trial = {
     stimulus: function() {
         function makeSelectRow(priorityNum, defaultCat) {
             return `
-            <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 8px;">
-                <strong style="color:#32b5a1; font-size: 18px; width: 100px;">Priority ${priorityNum}:</strong>
-                <select id="cat-${priorityNum}" style="padding: 8px; font-size: 16px; border-radius: 4px; border: 1px solid #555; background: #1e2229; color: white;">
+            <!-- NEU: id="row-..." und transition für weiches Ein-/Ausblenden der Farbe -->
+            <div id="row-${priorityNum}" style="display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px; width: 100%; max-width: 500px; transition: background 0.3s;">
+                <strong style="color:#32b5a1; font-size: 16px; width: 90px;">Priority ${priorityNum}:</strong>
+                <select id="cat-${priorityNum}" style="padding: 6px; font-size: 15px; border-radius: 4px; border: 1px solid #555; background: #1e2229; color: white; flex: 1;">
                     <option value="direction" ${defaultCat === 'direction' ? 'selected' : ''}>Direction</option>
                     <option value="bg" ${defaultCat === 'bg' ? 'selected' : ''}>Background</option>
                     <option value="size" ${defaultCat === 'size' ? 'selected' : ''}>Size</option>
                     <option value="type" ${defaultCat === 'type' ? 'selected' : ''}>Type</option>
                 </select>
-                <select id="val-${priorityNum}" style="padding: 8px; font-size: 16px; border-radius: 4px; border: 1px solid #555; background: #1e2229; color: white; width: 200px;">
+                <select id="val-${priorityNum}" style="padding: 6px; font-size: 15px; border-radius: 4px; border: 1px solid #555; background: #1e2229; color: white; width: 160px;">
                 </select>
             </div>`;
         }
 
         return `
-        <div style="background:#0f172a; padding:40px; color:white; font-family:sans-serif; text-align:left; border-radius: 8px; max-width: 800px; margin: 40px auto; border: 1px solid #334155;">
-            <h2 style="color:#deff9a; margin-top:0; text-align:center;">Configure ${aiName}</h2>
-            <p style="text-align:center; margin-bottom:30px; font-size: 18px;">According to your own strategy, rank the categories and select what to look for.</p>
-            <div id="error-msg" style="color:#d9534f; display:none; text-align:center; margin-bottom:15px; font-weight:bold; padding: 10px; background: rgba(217, 83, 79, 0.1); border-radius: 4px;">
-                Please select each category exactly once! (Do not use a category twice)
+        <div style="display: flex; flex-direction: column; align-items: center; max-width: 900px; margin: 20px auto; gap: 20px;">
+            
+            <!-- VORSCHAU-BILD -->
+            <div id="preview-image-wrapper" style="position:relative; width: 700px; aspect-ratio: 1920/1080; background: #222; border: 2px solid #555; border-radius: 4px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+                <img src="bilder/stimulus_001.jpg" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain;" />
+                <div style="position:absolute; bottom:10px; left:10px; background:rgba(0,0,0,0.7); color:white; padding:5px 10px; border-radius:4px; font-weight:bold;">Preview Example</div>
             </div>
-            ${makeSelectRow(1, 'direction')}
-            ${makeSelectRow(2, 'bg')}
-            ${makeSelectRow(3, 'size')}
-            ${makeSelectRow(4, 'type')}
-            <div style="text-align: center; margin-top: 30px;">
-                <button id="save-config-btn" class="action-btn btn-start" style="padding: 12px 30px;">Submit Settings</button>
+
+            <!-- KONFIGURATIONS-PANEL -->
+            <div style="background:#0f172a; padding:30px; color:white; font-family:sans-serif; border-radius: 8px; border: 1px solid #334155; width: 100%; box-sizing: border-box;">
+                
+                <p style="text-align:center; font-size: 16px; line-height: 1.5; margin-top: 0; margin-bottom: 20px;">
+                    Think about the strategy you use to search the images. You can now align <strong>${aiName}</strong>'s search order with your own approach by using the dropdown menus for each category.<br><br>
+                    Feel free to adjust these settings as often as you like. Click <strong style="color: #32b5a1;">Apply</strong> to run a demo with your current settings, or click <strong style="color: #32b5a1;">Proceed</strong> once you are ready to practice the task with your agent.
+                </p>
+
+                <div id="error-msg" style="color:#d9534f; display:none; text-align:center; margin-bottom:15px; font-weight:bold; padding: 10px; background: rgba(217, 83, 79, 0.1); border-radius: 4px;">
+                    Please select each category exactly once! (Do not use a category twice)
+                </div>
+                
+                <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                    ${makeSelectRow(1, 'direction')}
+                    ${makeSelectRow(2, 'bg')}
+                    ${makeSelectRow(3, 'size')}
+                    ${makeSelectRow(4, 'type')}
+                </div>
+                
+                <div style="display: flex; justify-content: center; gap: 20px; margin-top: 30px;">
+                    <button id="apply-btn" class="action-btn" style="background:#555; padding: 12px 30px; width: 150px;">Apply</button>
+                    <button id="proceed-btn" class="action-btn btn-start" style="padding: 12px 30px; width: 150px;">Proceed</button>
+                </div>
             </div>
         </div>
         `;
@@ -409,26 +429,102 @@ const customization_settings_trial = {
             document.getElementById('cat-' + i).addEventListener('change', () => updateSubSelect(i));
         }
 
-        document.getElementById('save-config-btn').addEventListener('click', function() {
+        const errorMsg = document.getElementById('error-msg');
+        const applyBtn = document.getElementById('apply-btn');
+        const proceedBtn = document.getElementById('proceed-btn');
+        const imageWrapper = document.getElementById('preview-image-wrapper');
+        let previewInterval;
+
+        function getSelectedConfig() {
             let selectedCats = [];
             for(let i=1; i<=4; i++) selectedCats.push(document.getElementById('cat-'+i).value);
             const uniqueCats = new Set(selectedCats);
+            
             if(uniqueCats.size !== 4) {
-                document.getElementById('error-msg').style.display = 'block';
-                return; 
+                errorMsg.style.display = 'block';
+                return null;
             }
-            probandenConfig = [];
+            errorMsg.style.display = 'none';
+            
+            let tempConfig = [];
             for(let i=1; i<=4; i++) {
                 let catEl = document.getElementById('cat-'+i);
                 let valEl = document.getElementById('val-'+i);
-                let c = catEl.value;
-                let v = valEl.value;
-                let cLabel = catEl.options[catEl.selectedIndex].text;
-                let vLabel = valEl.options[valEl.selectedIndex].text;
-                
-                probandenConfig.push({ category: c, value: v, label: cLabel, valueLabel: vLabel });
+                tempConfig.push({ 
+                    category: catEl.value, 
+                    value: valEl.value, 
+                    label: catEl.options[catEl.selectedIndex].text, 
+                    valueLabel: valEl.options[valEl.selectedIndex].text 
+                });
             }
-            jsPsych.finishTrial(); 
+            return tempConfig;
+        }
+
+        proceedBtn.addEventListener('click', function() {
+            const finalConfig = getSelectedConfig();
+            if (finalConfig) {
+                probandenConfig = finalConfig;
+                clearInterval(previewInterval); 
+                jsPsych.finishTrial(); 
+            }
+        });
+
+        applyBtn.addEventListener('click', function() {
+            const tempConfig = getSelectedConfig();
+            if (!tempConfig) return; 
+            
+            probandenConfig = tempConfig;
+            
+            applyBtn.disabled = true;
+            proceedBtn.disabled = true;
+            applyBtn.style.opacity = '0.5';
+            applyBtn.innerText = 'Running...';
+
+            imageWrapper.querySelectorAll('.ki-ring').forEach(el => el.remove());
+
+            ladeTabelleUndBereiteVor('tabellen/stimulus_001.csv', 1, false, () => {
+                let currentStep = 1;
+                clearInterval(previewInterval); 
+                
+                // Setze alle Zeilenfarben zurück, bevor es losgeht
+                for(let i=1; i<=4; i++) {
+                    document.getElementById(`row-${i}`).style.background = 'rgba(255,255,255,0.05)';
+                }
+                
+                // Erster Schritt sofort visuell hervorheben
+                document.getElementById('row-1').style.background = 'rgba(50, 181, 161, 0.25)';
+
+                previewInterval = setInterval(() => {
+                    
+                    aktuelleZeichenDaten.forEach(zeichen => {
+                        if (zeichen.ki_setzt_ring && zeichen.render_gruppe === currentStep) {
+                            const groesse = (zeichen.is_small === true || zeichen.is_small === "True") ? 'klein' : 'groß';
+                            renderRing('preview-image-wrapper', zeichen.center_x, zeichen.center_y, groesse, 0.0, zeichen);
+                        }
+                    });
+                    
+                    currentStep++;
+                    
+                    // Farb-Reset für alle Zeilen
+                    for(let i=1; i<=4; i++) {
+                        const row = document.getElementById(`row-${i}`);
+                        if(row) row.style.background = 'rgba(255,255,255,0.05)';
+                    }
+                    
+                    // Markiere die nächste Zeile (wenn wir noch in den Prio-Stufen 1-4 sind)
+                    if(currentStep <= 4) {
+                        document.getElementById(`row-${currentStep}`).style.background = 'rgba(50, 181, 161, 0.25)';
+                    }
+                    
+                    if (currentStep > 5) {
+                        clearInterval(previewInterval);
+                        applyBtn.disabled = false;
+                        proceedBtn.disabled = false;
+                        applyBtn.style.opacity = '1';
+                        applyBtn.innerText = 'Apply';
+                    }
+                }, 2000);
+            });
         });
     }
 };
