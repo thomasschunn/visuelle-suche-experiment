@@ -2,48 +2,43 @@
  * HAUPTABLAUF DES EXPERIMENTS
  */
 
-let aiName = "AI ASSISTANT";
-let experimentAborted = false; 
+(() => {
+const condition = resolveExperimentCondition(window.location.search);
+const debugEnabled = isExperimentDebugEnabled(window.location.search);
 
+if (!condition) {
+    document.body.innerHTML = `
+        <main style="max-width: 650px; margin: 15vh auto; padding: 24px; font-family: sans-serif;">
+            <h1>Configuration error</h1>
+            <p>The experiment link is missing a valid version. Please use the complete link provided by the study team, or contact them for a corrected link.</p>
+            <p>The URL must contain exactly one version parameter: ?version=1, ?version=2, ?version=3 or ?version=4.</p>
+        </main>`;
+    return;
+}
+
+let aiName = condition.agentNameMode === 'fixed' ? condition.fixedAgentName : "AI ASSISTANT";
+
+let submitted = false;
 const jsPsych = initJsPsych({
     on_finish: function() {
-        if(aktuelleVersuchsGruppe === 3) { 
-            jsPsych.data.displayData(); 
-            return;
-        }
-        console.log("Sende Daten an OSF...");
-        fetch("https://pipe.jspsych.org/api/data/", {
-            method: "POST",
-            headers: { "Content-Type": "application/json", Accept: "*/*" },
-            body: JSON.stringify({
-                experimentID: OSF_EXPERIMENT_ID,
-                filename: dateiName,
-                data: jsPsych.data.get().csv()
-            }),
-        }).catch(err => console.error(err));
-        
-        document.body.innerHTML = '<div style="text-align:center; margin-top:20vh; color:white; font-family:sans-serif;"><h1>Data Saved!</h1><p>You may close this window now.</p></div>';
+        if (submitted) showSubmission(jsPsych, debugEnabled);
     }
+});
+
+// Register before building/running any trial, including development screens.
+jsPsych.data.addProperties({
+    subject_id,
+    agent_id: condition.agentNameMode === 'fixed' ? condition.fixedAgentName : null,
+    ...Object.fromEntries(['PROLIFIC_PID', 'STUDY_ID', 'SESSION_ID'].filter(key => new URLSearchParams(window.location.search).has(key)).map(key => [key, new URLSearchParams(window.location.search).get(key)])),
+    experiment_version: condition.version,
+    customization_condition: condition.customizationCondition,
+    predictability_condition: condition.predictabilityCondition
 });
 
 var timeline = [];
 
-function createInfoScreen(title, contentHtml, btnText = "Next") {
-    return `
-        <div style="background:#0f172a; padding:40px; color:white; font-family:sans-serif; text-align:center; border-radius: 8px; max-width: 600px; margin: 40px auto; border: 1px solid #334155;">
-            <h2 style="color:#deff9a; margin-top:0;">${title}</h2>
-            <div style="font-size: 18px; line-height: 1.6; margin-bottom: 30px; text-align: left;">
-                ${contentHtml}
-            </div>
-            <div style="text-align: center;">
-                <button id="custom-next-btn" class="action-btn btn-start" style="padding: 12px 30px;">${btnText}</button>
-            </div>
-        </div>
-    `;
-}
-
 // ==========================================
-// 1. HAUPTMENÜ & ADMIN CONFIG
+// 1. DEVELOPMENT TOOLS (only with an explicit ?debug=1)
 // ==========================================
 let chose_calibration = false;
 
@@ -51,17 +46,16 @@ const main_menu = {
     type: jsPsychHtmlButtonResponse,
     stimulus: `
         <div style="background:#0f172a; padding:40px; color:white; font-family:sans-serif; text-align:center; border-radius: 8px; max-width: 600px; margin: 40px auto; border: 1px solid #334155;">
-            <h1 style="color:#deff9a; margin-top:0;">Experiment Setup</h1>
-            <p>Wähle den Modus für diesen Probanden:</p>
+            <h1 style="color:#deff9a; margin-top:0;">Development Tools</h1>
+            <p>Version ${condition.version}; debug run (no upload).</p>
         </div>
     `,
-    choices: ['1. Standard', '2. Customization', '3. Admin Skip (Runde 10)', '4. Eyetracker Kalibrierung'],
+    choices: ['Continue with URL version', 'Eyetracker Kalibrierung'],
     on_finish: function(data) { 
-        if (data.response === 3) {
+        if (data.response === 1) {
             chose_calibration = true; // Startet die Schleife für Kalibrierung neu
         } else {
             chose_calibration = false;
-            aktuelleVersuchsGruppe = data.response + 1; 
         }
     }
 };
@@ -92,7 +86,7 @@ const calibration_screen = {
 };
 
 // Schleife, die so lange läuft, wie "Eyetracker" ausgewählt wird
-timeline.push({
+if (debugEnabled) timeline.push({
     timeline: [
         main_menu, 
         {
@@ -106,271 +100,8 @@ timeline.push({
     loop_function: function() { return chose_calibration; }
 });
 
-const admin_config_trial = {
-    type: jsPsychHtmlButtonResponse,
-    stimulus: `
-        <div style="background:#0f172a; padding:40px; color:white; font-family:sans-serif; text-align:left; border-radius: 8px; max-width: 600px; margin: 40px auto; border: 1px solid #334155;">
-            <h2 style="color:#d9534f; margin-top:0; text-align:center;">Admin Quick-Config</h2>
-            <p style="text-align:center; margin-bottom:20px; color:#aaa;">Passe diese Werte für diesen Testlauf an.</p>
-            
-            <div style="margin-bottom: 20px;">
-                <label style="display:block; margin-bottom:5px; color:#32b5a1; font-weight:bold;">Rundendauer (Sekunden):</label>
-                <input type="number" id="admin-time" value="${RUNDEN_DAUER_SEK}" style="width:100%; padding:10px; font-size:16px; border-radius:4px; border:1px solid #555; background:#1e2229; color:white;">
-            </div>
-            <div style="margin-bottom: 20px;">
-                <label style="display:block; margin-bottom:5px; color:#32b5a1; font-weight:bold;">Anzahl Drift-Ringe:</label>
-                <input type="number" id="admin-drift" value="${ANZAHL_DRIFT_RINGE}" style="width:100%; padding:10px; font-size:16px; border-radius:4px; border:1px solid #555; background:#1e2229; color:white;">
-            </div>
-            <div style="margin-bottom: 30px;">
-                <label style="display:block; margin-bottom:5px; color:#32b5a1; font-weight:bold;">Sequenz-Geschwindigkeit (Millisekunden):</label>
-                <input type="number" id="admin-seq" value="${SEQUENZ_SCHRITT_MS}" style="width:100%; padding:10px; font-size:16px; border-radius:4px; border:1px solid #555; background:#1e2229; color:white;">
-            </div>
-            <div style="text-align:center;">
-                <button id="save-admin-btn" class="action-btn" style="background:#d9534f; padding: 12px 30px;">Übernehmen & Starten</button>
-            </div>
-        </div>
-    `,
-    choices: [],
-    on_load: function() {
-        document.getElementById('save-admin-btn').addEventListener('click', function() {
-            RUNDEN_DAUER_SEK = parseInt(document.getElementById('admin-time').value) || 15;
-            ANZAHL_DRIFT_RINGE = parseInt(document.getElementById('admin-drift').value) || 3;
-            SEQUENZ_SCHRITT_MS = parseInt(document.getElementById('admin-seq').value) || 600;
-            jsPsych.finishTrial();
-        });
-    }
-};
-
-timeline.push({
-    timeline: [admin_config_trial],
-    conditional_function: function() { return aktuelleVersuchsGruppe === 3; }
-});
-
-// ==========================================
-// 2. STORY INTRO (VOR DEM TRAINING)
-// ==========================================
-
-const glasses_check_trial = {
-    type: jsPsychHtmlButtonResponse,
-    stimulus: `
-    <!-- Vollflächiger weißer Hintergrund passend zur Vorlage -->
-    <div style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: white; color: black; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: sans-serif; z-index: 9999;">
-        <div style="max-width: 900px; padding: 40px; text-align: center;">
-            <p style="font-size: 24px; line-height: 1.4; margin-bottom: 80px;">
-                This study involves looking closely at small shapes and colors on your screen. If you normally wear<br>glasses or contacts for computer work, please put them on now.
-            </p>
-            
-            <div style="display: flex; flex-direction: column; align-items: flex-end; width: max-content; margin: 0 auto 50px auto; gap: 25px;">
-                <label style="font-size: 18px; cursor: pointer; display: flex; align-items: center;">
-                    I need glasses or contacts for computer work and I am wearing them now.
-                    <input type="radio" name="glasses" value="1" style="margin-left: 20px; width: 22px; height: 22px; cursor: pointer;">
-                </label>
-                <label style="font-size: 18px; cursor: pointer; display: flex; align-items: center;">
-                    I do not need glasses or contacts for computer work.
-                    <input type="radio" name="glasses" value="0" style="margin-left: 20px; width: 22px; height: 22px; cursor: pointer;">
-                </label>
-            </div>
-            
-            <!-- Der Button ist anfangs unsichtbar, damit der User eine Option wählen muss -->
-            <button id="glasses-next-btn" class="action-btn" style="padding: 12px 30px; display: none; margin: 0 auto; background-color: #32b5a1; color: white; border: none; border-radius: 4px; font-size: 18px; cursor: pointer;">Next</button>
-        </div>
-    </div>
-    `,
-    choices: [],
-    on_load: function() {
-        const radios = document.querySelectorAll('input[name="glasses"]');
-        const nextBtn = document.getElementById('glasses-next-btn');
-
-        // Button einblenden, sobald eine Option angeklickt wird
-        radios.forEach(r => r.addEventListener('change', () => {
-            nextBtn.style.display = 'block';
-        }));
-
-        nextBtn.addEventListener('click', () => {
-            const selected = document.querySelector('input[name="glasses"]:checked').value;
-            
-            // Hängt die Spalte "wearing_glasses" (mit 1 oder 0) global an ALLE Datensätze dieses Probanden im Log an
-            jsPsych.data.addProperties({ wearing_glasses: parseInt(selected) });
-            
-            jsPsych.finishTrial();
-        });
-    }
-};
-
-let intro_timeline = [
-    glasses_check_trial, // <--- Startbildschirm mit Brillen-Abfrage
-    {
-        // Text 1
-        type: jsPsychHtmlButtonResponse,
-        stimulus: createInfoScreen(
-            "Context", 
-            `<p>Imagine you work for a company that manufactures and maintains metal components.</p>
-             <p>You will examine simplified radiographic images to identify material defects. If a component exceeds a specific threshold of defects, it is considered unsafe and must be rejected.</p>
-             <p>This task is safety-critical: missing a defect risks failure in service, while falsely rejecting a good part causes unnecessary cost and delay. Avoid both types of errors.</p>`
-        ),
-        choices: [], 
-        on_load: () => document.getElementById('custom-next-btn').addEventListener('click', () => jsPsych.finishTrial())
-    },
-    {
-        // Text 2
-        type: jsPsychHtmlButtonResponse,
-        stimulus: createInfoScreen(
-            "The Task", 
-            `<p>You will view component images one by one. Your task is to classify each part based on its defects.</p>
-             <p>An <strong>L</strong> or an <strong>O</strong> is a defect. Ignore all other letters. Orange and blue letters as well as large and small ones are equally important.</p>
-             <p>Flag a component as <i style="color: #d9534f;">reject</i> if it contains <strong style="color: #d9534f;">more than 10</strong> defects. Otherwise, flag it as <i style="color: #5cb85c;">pass</i>.</p>
-             <p>You can click on defects to mark them for easier counting. Click again to deselect.</p>`
-        ),
-        choices: [], 
-        on_load: () => document.getElementById('custom-next-btn').addEventListener('click', () => jsPsych.finishTrial())
-    },
-    {
-        // Text 3
-        type: jsPsychHtmlButtonResponse,
-        stimulus: createInfoScreen(
-            "Practice", 
-            `<div style="text-align: center;">
-                 <p>Next, you will practice the task.</p>
-                 <p>Use the buttons below to classify each component:</p>
-                 <ul style="display: inline-block; text-align: left; margin: 10px auto;">
-                     <li><i style="color: #d9534f;">reject</i>: more than 10 defects</li>
-                     <li><i style="color: #5cb85c;">pass</i>: 10 or less defects</li>
-                 </ul>
-                 <p>Defects are <strong>Ls</strong> and <strong>Os</strong>.</p>
-             </div>`, 
-            "Start Training"
-        ),
-        choices: [], 
-        on_load: () => document.getElementById('custom-next-btn').addEventListener('click', () => jsPsych.finishTrial())
-    }
-];
-
-timeline.push({
-    timeline: intro_timeline,
-    conditional_function: function() { return aktuelleVersuchsGruppe === 1 || aktuelleVersuchsGruppe === 2; }
-});
-
-// ==========================================
-// 3. TRAINING LOOP
-// ==========================================
-let training_timeline = []; 
-for (let t = 1; t <= ANZAHL_TRAINING_RUNDEN; t++) {
-    const formatierteNummer = String(t).padStart(3, '0');
-    // Das Array mit den Bildern passen wir später an, 
-    // solange greift hier noch deine bestehende Namenskonvention.
-    const bildPfad = `bilder/stimulus_training_${formatierteNummer}.jpg`;
-
-    // Den CSV-Pfad bereiten wir hier schon vor, auch wenn er aktuell nicht geladen wird.
-    // So können wir ihn in Zukunft in wenigen Sekunden aktivieren, falls du Logs brauchst.
-    const csvPfad = `tabellen/stimulus_training_${formatierteNummer}.csv`;
-
-    const training_trial = {
-        type: jsPsychHtmlButtonResponse,
-        stimulus: `
-        <div class="experiment-container">
-            <div id="image-wrapper" class="image-container" style="position:relative; width:100%; aspect-ratio: 1920/1080; cursor: crosshair;">
-                <img src="${bildPfad}" style="position:absolute; top:0; left:0; width: 100%; height: 100%; object-fit: contain; border-radius: 4px;" />
-            </div>
-            <div class="right-column">
-                <div style="background:#1e2229; padding:20px; border-radius:10px; color:white; font-family:sans-serif; border: 2px solid #555;">
-                    <h3 style="margin-top:0; border-bottom:1px solid #333; padding-bottom:10px;">TRAINING (${t}/${ANZAHL_TRAINING_RUNDEN})</h3>
-                    <p style="color:#e0e0e0; line-height:1.5;">Click anywhere on the image to place a marker as a counting aid.</p>
-                    <p style="color:#e0e0e0; line-height:1.5;">Click on an existing marker to remove it.</p>
-                </div>
-                <div class="button-container" style="margin-top: 20px;">
-                    <!-- Neue Pass/Reject Buttons -->
-                    <button id="btn-pass" class="action-btn" style="background-color: #5cb85c;">Pass</button>
-                    <button id="btn-reject" class="action-btn btn-reset">Reject</button>
-                </div>
-            </div>
-        </div>
-        `,
-        choices: [],
-        on_load: function() {
-            const imageWrapper = document.getElementById('image-wrapper');
-            const passBtn = document.getElementById('btn-pass');
-            const rejectBtn = document.getElementById('btn-reject');
-            
-            // 1. Interaktion: Freien Marker setzen
-            imageWrapper.addEventListener('click', function(e) {
-                // Verhindern, dass ein Marker gesetzt wird, wenn man auf einen bereits bestehenden klickt
-                if(e.target.classList.contains('ki-ring')) return;
-
-                // X/Y Koordinaten des Klicks relativ zum Bild berechnen
-                const rect = imageWrapper.getBoundingClientRect();
-                const clickX = e.clientX - rect.left;
-                const clickY = e.clientY - rect.top;
-
-                // Marker-Element erstellen (nutzt deine bestehende CSS Klasse aus style.css)
-                const marker = document.createElement('div');
-                marker.classList.add('ki-ring'); 
-                marker.style.width = '40px'; 
-                marker.style.height = '40px';
-                marker.style.left = clickX + 'px';
-                marker.style.top = clickY + 'px';
-                
-                // 2. Interaktion: Marker löschen (Toggle)
-                marker.addEventListener('click', function(markerEvent) {
-                    markerEvent.stopPropagation(); // Verhindert, dass das Bild erneut das Klick-Event feuert
-                    marker.remove();
-                });
-
-                imageWrapper.appendChild(marker);
-            });
-
-            // 3. Navigation & Datenspeicherung
-            function endTrial(decision) {
-                // jsPsych.finishTrial() beendet den Screen sofort. Alle Marker werden 
-                // durch das Laden des nächsten HTML-Blocks restlos gelöscht.
-                jsPsych.finishTrial({ 
-                    runde: t, 
-                    is_training: true, 
-                    entscheidung: decision
-                });
-            }
-
-            passBtn.addEventListener('click', () => endTrial('Pass'));
-            rejectBtn.addEventListener('click', () => endTrial('Reject'));
-        }
-    };
-    
-    training_timeline.push(training_trial);
-}
-
-timeline.push({
-    timeline: training_timeline,
-    conditional_function: function() { return aktuelleVersuchsGruppe === 1 || aktuelleVersuchsGruppe === 2; }
-});
-
-// ==========================================
-// NEUER SCREEN: DIREKT NACH DEM TRAINING (Für Gruppe 1 & 2)
-// ==========================================
-const practice_finished_trial = {
-    type: jsPsychHtmlButtonResponse,
-    stimulus: `
-    <div style="background:#0f172a; padding: 60px 40px; color:white; font-family:sans-serif; text-align:center; border-radius: 8px; max-width: 700px; margin: 40px auto;">
-        <p style="font-size: 24px; line-height: 1.4; margin-bottom: 30px;">
-            You have finished the practice.
-        </p>
-        <p style="font-size: 24px; line-height: 1.4; margin-bottom: 40px;">
-            Your company has introduced an intelligent assistance system for defect detection. In this next phase, an AI agent will assist you during the task.
-        </p>
-        <button id="next-btn-practice-done" class="action-btn btn-start" style="padding: 12px 30px;">Next</button>
-    </div>
-    `,
-    choices: [],
-    on_load: function() {
-        document.getElementById('next-btn-practice-done').addEventListener('click', () => jsPsych.finishTrial());
-    }
-};
-
-timeline.push({
-    timeline: [practice_finished_trial],
-    conditional_function: function() { return aktuelleVersuchsGruppe === 1 || aktuelleVersuchsGruppe === 2; }
-});
-
-
-
+// All versions use the same beginning, without condition-dependent branches.
+timeline.push(...createCommonBeginning(jsPsych));
 
 // ==========================================
 // 4. KI INTRO & CUSTOMIZATION
@@ -380,8 +111,7 @@ timeline.push({
 const standard_intro_new_1 = {
     type: jsPsychHtmlButtonResponse,
     stimulus: function() {
-        // Hier wird der Name im Hintergrund fest für Gruppe 1 vergeben
-        aiName = "DA02"; 
+        aiName = condition.fixedAgentName;
         
         return `
         <div style="background:#0f172a; padding:40px; color:white; font-family:sans-serif; text-align:center; border-radius: 8px; max-width: 700px; margin: 40px auto; border: 1px solid #334155;">
@@ -418,11 +148,12 @@ const standard_intro_new_2 = {
     }
 };
 
-// Alle drei Screens werden nacheinander abgespielt, wenn Standard-Modus (Gruppe 1) aktiv ist
-timeline.push({
-    timeline: [standard_intro_new_1, standard_intro_new_2],
-    conditional_function: function() { return aktuelleVersuchsGruppe === 1; }
-});
+// Filled below after the shared mistakes/reminder screens have been defined.
+const standardBranch = {
+    timeline: [],
+    conditional_function: function() { return !condition.customizationEnabled; }
+};
+timeline.push(standardBranch);
 
 const customization_intro_new_1 = {
     type: jsPsychHtmlButtonResponse,
@@ -487,8 +218,9 @@ const customization_name_trial = {
             
             if(namePattern.test(inputVal)) {
                 errorMsg.style.display = 'none'; // Fehler verstecken
-                aiName = inputVal.toUpperCase(); 
-                jsPsych.finishTrial(); // Nur weitergehen, wenn Eingabe korrekt ist
+                aiName = inputVal.toUpperCase();
+                jsPsych.data.addProperties({ agent_id: aiName });
+                jsPsych.finishTrial({ agent_id: aiName });
             } else {
                 errorMsg.style.display = 'block'; // Fehler anzeigen
             }
@@ -496,6 +228,7 @@ const customization_name_trial = {
     }
 };
 
+let disposeCustomization = () => {};
 const customization_settings_trial = {
     type: jsPsychHtmlButtonResponse,
     stimulus: function() {
@@ -510,6 +243,7 @@ const customization_settings_trial = {
                 <select id="val-${id}" style="padding: 6px; font-size: 15px; border-radius: 4px; border: 1px solid #555; background: #1e2229; color: white; flex: 1;">
                     ${opts}
                 </select>
+                <output id="order-${id}" style="font-size:14px;">${options.map(o => o.t).join(' → ')}</output>
             </div>`;
         }
 
@@ -526,7 +260,7 @@ const customization_settings_trial = {
                 
                 <!-- VORSCHAU-BILD -->
                 <div id="preview-image-wrapper" style="position:relative; width: 700px; flex-shrink: 0; aspect-ratio: 1920/1080; background: #222; border: 2px solid #555; border-radius: 4px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
-                    <img src="bilder/stimulus_001.jpg" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain;" />
+                    <img id="preview-image" src="bilder/stimulus_001.jpg" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain;" />
                     <div style="position:absolute; bottom:10px; left:10px; background:rgba(0,0,0,0.7); color:white; padding:5px 10px; border-radius:4px; font-weight:bold;">Preview Example</div>
                 </div>
 
@@ -552,7 +286,7 @@ const customization_settings_trial = {
                 
                 <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
                     ${makeRow(1, 'Direction', 'direction', [{v:'top_left', t:'top left'}, {v:'top_right', t:'top right'}, {v:'bottom_right', t:'bottom right'}, {v:'bottom_left', t:'bottom left'}])}
-                    ${makeRow(2, 'Background', 'bg', [{v:'dark', t:'dark areas'}, {v:'light', t:'light areas'}])}
+                    ${makeRow(2, 'Background', 'bg', [{v:'dark', t:'dark'}, {v:'light', t:'light'}])}
                     ${makeRow(3, 'Size', 'size', [{v:'large', t:'large'}, {v:'small', t:'small'}])}
                     ${makeRow(4, 'Type', 'type', [{v:'L', t:'L'}, {v:'O', t:'O'}])}
                 </div>
@@ -567,113 +301,9 @@ const customization_settings_trial = {
     },
     choices: [],
     on_load: function() {
-        const applyBtn = document.getElementById('apply-btn');
-        const proceedBtn = document.getElementById('proceed-btn');
-        const imageWrapper = document.getElementById('preview-image-wrapper');
-        const statusText = document.getElementById('status-text');
-        const instructionsText = document.getElementById('instructions-text');
-        
-        let previewInterval;
-
-        function getSelectedConfig() {
-            let tempConfig = [];
-            for(let i=1; i<=4; i++) {
-                let catEl = document.getElementById('cat-'+i);
-                let labelEl = document.getElementById('label-'+i);
-                let valEl = document.getElementById('val-'+i);
-                tempConfig.push({ 
-                    category: catEl.value, 
-                    value: valEl.value, 
-                    label: labelEl.value, 
-                    valueLabel: valEl.options[valEl.selectedIndex].text 
-                });
-            }
-            return tempConfig;
-        }
-
-        proceedBtn.addEventListener('click', function() {
-            probandenConfig = getSelectedConfig();
-            clearInterval(previewInterval); 
-            jsPsych.finishTrial(); 
-        });
-
-        applyBtn.addEventListener('click', function() {
-            const tempConfig = getSelectedConfig();
-            probandenConfig = tempConfig;
-            
-            applyBtn.disabled = true;
-            proceedBtn.disabled = true;
-            applyBtn.style.opacity = '0.5';
-            applyBtn.innerText = 'Running...';
-
-            // Text exakt nach Mockup aufbauen (z.B. "... starting search with large Ls on dark areas in the top left ...")
-            const dirVal = tempConfig[0].valueLabel;
-            const bgVal = tempConfig[1].valueLabel;
-            const sizeVal = tempConfig[2].valueLabel;
-            const typeVal = tempConfig[3].valueLabel;
-            
-            statusText.innerHTML = `... starting search with ${sizeVal} ${typeVal}s on ${bgVal} in the ${dirVal} ...`;
-
-            imageWrapper.classList.remove('preview-pass', 'preview-reject');
-            imageWrapper.querySelectorAll('.ki-ring').forEach(el => el.remove());
-
-            ladeTabelleUndBereiteVor('tabellen/stimulus_001.csv', 1, false, () => {
-                let currentStep = 1;
-                let circleCount = 0; 
-                
-                clearInterval(previewInterval); 
-                
-                for(let i=1; i<=4; i++) {
-                    document.getElementById(`row-${i}`).style.background = 'rgba(255,255,255,0.05)';
-                }
-                document.getElementById('row-1').style.background = 'rgba(50, 181, 161, 0.25)';
-
-                previewInterval = setInterval(() => {
-                    
-                    aktuelleZeichenDaten.forEach(zeichen => {
-                        if (zeichen.ki_setzt_ring && zeichen.render_gruppe === currentStep) {
-                            const groesse = (zeichen.is_small === true || zeichen.is_small === "True") ? 'klein' : 'groß';
-                            renderRing('preview-image-wrapper', zeichen.center_x, zeichen.center_y, groesse, 0.0, zeichen);
-                            circleCount++; 
-                        }
-                    });
-                    
-                    currentStep++;
-                    
-                    for(let i=1; i<=4; i++) {
-                        const row = document.getElementById(`row-${i}`);
-                        if(row) row.style.background = 'rgba(255,255,255,0.05)';
-                    }
-                    if(currentStep <= 4) {
-                        document.getElementById(`row-${currentStep}`).style.background = 'rgba(50, 181, 161, 0.25)';
-                    }
-                    
-                    if (currentStep > 5) {
-                        clearInterval(previewInterval);
-                        applyBtn.disabled = false;
-                        proceedBtn.disabled = false;
-                        applyBtn.style.opacity = '1';
-                        applyBtn.innerText = 'Apply';
-                        
-                        if (circleCount >= 11) {
-                            imageWrapper.classList.add('preview-reject');
-                        } else {
-                            imageWrapper.classList.add('preview-pass');
-                        }
-
-                        statusText.innerHTML = `<span style="font-size: 24px; font-weight: bold; color: #111;">Final verdict:<br>${circleCount} defects</span>`;
-
-                        const isReject = circleCount >= 11;
-                        const colorFlag = isReject ? 'red' : 'green';
-                        const actionText = isReject ? 'reject' : 'pass';
-                        const colorHex = isReject ? '#d9534f' : '#5cb85c';
-
-                        instructionsText.innerHTML = `<strong>${aiName}</strong> found ${circleCount} defects in this example and flagged the component <strong style="color:${colorHex};">${colorFlag}</strong>.`;
-                    }
-                }, 2000); 
-            });
-        });
-    }
+        disposeCustomization = mountCustomizationPreview(jsPsych, aiName);
+    },
+    on_finish: function() { disposeCustomization(); }
 };
 
 // ==========================================
@@ -730,203 +360,23 @@ const ai_practice_reminder_trial = {
     }
 };
 
+standardBranch.timeline = [
+    standard_intro_new_1, standard_intro_new_2,
+    ...createStandardPreparation(jsPsych, EXPERIMENT_CONDITIONS[3].fixedAgentName),
+    ai_mistakes_trial, ai_practice_reminder_trial
+];
+
 // Timeline Push mit den beiden neuen Screens anstelle des alten
 timeline.push({
     timeline: [customization_intro_new_1, customization_intro_new_2, customization_name_trial, customization_settings_trial, ai_mistakes_trial, ai_practice_reminder_trial],
-    conditional_function: function() { return aktuelleVersuchsGruppe === 2; }
+    conditional_function: function() { return condition.customizationEnabled; }
 });
 
 
-// ==========================================
-// 5. HAUPT-RUNDEN SCHLEIFE
-// ==========================================
-for (let runde = 1; runde <= ANZAHL_RUNDEN; runde++) {
-    const formatierteNummer = String(runde).padStart(3, '0');
-    const bildPfad = `bilder/stimulus_${formatierteNummer}.jpg`;
-    const csvPfad = `tabellen/stimulus_${formatierteNummer}.csv`;
-
-    const fixation_cross = {
-        type: jsPsychHtmlButtonResponse,
-        stimulus: function() {
-            let placeholderList = '';
-            probandenConfig.forEach((conf, index) => {
-                placeholderList += `<li>${index+1}. ${conf.label} analysis</li>`;
-            });
-            placeholderList += `<li>5. Final Anomaly Scan</li>`;
-
-            return `
-            <div class="experiment-container">
-                <div class="image-container" style="background-color: #808080; display: flex; justify-content: center; align-items: center;">
-                    <svg width="80" height="80" viewBox="0 0 100 100">
-                        <line x1="50" y1="10" x2="50" y2="90" stroke="black" stroke-width="8" stroke-linecap="round" />
-                        <line x1="10" y1="50" x2="90" y2="50" stroke="black" stroke-width="8" stroke-linecap="round" />
-                    </svg>
-                </div>
-                <div class="right-column" style="opacity: 0.5;">
-                    <div class="ki-panel">
-                        <h3>${aiName} <span style="float:right; color:#888;">PREPARING...</span></h3>
-                        <ul style="margin-top:15px; list-style:none; padding:0; color:#888;">
-                            ${placeholderList}
-                        </ul>
-                    </div>
-                    <div class="button-container" style="flex-direction: column; text-align: center; margin-top: 20px;">
-                        <div style="font-size: 16px; color: #888; margin-bottom: 12px; font-weight: bold;">Ready...</div>
-                        <button class="action-btn btn-reset" disabled>Recalibrate</button>
-                    </div>
-                </div>
-            </div>
-            `;
-        },
-        choices: [],
-        trial_duration: FIXATION_DAUER_MS
-    };
-
-    const runden_trial = {
-        type: jsPsychHtmlButtonResponse,
-        stimulus: function() {
-            let kiListHtml = '';
-            probandenConfig.forEach((conf, index) => {
-                kiListHtml += `<li class="scan-step" id="step-${index+1}"><span class="ki-number">${index+1}</span> ${conf.label}: ${conf.valueLabel}</li>`;
-            });
-            kiListHtml += `<li class="scan-step" id="step-5" style="color: #d9534f;"><span class="ki-number" style="background:#d9534f; color:#fff;">5</span> Final Anomaly Scan</li>`;
-
-            const adminBtnHtml = aktuelleVersuchsGruppe === 3 ? `<button id="admin-next-btn" class="action-btn btn-start" style="margin-bottom: 10px;" disabled>Weiter (Admin)</button>` : ``;
-
-            return `
-            <style>
-                .scan-step { opacity: 0.3; transition: opacity 0.3s; }
-                .scan-active { opacity: 1.0; color: #deff9a; font-weight: bold; }
-            </style>
-            <div class="experiment-container">
-                <div id="image-wrapper" class="image-container" style="position:relative; width:100%; aspect-ratio: 1920/1080;">
-                    <img src="${bildPfad}" style="position:absolute; top:0; left:0; width: 100%; height: 100%; object-fit: contain; border-radius: 4px;" />
-                </div>
-                <div class="right-column">
-                    <div class="ki-panel">
-                        <h3>${aiName} <span style="float:right; color:#f08e16;" id="scan-status">SCANNING...</span></h3>
-                        <ul id="ki-list" style="margin-top:15px; list-style:none; padding:0;">
-                            ${kiListHtml}
-                        </ul>
-                    </div>
-                    <div class="button-container" style="flex-direction: column; text-align: center; margin-top: 20px;">
-                        <div id="countdown-timer" style="font-size: 16px; color: #e0e0e0; margin-bottom: 12px; font-weight: bold;">Ready...</div>
-                        ${adminBtnHtml}
-                        <button id="custom-reset-btn" class="action-btn btn-reset" disabled>Recalibrate</button>
-                    </div>
-                </div>
-            </div>
-            `;
-        },
-        choices: [],
-        on_finish: function(data) {
-            if (data.beendigungs_grund === 'reset') {
-                experimentAborted = true; 
-            }
-        },
-        on_load: function() {
-            const resetBtn = document.getElementById('custom-reset-btn');
-            const timerDisplay = document.getElementById('countdown-timer');
-            const statusText = document.getElementById('scan-status');
-            const imageWrapper = document.getElementById('image-wrapper');
-            const adminNextBtn = document.getElementById('admin-next-btn'); 
-            let countdownInterval;
-            let isScanFinished = false;
-
-            ladeTabelleUndBereiteVor(csvPfad, runde, false, () => {
-                let currentStep = 1;
-                const aktuellerDrift = berechneDrift(runde);
-
-                let sequenceInterval = setInterval(() => {
-                    document.querySelectorAll('.scan-step').forEach(el => el.classList.remove('scan-active'));
-                    if(document.getElementById(`step-${currentStep}`)) document.getElementById(`step-${currentStep}`).classList.add('scan-active');
-
-                    aktuelleZeichenDaten.forEach(zeichen => {
-                        if (zeichen.ki_setzt_ring && zeichen.render_gruppe === currentStep) {
-                            const groesse = (zeichen.is_small === true || zeichen.is_small === "True") ? 'klein' : 'groß';
-                            const ringDrift = zeichen.wird_verschoben ? aktuellerDrift : 0.0;
-                            renderRing('image-wrapper', zeichen.center_x, zeichen.center_y, groesse, ringDrift, zeichen);
-                            zeichen.hat_ring = true;
-                        }
-                    });
-                    currentStep++;
-
-                    if (currentStep > 5) {
-                        clearInterval(sequenceInterval);
-                        statusText.innerText = "ASSISTING";
-                        statusText.style.color = "#32b5a1";
-                        resetBtn.disabled = false;
-                        if (adminNextBtn) adminNextBtn.disabled = false; 
-                        isScanFinished = true;
-                        
-                        let timeLeft = RUNDEN_DAUER_SEK;
-                        timerDisplay.innerText = `Continue in ${timeLeft}...`;
-                        countdownInterval = setInterval(() => {
-                            timeLeft--;
-                            timerDisplay.innerText = `Continue in ${timeLeft}...`;
-                            if (timeLeft <= 0) beendeRunde('timeout');
-                        }, 1000);
-                    }
-                }, SEQUENZ_SCHRITT_MS);
-            });
-
-            function beendeRunde(grund) {
-                clearInterval(countdownInterval);
-                let ki_falsch_korrigiert = 0, ki_vergessen_gefunden = 0, proband_neu_falsch = 0;    
-                aktuelleZeichenDaten.forEach(z => {
-                    if (!z.ist_ziel && z.ki_setzt_ring && !z.hat_ring) ki_falsch_korrigiert++;
-                    if (z.ist_ziel && !z.ki_setzt_ring && z.hat_ring) ki_vergessen_gefunden++;
-                    if (!z.ist_ziel && !z.ki_setzt_ring && z.hat_ring) proband_neu_falsch++;
-                });
-                jsPsych.finishTrial({ runde: runde, versuchsgruppe: aktuelleVersuchsGruppe, beendigungs_grund: grund, korrigierte_falsche_ki_ringe: ki_falsch_korrigiert, gefundene_vergessene_ki_ringe: ki_vergessen_gefunden, proband_falsch_markiert: proband_neu_falsch });
-            }
-
-            resetBtn.addEventListener('click', () => beendeRunde('reset'));
-            if (adminNextBtn) adminNextBtn.addEventListener('click', () => beendeRunde('admin_skip'));
-
-            imageWrapper.addEventListener('click', function(e) {
-                if (!isScanFinished) return;
-                
-                const rect = imageWrapper.getBoundingClientRect();
-                const scale = rect.width / ORIGINAL_BILD_BREITE; 
-
-                // 1. Bildschirm-Klick berechnen
-                const screenKlickX = e.clientX - rect.left;
-                const screenKlickY = e.clientY - rect.top;
-
-                // 2. Zurückrechnen in die Original-Welt (Tabelle)
-                const originalKlickX = screenKlickX / scale;
-                const originalKlickY = screenKlickY / scale;
-
-                let naechstesZeichen = null;
-                let minimaleDistanz = Infinity;
-                
-                aktuelleZeichenDaten.forEach(zeichen => {
-                    const distanz = Math.sqrt(Math.pow(originalKlickX - zeichen.center_x, 2) + Math.pow(originalKlickY - zeichen.center_y, 2));
-                    if (distanz < minimaleDistanz) { minimaleDistanz = distanz; naechstesZeichen = zeichen; }
-                });
-
-                if (naechstesZeichen && minimaleDistanz <= 40 && !naechstesZeichen.hat_ring) {
-                    const groesse = (naechstesZeichen.is_small === true || naechstesZeichen.is_small === "True") ? 'klein' : 'groß';
-                    renderRing('image-wrapper', naechstesZeichen.center_x, naechstesZeichen.center_y, groesse, 0.0, naechstesZeichen);
-                    naechstesZeichen.hat_ring = true;
-                }
-            });
-        }
-    };
-
-    let runde_timeline = [];
-    if (runde > 1) runde_timeline.push(fixation_cross);
-    runde_timeline.push(runden_trial);
-
-    timeline.push({
-        timeline: runde_timeline,
-        conditional_function: function() {
-            if (experimentAborted) return false;
-            if (aktuelleVersuchsGruppe === 3 && runde < RUNDEN_OHNE_DRIFT + 1) return false;
-            return true;
-        }
-    });
-}
+// Both phases are populated from one validated, offline-generated condition plan.
+const aiPracticeTimeline = { timeline: [] };
+const mainTaskTimeline = { timeline: [] };
+timeline.push(aiPracticeTimeline);
 
 // ==========================================
 // 6. ABSCHLUSS-FRAGEBÖGEN (NACH DEM EXPERIMENT)
@@ -936,72 +386,150 @@ const likert_scale = ["1 - Strongly Disagree", "2", "3", "4", "5", "6", "7 - Str
 const preamble_text = `<div style="max-width: 800px; margin: 0 auto; text-align: left; margin-bottom: 20px;"><p>We are interested in your perceptions of the agent.<br>Please take your time to answer the following questions based on your experiences so far. There are no right or wrong answers.<br><br>Please indicate the degree to which you personally agree or disagree with the following statements.</p></div>`;
 const short_preamble = `<div style="max-width: 800px; margin: 0 auto; text-align: left; margin-bottom: 20px;"><p>Please indicate the degree to which you personally agree or disagree with the following statements.</p></div>`;
 
-// 6.1 Recalibrate Frage (Nur wenn abgebrochen wurde)
-const recalibrate_survey = {
-    type: jsPsychSurveyText,
-    preamble: '<div style="max-width: 800px; margin: 0 auto; text-align: left;"><h3>Recalibration</h3></div>',
-    questions: [
-        {prompt: "Why did you click on „Recalibrate“?<br>Please type your answer…", rows: 5, name: 'recalibrate_reason'}
-    ],
-    conditional_function: function() { return experimentAborted; }
-};
-timeline.push(recalibrate_survey);
+// Survey Likert 1.1.3 returns zero-based indices. Export only named 1–7 values.
+function flattenLikertResponses(data, names) {
+    const response = typeof data.response === 'string' ? JSON.parse(data.response) : data.response;
+    const values = names.map(name => {
+        const value = response && response[name];
+        if (!Number.isInteger(value) || value < 0 || value > 6) {
+            throw new Error(`Invalid Likert response: ${name}`);
+        }
+        return value + 1;
+    });
+    names.forEach((name, index) => { data[name] = values[index]; });
+    delete data.response;
+}
 
-// 6.2 Paket 1: Customization (Die ersten 3)
-const customization_survey = {
-    type: jsPsychSurveyLikert,
-    preamble: preamble_text,
-    questions: [
-        {prompt: "I customized the agent before using it for the task.", name: 'cust_1', labels: likert_scale, required: true},
-        {prompt: "The agent I worked with was customized based on my instructions.", name: 'cust_2', labels: likert_scale, required: true},
-        {prompt: "The agent I worked with was customized based on my search strategy.", name: 'cust_3', labels: likert_scale, required: true}
-    ]
-};
-timeline.push(customization_survey);
+function createPerceptionSurvey(scale, prompts, prefix = 'pre', explicitNames = null) {
+    const names = explicitNames || prompts.map((_, index) => `${prefix}_${scale}_${index + 1}`);
+    return {
+        type: jsPsychSurveyLikert,
+        data: { phase: `${prefix}_perceptions`, scale },
+        questions: prompts.map((prompt, index) => ({ prompt, name: names[index], labels: likert_scale, required: true })),
+        randomize_question_order: false,
+        button_label: 'Next',
+        on_finish: data => flattenLikertResponses(data, names)
+    };
+}
 
-// 6.3 Paket 2: Trust (Die nächsten 2)
-const trust_survey = {
-    type: jsPsychSurveyLikert,
-    preamble: short_preamble,
-    questions: [
-        {prompt: "I trust the agent.", name: 'trust_1', labels: likert_scale, required: true},
-        {prompt: "I can rely on the agent.", name: 'trust_2', labels: likert_scale, required: true}
+timeline.push({
+    timeline: [
+        { type: jsPsychHtmlButtonResponse, stimulus: preamble_text, choices: ['Next'],
+          data: { phase: 'pre_perceptions_intro' } },
+        createPerceptionSurvey('ownership', [
+            'The version of the agent that assists me with the defect detection is MY agent.',
+            'I sense that the agent is MY agent.',
+            'I feel a very high degree of ownership for the agent.',
+            'It is hard for me to think about the agent as MINE.'
+        ]),
+        createPerceptionSurvey('satisfaction', [
+            'I am satisfied with the agent I worked with.',
+            'The agent I worked with meets my expectations.',
+            'I like the agent I worked with.'
+        ]),
+        createPerceptionSurvey('trust', ['I trust the agent.', 'I can rely on the agent.']),
+        { type: jsPsychHtmlButtonResponse,
+          stimulus: () => `<p>After the practice phase, you will work with ${escapeAiHtml(condition.customizationEnabled ? aiName : condition.fixedAgentName)} on real defect detection.</p>`,
+          choices: ['Start'], data: { phase: 'main_task_transition' } }
     ]
-};
-timeline.push(trust_survey);
+});
+timeline.push(mainTaskTimeline);
 
-// 6.4 Paket 3: Szenario-Text + Responsibility (Die letzten 2)
-const responsibility_survey = {
-    type: jsPsychSurveyLikert,
-    preamble: `
-        <div style="text-align: left; max-width: 800px; margin: 0 auto; line-height: 1.6; margin-bottom: 30px;">
-            <p>Now, imagine that you have reported the detected component defects to your company. During further processing of a component you inspected before the break, high porosity was detected.</p>
-            <p>An experienced engineer has raised concerns that serious errors were made in defect detection for this component, and that it was consequently misclassified. In short, they gave the classifications on this component a negative evaluation.</p>
-            <p style="margin-top: 20px;"><strong>Please indicate the degree to which you personally agree or disagree with the following statements.</strong></p>
-        </div>`,
-    questions: [
-        {prompt: "I am personally responsible for the misclassified component.", name: 'resp_1', labels: likert_scale, required: true},
-        {prompt: "The AI system is responsible for the misclassified component.", name: 'resp_2', labels: likert_scale, required: true}
-    ]
-};
-timeline.push(responsibility_survey);
+// Post-task measures follow Main Trial 30 directly.
+timeline.push(
+    { type: jsPsychHtmlButtonResponse,
+      stimulus: '<p>You have completed the inspection task. Please answer a few more questions about your experience.</p>',
+      choices: ['Next'], data: { phase: 'post_task_intro' } },
+    createPerceptionSurvey('satisfaction', [
+        'I am satisfied with the agent I worked with.',
+        'The agent I worked with meets my expectations.',
+        'I like the agent I worked with.'
+    ], 'post'),
+    createPerceptionSurvey('trust', ['I trust the agent.', 'I can rely on the agent.'], 'post'),
+    { type: jsPsychHtmlButtonResponse,
+      stimulus: '<p>Now, imagine that you have submitted your classifications to your company. During routine quality assurance, a discrepancy was identified for one of the components you inspected: the recorded number of defects did not match the result of the follow-up examination. An experienced engineer has raised concerns about the accuracy of the defect detection for this component and about how it was classified. In short, they gave a negative evaluation of the classification for this component.</p>',
+      choices: ['Next'], data: { phase: 'responsibility_scenario' } },
+    createPerceptionSurvey('responsibility', [
+        'I am personally responsible for the misclassified component.',
+        'The AI agent is responsible for the misclassified component.'
+    ], 'post', ['responsibility_self', 'responsibility_agent'])
+);
+// Final questionnaire: shared across all four conditions.
+function createPatternQuestions(prefix, prompt) {
+    let noticed = null;
+    const noticedField = `${prefix}_noticed`, textField = `${prefix}_text`;
+    return [
+        { type: jsPsychHtmlButtonResponse, stimulus: `<p>${prompt}</p>`, choices: ['Yes', 'No'],
+          data: { phase: 'final_patterns' },
+          on_start: () => { noticed = null; },
+          on_finish: data => {
+              if (data.response !== 0 && data.response !== 1) throw new Error('Missing Yes/No response');
+              noticed = data.response === 0 ? YES_NO_CODES.yes : YES_NO_CODES.no;
+              data[noticedField] = noticed;
+              data[textField] = null;
+              delete data.response;
+          } },
+        { conditional_function: () => noticed === YES_NO_CODES.yes,
+          timeline: [{ type: jsPsychSurveyText,
+              questions: [{ prompt: 'Which pattern did you notice?', name: textField, required: true, rows: 4 }],
+              button_label: 'Next', data: { phase: 'final_patterns' },
+              on_finish: data => {
+                  const response = typeof data.response === 'string' ? JSON.parse(data.response) : data.response;
+                  if (typeof response?.[textField] !== 'string' || !response[textField].length) throw new Error('Missing pattern text');
+                  data[noticedField] = noticed;
+                  data[textField] = response[textField];
+                  delete data.response;
+              }
+          }] }
+    ];
+}
+const manipulation = createPerceptionSurvey('manipulation', [
+    'I customized the agent before using it for the task.',
+    'The agent I worked with was customized based on my instructions.',
+    'The agent I worked with was customized based on my search strategy.',
+    'The agent I worked with searched in the order I customized.',
+    'The agent I worked with acted predictably.'
+], 'final', ['manip_customized', 'manip_instructions', 'manip_search_strategy', 'manip_search_order', 'manip_predictable']);
+const attitude = createPerceptionSurvey('attitude', [
+    'To what extent do you think artificial intelligence will make this world a better place?',
+    'How much would you like to use technologies that rely on artificial intelligence?',
+    'To what extent do you look forward to future developments in the field of artificial intelligence?',
+    'To what extent do you believe that artificial intelligence offers solutions to global problems?',
+    'Do you have mostly positive feelings when you think about artificial intelligence?',
+    'To what extent would you rather choose a technology with artificial intelligence than one without it?'
+], 'ai');
+attitude.questions.forEach(question => { question.labels = ['1 - Not at all', '2', '3', '4', '5', '6', '7 - Definitely']; });
+timeline.push({ timeline: [
+    { type: jsPsychHtmlButtonResponse,
+      stimulus: '<p>Finally, please also answer the following questions and statements about the task and about your perceptions of AI.</p>',
+      choices: ['Next'], data: { phase: 'final_questionnaire_intro' } },
+    manipulation,
+    ...createPatternQuestions('defect_pattern', 'Did you notice any pattern in where the defects tended to appear on the components?'),
+    ...createPatternQuestions('ai_error_pattern', 'Did you notice any pattern in what kind of findings the agent tended to get wrong?'),
+    attitude
+] });
 
 // 6.5 Outro
 const outro_trial = {
     type: jsPsychHtmlButtonResponse,
-    stimulus: `
-        <div style="background:#0f172a; padding:40px; color:white; font-family:sans-serif; text-align:center; border-radius: 8px; max-width: 600px; margin: 40px auto; border: 1px solid #334155;">
-            <h2 style="color:#deff9a; margin-top:0;">Thank you!</h2>
-            <p style="font-size: 18px; line-height: 1.6; margin-bottom: 20px;">
-                We were interested in your interaction with the agent and whether you were interested in recalibrating, so there is no need for further recalibration.
-            </p>
-            <p style="font-size: 18px; line-height: 1.6; margin-bottom: 30px;">
-                Thank you for participating.<br>You may close this window now.
-            </p>
-        </div>
-    `,
-    choices: ['Finish & Save Data']
+    stimulus: '<p>Thank you very much for taking part in this study. Your responses have been recorded, please click Submit to finish.</p>',
+    choices: ['Submit'],
+    data: { phase: 'submission' },
+    on_finish: data => { submitted = true; data.submitted = true; }
+
 };
 timeline.push(outro_trial);
 
-jsPsych.run(timeline);
+loadAiResources(condition).then(resources => {
+    for (const { plan, symbols } of resources) {
+        const trial = createAiTrial({ jsPsych, plan, symbols, condition,
+            getAgentId: () => aiName,
+            getSearchOrder: () => condition.customizationEnabled
+                ? participantCustomization : buildCustomization(STANDARD_SEARCH_STARTS) });
+        (plan.phase === 'ai_practice' ? aiPracticeTimeline : mainTaskTimeline).timeline.push(trial);
+    }
+    jsPsych.run(timeline);
+}).catch(error => {
+    document.body.innerHTML = `<main style="max-width:800px;margin:15vh auto;font-family:sans-serif;"><h1>Configuration error</h1><p>${escapeAiHtml(error.message)}</p></main>`;
+});
+})();

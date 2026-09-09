@@ -131,7 +131,7 @@
 }
 
 .btn-reset {
-    background-color: #d9534f; /* Signalrot für den Abbruch */
+    background-color: #d9534f; /* Reject */
 }
 
 .btn-reset:hover {
@@ -149,13 +149,14 @@
 .text-orange { color: #f08e16; font-weight: bold; } /* Aus den Spezifikationen [cite: 5, 40] */
 .text-blue { color: #2660c4; font-weight: bold; }   /* Aus den Spezifikationen [cite: 5, 39] */
 
-/* Der dynamische KI-Ring */
+/* KI-Ringe sind reine Anzeigen; nur Trainingsmarker sind interaktiv. */
 .ki-ring {
     position: absolute; /* Löst den Ring aus dem normalen Layout und legt ihn über das Bild */
     border: 3px solid #ffffff; /* Weiß und 3px stark */
     border-radius: 50%; /* Macht aus dem Viereck einen perfekten Kreis */
     box-sizing: border-box;
-    cursor: pointer; /* Zeigefinger-Maus beim Drüberfahren */
+    pointer-events: none;
+    cursor: default;
     
     /* Wichtig: Zentriert den Kreis exakt auf der x/y-Koordinate, statt ihn an der oberen linken Ecke aufzuhängen */
     transform: translate(-50%, -50%);
@@ -163,13 +164,22 @@
     /* Ein minimaler Schatten hilft, falls der Hintergrund mal exakt weiß/hellgrau ist */
     box-shadow: 0px 0px 3px rgba(0,0,0,0.3);
     
-    /* Falls wir Ringe flüssig driften lassen wollen: */
-    transition: left 0.1s linear, top 0.1s linear;
 }
 
-/* Ein kleiner Effekt beim Drüberfahren (Hover) */
-.ki-ring:hover {
+.training-marker {
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.training-marker:hover {
     border-color: #d9534f; /* Wird rot, um zu zeigen, dass man ihn löschen kann */
     background-color: rgba(217, 83, 79, 0.2); /* Ganz leicht rot gefüllt */
 }
+
+/* Shared preview verdict styling, including the Standard branch. */
+.preview-pass { border: 4px solid #5cb85c !important; }
+.preview-reject { border: 4px solid #d9534f !important; }
+.ai-agent-verdict { margin-top: 20px; padding: 12px; font-weight: bold; font-size: 24px; border-radius: 6px; }
+.ai-verdict-pass { background: #174c27; color: #fff; border: 3px solid #5cb85c; }
+.ai-verdict-reject { background: #701c20; color: #fff; border: 3px solid #d9534f; }
 

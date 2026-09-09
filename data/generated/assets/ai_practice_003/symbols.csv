@@ -1,0 +1,17 @@
+shape,center_x,center_y,color_hex,size_px,is_small,rotation,bg_luminance,bg_dark
+L,130,323,#FF8C00,15,True,270,0,True
+O,818,57,#0064FF,15,True,0,7,True
+L,300,745,#FF8C00,35,False,180,0,True
+O,872,497,#0064FF,15,True,0,3,True
+O,117,240,#FF8C00,15,True,0,7,True
+O,164,269,#0064FF,35,False,270,38,True
+Q,864,202,#FF8C00,15,True,0,181,False
+O,52,224,#FF8C00,35,False,90,14,True
+L,925,497,#FF8C00,35,False,180,3,True
+L,77,284,#0064FF,15,True,0,3,True
+L,877,96,#0064FF,35,False,180,21,True
+O,810,437,#FF8C00,35,False,180,167,False
+T,663,66,#0064FF,15,True,0,196,False
+Q,589,444,#0064FF,35,False,180,187,False
+L,837,546,#0064FF,15,True,270,38,True
+T,472,525,#FF8C00,35,False,180,191,False

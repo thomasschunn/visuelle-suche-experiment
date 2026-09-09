@@ -1,0 +1,11 @@
+{
+  "experiment_start_allowed": false,
+  "seed": 20260909,
+  "valid_versions": [
+    1,
+    3
+  ],
+  "validation_errors": [
+    "main_task trial 28: HIGH requires 2 misses, but only 1 orange eligible symbols exist"
+  ]
+}
