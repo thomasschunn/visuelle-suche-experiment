@@ -55,7 +55,7 @@ const main_menu = {
             <p>Wähle den Modus für diesen Probanden:</p>
         </div>
     `,
-    choices: ['1. Standard (Ohne Konfig)', '2. Interaktiv (Mit Konfig)', '3. Admin Skip (Runde 10)', '4. Eyetracker Kalibrierung'],
+    choices: ['1. Standard', '2. Customization', '3. Admin Skip (Runde 10)', '4. Eyetracker Kalibrierung'],
     on_finish: function(data) { 
         if (data.response === 3) {
             chose_calibration = true; // Startet die Schleife für Kalibrierung neu
@@ -149,7 +149,56 @@ timeline.push({
 // ==========================================
 // 2. STORY INTRO (VOR DEM TRAINING)
 // ==========================================
+
+const glasses_check_trial = {
+    type: jsPsychHtmlButtonResponse,
+    stimulus: `
+    <!-- Vollflächiger weißer Hintergrund passend zur Vorlage -->
+    <div style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: white; color: black; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: sans-serif; z-index: 9999;">
+        <div style="max-width: 900px; padding: 40px; text-align: center;">
+            <p style="font-size: 24px; line-height: 1.4; margin-bottom: 80px;">
+                This study involves looking closely at small shapes and colors on your screen. If you normally wear<br>glasses or contacts for computer work, please put them on now.
+            </p>
+            
+            <div style="display: flex; flex-direction: column; align-items: flex-end; width: max-content; margin: 0 auto 50px auto; gap: 25px;">
+                <label style="font-size: 18px; cursor: pointer; display: flex; align-items: center;">
+                    I need glasses or contacts for computer work and I am wearing them now.
+                    <input type="radio" name="glasses" value="1" style="margin-left: 20px; width: 22px; height: 22px; cursor: pointer;">
+                </label>
+                <label style="font-size: 18px; cursor: pointer; display: flex; align-items: center;">
+                    I do not need glasses or contacts for computer work.
+                    <input type="radio" name="glasses" value="0" style="margin-left: 20px; width: 22px; height: 22px; cursor: pointer;">
+                </label>
+            </div>
+            
+            <!-- Der Button ist anfangs unsichtbar, damit der User eine Option wählen muss -->
+            <button id="glasses-next-btn" class="action-btn" style="padding: 12px 30px; display: none; margin: 0 auto; background-color: #32b5a1; color: white; border: none; border-radius: 4px; font-size: 18px; cursor: pointer;">Next</button>
+        </div>
+    </div>
+    `,
+    choices: [],
+    on_load: function() {
+        const radios = document.querySelectorAll('input[name="glasses"]');
+        const nextBtn = document.getElementById('glasses-next-btn');
+
+        // Button einblenden, sobald eine Option angeklickt wird
+        radios.forEach(r => r.addEventListener('change', () => {
+            nextBtn.style.display = 'block';
+        }));
+
+        nextBtn.addEventListener('click', () => {
+            const selected = document.querySelector('input[name="glasses"]:checked').value;
+            
+            // Hängt die Spalte "wearing_glasses" (mit 1 oder 0) global an ALLE Datensätze dieses Probanden im Log an
+            jsPsych.data.addProperties({ wearing_glasses: parseInt(selected) });
+            
+            jsPsych.finishTrial();
+        });
+    }
+};
+
 let intro_timeline = [
+    glasses_check_trial, // <--- Startbildschirm mit Brillen-Abfrage
     {
         // Text 1
         type: jsPsychHtmlButtonResponse,
@@ -225,8 +274,8 @@ for (let t = 1; t <= ANZAHL_TRAINING_RUNDEN; t++) {
             <div class="right-column">
                 <div style="background:#1e2229; padding:20px; border-radius:10px; color:white; font-family:sans-serif; border: 2px solid #555;">
                     <h3 style="margin-top:0; border-bottom:1px solid #333; padding-bottom:10px;">TRAINING (${t}/${ANZAHL_TRAINING_RUNDEN})</h3>
-                    <p style="color:#e0e0e0; line-height:1.5;">Klicke auf eine beliebige Stelle im Bild, um einen Marker als Zählhilfe zu setzen.</p>
-                    <p style="color:#e0e0e0; line-height:1.5;">Klicke auf einen bestehenden Marker, um ihn wieder zu entfernen.</p>
+                    <p style="color:#e0e0e0; line-height:1.5;">Click anywhere on the image to place a marker as a counting aid.</p>
+                    <p style="color:#e0e0e0; line-height:1.5;">Click on an existing marker to remove it.</p>
                 </div>
                 <div class="button-container" style="margin-top: 20px;">
                     <!-- Neue Pass/Reject Buttons -->
@@ -294,25 +343,124 @@ timeline.push({
 });
 
 // ==========================================
+// NEUER SCREEN: DIREKT NACH DEM TRAINING (Für Gruppe 1 & 2)
+// ==========================================
+const practice_finished_trial = {
+    type: jsPsychHtmlButtonResponse,
+    stimulus: `
+    <div style="background:#0f172a; padding: 60px 40px; color:white; font-family:sans-serif; text-align:center; border-radius: 8px; max-width: 700px; margin: 40px auto;">
+        <p style="font-size: 24px; line-height: 1.4; margin-bottom: 30px;">
+            You have finished the practice.
+        </p>
+        <p style="font-size: 24px; line-height: 1.4; margin-bottom: 40px;">
+            Your company has introduced an intelligent assistance system for defect detection. In this next phase, an AI agent will assist you during the task.
+        </p>
+        <button id="next-btn-practice-done" class="action-btn btn-start" style="padding: 12px 30px;">Next</button>
+    </div>
+    `,
+    choices: [],
+    on_load: function() {
+        document.getElementById('next-btn-practice-done').addEventListener('click', () => jsPsych.finishTrial());
+    }
+};
+
+
+// ==========================================
 // 4. KI INTRO & CUSTOMIZATION
 // ==========================================
+
+// 1. Dein bereits bestehender Screen (nur der Button heißt jetzt "Next")
+const standard_intro_original = {
+    type: jsPsychHtmlButtonResponse,
+    stimulus: createInfoScreen("You have finished the practice.", "<p>Your company has introduced an intelligent assistance system for defect detection. In this next phase, an AI agent will assist you during the task</p>", "Next"),
+    choices: [], on_load: () => document.getElementById('custom-next-btn').addEventListener('click', () => jsPsych.finishTrial())
+};
+
+// 2. NEU: Erstes Textfenster (DA02 Aufgaben)
+const standard_intro_new_1 = {
+    type: jsPsychHtmlButtonResponse,
+    stimulus: function() {
+        // Hier wird der Name im Hintergrund fest für Gruppe 1 vergeben
+        aiName = "DA02"; 
+        
+        return `
+        <div style="background:#0f172a; padding:40px; color:white; font-family:sans-serif; text-align:center; border-radius: 8px; max-width: 700px; margin: 40px auto; border: 1px solid #334155;">
+            <p style="font-size: 22px; line-height: 1.6; margin-bottom: 20px;">
+                The AI <i>DA02</i> will assist by marking defects and providing a reject or pass recommendation for each component.
+            </p>
+            <p style="font-size: 22px; line-height: 1.6; margin-bottom: 30px;">
+                Your task remains to classify each part as ready to proceed (pass) or defective (reject).
+            </p>
+            <button id="next-btn-std-1" class="action-btn btn-start" style="padding: 12px 30px;">Next</button>
+        </div>
+        `;
+    },
+    choices: [],
+    on_load: function() {
+        document.getElementById('next-btn-std-1').addEventListener('click', () => jsPsych.finishTrial());
+    }
+};
+
+// 3. NEU: Zweites Textfenster (Exploration & Evaluation)
+const standard_intro_new_2 = {
+    type: jsPsychHtmlButtonResponse,
+    stimulus: `
+    <div style="background:#0f172a; padding:40px; color:white; font-family:sans-serif; text-align:center; border-radius: 8px; max-width: 700px; margin: 40px auto; border: 1px solid #334155;">
+        <p style="font-size: 22px; line-height: 1.6; margin-bottom: 30px;">
+            Before working together with the AI agent, please take some time to explore its functions. Note that you will later be asked to evaluate it in your role as a defect inspector.
+        </p>
+        <button id="next-btn-std-2" class="action-btn btn-start" style="padding: 12px 30px;">Next</button>
+    </div>
+    `,
+    choices: [],
+    on_load: function() {
+        document.getElementById('next-btn-std-2').addEventListener('click', () => jsPsych.finishTrial());
+    }
+};
+
+// Alle drei Screens werden nacheinander abgespielt, wenn Standard-Modus (Gruppe 1) aktiv ist
 timeline.push({
-    timeline: [{
-        type: jsPsychHtmlButtonResponse,
-        stimulus: createInfoScreen("You have finished the practice.", "<p>Your company has introduced an intelligent assistance system for defect detection. In this next phase, an AI agent will assist you during the task</p>", "Start Main Task"),
-        choices: [], on_load: () => document.getElementById('custom-next-btn').addEventListener('click', () => jsPsych.finishTrial())
-    }],
+    timeline: [standard_intro_original, standard_intro_new_1, standard_intro_new_2],
     conditional_function: function() { return aktuelleVersuchsGruppe === 1; }
 });
 
-timeline.push({
-    timeline: [{
-        type: jsPsychHtmlButtonResponse,
-        stimulus: createInfoScreen("Well done!", "<p>The AI will assist by marking defects and providing a reject or pass recommendation for each component.</p><p>Your task remains to classify each part as ready to proceed (pass) or defective (reject).</p>"),
-        choices: [], on_load: () => document.getElementById('custom-next-btn').addEventListener('click', () => jsPsych.finishTrial())
-    }],
-    conditional_function: function() { return aktuelleVersuchsGruppe === 2; }
-});
+const customization_practice_finished_trial = {
+    type: jsPsychHtmlButtonResponse,
+    stimulus: `
+    <div style="background:#0f172a; padding:40px; color:white; font-family:sans-serif; text-align:center; border-radius: 8px; max-width: 700px; margin: 40px auto; border: 1px solid #334155;">
+        <p style="font-size: 22px; line-height: 1.6; margin-bottom: 30px;">
+            You have finished the practice.
+        </p>
+        <p style="font-size: 22px; line-height: 1.6; margin-bottom: 30px;">
+            Your company has introduced an intelligent assistance system for defect detection. In this next phase, an AI agent will assist you during the task
+        </p>
+        <button id="next-btn-cust-intro" class="action-btn btn-start" style="padding: 12px 30px;">Next</button>
+    </div>
+    `,
+    choices: [],
+    on_load: function() {
+        document.getElementById('next-btn-cust-intro').addEventListener('click', () => jsPsych.finishTrial());
+    }
+};
+
+const customization_well_done_trial = {
+    type: jsPsychHtmlButtonResponse,
+    stimulus: `
+    <div style="background:#0f172a; padding:40px; color:white; font-family:sans-serif; text-align:center; border-radius: 8px; max-width: 700px; margin: 40px auto; border: 1px solid #334155;">
+        <p style="font-size: 22px; line-height: 1.6; margin-bottom: 20px;">
+            The AI will assist by marking defects and providing a reject or pass recommendation for each component.
+        </p>
+        <p style="font-size: 22px; line-height: 1.6; margin-bottom: 30px;">
+            Your task remains to classify each part as ready to proceed (pass) or defective (reject).
+        </p>
+        <button id="next-btn-well-done" class="action-btn btn-start" style="padding: 12px 30px;">Next</button>
+    </div>
+    `,
+    choices: [],
+    on_load: function() {
+        document.getElementById('next-btn-well-done').addEventListener('click', () => jsPsych.finishTrial());
+    }
+};
 
 const customization_name_trial = {
     type: jsPsychHtmlButtonResponse,
@@ -356,7 +504,6 @@ const customization_settings_trial = {
     stimulus: function() {
         function makeSelectRow(priorityNum, defaultCat) {
             return `
-            <!-- NEU: id="row-..." und transition für weiches Ein-/Ausblenden der Farbe -->
             <div id="row-${priorityNum}" style="display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px; width: 100%; max-width: 500px; transition: background 0.3s;">
                 <strong style="color:#32b5a1; font-size: 16px; width: 90px;">Priority ${priorityNum}:</strong>
                 <select id="cat-${priorityNum}" style="padding: 6px; font-size: 15px; border-radius: 4px; border: 1px solid #555; background: #1e2229; color: white; flex: 1;">
@@ -371,18 +518,39 @@ const customization_settings_trial = {
         }
 
         return `
-        <div style="display: flex; flex-direction: column; align-items: center; max-width: 900px; margin: 20px auto; gap: 20px;">
+        <style>
+            .preview-pass { border: 4px solid #5cb85c !important; box-shadow: 0 0 15px rgba(92, 184, 92, 0.5) !important; transition: all 0.3s; }
+            .preview-reject { border: 4px solid #d9534f !important; box-shadow: 0 0 15px rgba(217, 83, 79, 0.5) !important; transition: all 0.3s; }
+        </style>
+
+        <div style="display: flex; flex-direction: column; align-items: center; max-width: 1050px; margin: 20px auto; gap: 20px;">
             
-            <!-- VORSCHAU-BILD -->
-            <div id="preview-image-wrapper" style="position:relative; width: 700px; aspect-ratio: 1920/1080; background: #222; border: 2px solid #555; border-radius: 4px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
-                <img src="bilder/stimulus_001.jpg" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain;" />
-                <div style="position:absolute; bottom:10px; left:10px; background:rgba(0,0,0,0.7); color:white; padding:5px 10px; border-radius:4px; font-weight:bold;">Preview Example</div>
+            <!-- TOP AREA: Bild links, Status rechts -->
+            <div style="display: flex; gap: 20px; width: 100%; justify-content: center; align-items: stretch;">
+                
+                <!-- VORSCHAU-BILD -->
+                <div id="preview-image-wrapper" style="position:relative; width: 700px; flex-shrink: 0; aspect-ratio: 1920/1080; background: #222; border: 2px solid #555; border-radius: 4px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.5);">
+                    <img src="bilder/stimulus_001.jpg" style="position:absolute; top:0; left:0; width:100%; height:100%; object-fit:contain;" />
+                    <div style="position:absolute; bottom:10px; left:10px; background:rgba(0,0,0,0.7); color:white; padding:5px 10px; border-radius:4px; font-weight:bold;">Preview Example</div>
+                </div>
+
+                <!-- NEU: KI-STATUS-FENSTER -->
+                <div style="flex: 1; background: #d0d0d0; border: 2px solid #333; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; color: #444; font-family: sans-serif;">
+                    <div style="background: #999; border: 2px solid #333; padding: 5px 20px; font-size: 22px; font-weight: bold; letter-spacing: 4px; color: #111; margin-bottom: 30px; margin-top: 10px;">
+                        ${aiName}
+                    </div>
+                    <div id="status-text" style="font-size: 18px; line-height: 1.6; text-align: left; width: 100%;">
+                        <span style="color:#888; font-style:italic;">Ready for configuration...</span>
+                    </div>
+                </div>
+
             </div>
 
             <!-- KONFIGURATIONS-PANEL -->
             <div style="background:#0f172a; padding:30px; color:white; font-family:sans-serif; border-radius: 8px; border: 1px solid #334155; width: 100%; box-sizing: border-box;">
                 
-                <p style="text-align:center; font-size: 16px; line-height: 1.5; margin-top: 0; margin-bottom: 20px;">
+                <!-- NEU: Text hat jetzt eine ID, um ihn nach dem Durchlauf dynamisch zu ändern -->
+                <p id="instructions-text" style="text-align:center; font-size: 16px; line-height: 1.5; margin-top: 0; margin-bottom: 20px;">
                     Think about the strategy you use to search the images. You can now align <strong>${aiName}</strong>'s search order with your own approach by using the dropdown menus for each category.<br><br>
                     Feel free to adjust these settings as often as you like. Click <strong style="color: #32b5a1;">Apply</strong> to run a demo with your current settings, or click <strong style="color: #32b5a1;">Proceed</strong> once you are ready to practice the task with your agent.
                 </p>
@@ -433,6 +601,9 @@ const customization_settings_trial = {
         const applyBtn = document.getElementById('apply-btn');
         const proceedBtn = document.getElementById('proceed-btn');
         const imageWrapper = document.getElementById('preview-image-wrapper');
+        const statusText = document.getElementById('status-text');
+        const instructionsText = document.getElementById('instructions-text');
+        
         let previewInterval;
 
         function getSelectedConfig() {
@@ -479,39 +650,48 @@ const customization_settings_trial = {
             proceedBtn.disabled = true;
             applyBtn.style.opacity = '0.5';
             applyBtn.innerText = 'Running...';
+            
+            // Text im rechten Status-Fenster zurücksetzen
+            statusText.innerHTML = `... preparing search pattern ...`;
 
+            imageWrapper.classList.remove('preview-pass', 'preview-reject');
             imageWrapper.querySelectorAll('.ki-ring').forEach(el => el.remove());
 
             ladeTabelleUndBereiteVor('tabellen/stimulus_001.csv', 1, false, () => {
                 let currentStep = 1;
+                let circleCount = 0; 
+                
                 clearInterval(previewInterval); 
                 
-                // Setze alle Zeilenfarben zurück, bevor es losgeht
                 for(let i=1; i<=4; i++) {
                     document.getElementById(`row-${i}`).style.background = 'rgba(255,255,255,0.05)';
                 }
-                
-                // Erster Schritt sofort visuell hervorheben
                 document.getElementById('row-1').style.background = 'rgba(50, 181, 161, 0.25)';
 
                 previewInterval = setInterval(() => {
                     
+                    // NEU: Aktuellen Text ins rechte Fenster schreiben
+                    if (currentStep <= 4) {
+                        const stepConfig = tempConfig[currentStep - 1];
+                        statusText.innerHTML = `... processing Priority ${currentStep}:<br><strong style="color:#111; font-size: 20px;">${stepConfig.label}: ${stepConfig.valueLabel}</strong> ...`;
+                    } else if (currentStep === 5) {
+                        statusText.innerHTML = `... running Final Anomaly Scan ...`;
+                    }
+
                     aktuelleZeichenDaten.forEach(zeichen => {
                         if (zeichen.ki_setzt_ring && zeichen.render_gruppe === currentStep) {
                             const groesse = (zeichen.is_small === true || zeichen.is_small === "True") ? 'klein' : 'groß';
                             renderRing('preview-image-wrapper', zeichen.center_x, zeichen.center_y, groesse, 0.0, zeichen);
+                            circleCount++; 
                         }
                     });
                     
                     currentStep++;
                     
-                    // Farb-Reset für alle Zeilen
                     for(let i=1; i<=4; i++) {
                         const row = document.getElementById(`row-${i}`);
                         if(row) row.style.background = 'rgba(255,255,255,0.05)';
                     }
-                    
-                    // Markiere die nächste Zeile (wenn wir noch in den Prio-Stufen 1-4 sind)
                     if(currentStep <= 4) {
                         document.getElementById(`row-${currentStep}`).style.background = 'rgba(50, 181, 161, 0.25)';
                     }
@@ -522,29 +702,87 @@ const customization_settings_trial = {
                         proceedBtn.disabled = false;
                         applyBtn.style.opacity = '1';
                         applyBtn.innerText = 'Apply';
+                        
+                        if (circleCount >= 11) {
+                            imageWrapper.classList.add('preview-reject');
+                        } else {
+                            imageWrapper.classList.add('preview-pass');
+                        }
+
+                        // NEU: Final verdict im rechten Fenster
+                        statusText.innerHTML = `<span style="font-size: 24px; font-weight: bold; color: #111;">Final verdict:<br>${circleCount} defects</span>`;
+
+                        // NEU: Einleitungstext im dunklen Fenster anpassen
+                        const isReject = circleCount >= 11;
+                        const colorFlag = isReject ? 'red' : 'green';
+                        const actionText = isReject ? 'reject' : 'pass';
+                        const colorHex = isReject ? '#d9534f' : '#5cb85c';
+
+                        instructionsText.innerHTML = `<strong>${aiName}</strong> found ${circleCount} defects in this example and flagged the component <strong style="color:${colorHex};">${colorFlag}</strong>, recommending a ${actionText}. In this case, your task would be to <strong>${actionText}</strong> the part.<br>You can now re-customize your agent or proceed to the task.`;
                     }
-                }, 2000);
+                }, 2000); 
             });
         });
     }
 };
 
-const final_rules_trial = {
+// ==========================================
+// NEUE SCREENS NACH DER KONFIGURATION
+// ==========================================
+
+const ai_mistakes_trial = {
     type: jsPsychHtmlButtonResponse,
     stimulus: function() {
-        return createInfoScreen("Ready to inspect", `
-            <p>${aiName} is configured. Now you do the defect inspection together with ${aiName}.</p>
-            <p>Your task is again to find defects and mark them by clicking on them. Again, missing defects and marking non-defects are critical errors and should be avoided.</p>
-            <p>You have 15 seconds per component.</p>
-            <p style="color:#888; font-size:14px;">If necessary, you can use the "recalibrate" button on the right to abort. Use the button carefully.</p>
-        `, "Start Main Task");
+        return `
+        <div style="background:#0f172a; padding:40px; color:white; font-family:sans-serif; text-align:center; border-radius: 8px; max-width: 700px; margin: 40px auto; border: 1px solid #334155;">
+            <p style="font-size: 20px; line-height: 1.6; margin-bottom: 30px;">
+                Like all systems of this type, <strong>${aiName}</strong> can make mistakes. Under the operating conditions used here, it classifies approximately 90% of individual markings correctly. Residual misclassifications are an expected characteristic of intelligent visual inspection and are documented in the system specification. They occur because surface texture, contrast, and marking geometry can make individual markings harder to resolve. Your task is to make the final assessment for each component.
+            </p>
+            <button id="next-btn-1" class="action-btn btn-start" style="padding: 12px 30px;">Next</button>
+        </div>
+        `;
     },
     choices: [],
-    on_load: function() { document.getElementById('custom-next-btn').addEventListener('click', () => jsPsych.finishTrial()); }
+    on_load: function() {
+        document.getElementById('next-btn-1').addEventListener('click', () => jsPsych.finishTrial());
+    }
 };
 
+const ai_practice_reminder_trial = {
+    type: jsPsychHtmlButtonResponse,
+    stimulus: function() {
+        return `
+        <div style="background:#0f172a; padding:40px; color:white; font-family:sans-serif; text-align:center; border-radius: 8px; max-width: 600px; margin: 40px auto; border: 1px solid #334155;">
+            <p style="font-size: 20px; line-height: 1.6; margin-bottom: 10px;">
+                Now you can practice the detection task with <strong>${aiName}</strong>.
+            </p>
+            <p style="font-size: 20px; line-height: 1.6; margin-bottom: 10px;">
+                To help you get started, the practice begins with simpler images.
+            </p>
+            <p style="font-size: 20px; line-height: 1.6; margin-bottom: 30px;">
+                Be aware that AI can make mistakes.
+            </p>
+            
+            <p style="font-size: 20px; margin-bottom: 10px;">Remember:</p>
+            <ul style="display: inline-block; text-align: left; font-size: 20px; line-height: 1.6; margin: 0 auto 30px auto; padding-left: 20px;">
+                <li><i style="color: #d9534f; font-weight: bold;">reject</i>: more than 10 defects</li>
+                <li><i style="color: #5cb85c; font-weight: bold;">pass</i>: 10 or less defects</li>
+                <li>Defects: <strong>Ls</strong> and <strong>Os</strong></li>
+            </ul>
+            <br>
+            <button id="next-btn-2" class="action-btn btn-start" style="padding: 12px 30px;">start</button>
+        </div>
+        `;
+    },
+    choices: [],
+    on_load: function() {
+        document.getElementById('next-btn-2').addEventListener('click', () => jsPsych.finishTrial());
+    }
+};
+
+// Timeline Push mit den beiden neuen Screens anstelle des alten
 timeline.push({
-    timeline: [customization_name_trial, customization_settings_trial, final_rules_trial],
+    timeline: [customization_name_trial, customization_settings_trial, ai_mistakes_trial, ai_practice_reminder_trial],
     conditional_function: function() { return aktuelleVersuchsGruppe === 2; }
 });
 
