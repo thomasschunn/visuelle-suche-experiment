@@ -364,17 +364,17 @@ const practice_finished_trial = {
     }
 };
 
+timeline.push({
+    timeline: [practice_finished_trial],
+    conditional_function: function() { return aktuelleVersuchsGruppe === 1 || aktuelleVersuchsGruppe === 2; }
+});
+
+
+
 
 // ==========================================
 // 4. KI INTRO & CUSTOMIZATION
-// ==========================================
-
-// 1. Dein bereits bestehender Screen (nur der Button heißt jetzt "Next")
-const standard_intro_original = {
-    type: jsPsychHtmlButtonResponse,
-    stimulus: createInfoScreen("You have finished the practice.", "<p>Your company has introduced an intelligent assistance system for defect detection. In this next phase, an AI agent will assist you during the task</p>", "Next"),
-    choices: [], on_load: () => document.getElementById('custom-next-btn').addEventListener('click', () => jsPsych.finishTrial())
-};
+// =========================================
 
 // 2. NEU: Erstes Textfenster (DA02 Aufgaben)
 const standard_intro_new_1 = {
@@ -420,54 +420,51 @@ const standard_intro_new_2 = {
 
 // Alle drei Screens werden nacheinander abgespielt, wenn Standard-Modus (Gruppe 1) aktiv ist
 timeline.push({
-    timeline: [standard_intro_original, standard_intro_new_1, standard_intro_new_2],
+    timeline: [standard_intro_new_1, standard_intro_new_2],
     conditional_function: function() { return aktuelleVersuchsGruppe === 1; }
 });
 
-const customization_practice_finished_trial = {
+const customization_intro_new_1 = {
     type: jsPsychHtmlButtonResponse,
     stimulus: `
-    <div style="background:#0f172a; padding:40px; color:white; font-family:sans-serif; text-align:center; border-radius: 8px; max-width: 700px; margin: 40px auto; border: 1px solid #334155;">
-        <p style="font-size: 22px; line-height: 1.6; margin-bottom: 30px;">
-            You have finished the practice.
+    <div style="background:#0f172a; padding: 60px 40px; color:white; font-family:sans-serif; text-align:center; border-radius: 8px; max-width: 700px; margin: 40px auto;">
+        <p style="font-size: 24px; line-height: 1.4; margin-bottom: 30px;">
+            The AI will assist by marking defects and providing a reject or pass recommendation for each component.
         </p>
-        <p style="font-size: 22px; line-height: 1.6; margin-bottom: 30px;">
-            Your company has introduced an intelligent assistance system for defect detection. In this next phase, an AI agent will assist you during the task
+        <p style="font-size: 24px; line-height: 1.4; margin-bottom: 40px;">
+            Your task remains to classify each part as ready to proceed (pass) or defective (reject).
         </p>
-        <button id="next-btn-cust-intro" class="action-btn btn-start" style="padding: 12px 30px;">Next</button>
+        <button id="next-btn-cust-1" class="action-btn btn-start" style="padding: 12px 30px;">Next</button>
     </div>
     `,
     choices: [],
     on_load: function() {
-        document.getElementById('next-btn-cust-intro').addEventListener('click', () => jsPsych.finishTrial());
+        document.getElementById('next-btn-cust-1').addEventListener('click', () => jsPsych.finishTrial());
     }
 };
 
-const customization_well_done_trial = {
+const customization_intro_new_2 = {
     type: jsPsychHtmlButtonResponse,
     stimulus: `
-    <div style="background:#0f172a; padding:40px; color:white; font-family:sans-serif; text-align:center; border-radius: 8px; max-width: 700px; margin: 40px auto; border: 1px solid #334155;">
-        <p style="font-size: 22px; line-height: 1.6; margin-bottom: 20px;">
-            The AI will assist by marking defects and providing a reject or pass recommendation for each component.
+    <div style="background:#0f172a; padding: 60px 40px; color:white; font-family:sans-serif; text-align:center; border-radius: 8px; max-width: 700px; margin: 40px auto;">
+        <p style="font-size: 24px; line-height: 1.4; margin-bottom: 40px;">
+            Before working together with your AI agent, please take some time to customize it using the customization interface on the next page to suit your role as a defect inspector.
         </p>
-        <p style="font-size: 22px; line-height: 1.6; margin-bottom: 30px;">
-            Your task remains to classify each part as ready to proceed (pass) or defective (reject).
-        </p>
-        <button id="next-btn-well-done" class="action-btn btn-start" style="padding: 12px 30px;">Next</button>
+        <button id="next-btn-cust-2" class="action-btn btn-start" style="padding: 12px 30px;">Next</button>
     </div>
     `,
     choices: [],
     on_load: function() {
-        document.getElementById('next-btn-well-done').addEventListener('click', () => jsPsych.finishTrial());
+        document.getElementById('next-btn-cust-2').addEventListener('click', () => jsPsych.finishTrial());
     }
 };
+
 
 const customization_name_trial = {
     type: jsPsychHtmlButtonResponse,
     stimulus: `
         <div style="background:#0f172a; padding:40px; color:white; font-family:sans-serif; text-align:center; border-radius: 8px; max-width: 600px; margin: 40px auto; border: 1px solid #334155;">
             <h2 style="color:#deff9a; margin-top:0;">Agent Identification</h2>
-            <p style="margin-bottom: 20px; font-size: 18px; line-height: 1.5; text-align: left;">Before working with your AI agent, please take some time to customize it, based on your job as a defect inspector.</p>
             <p style="margin-bottom: 20px; font-size: 18px; line-height: 1.5; text-align: left;">First, give your AI agent an identification so that your settings can be saved. Identifications consist of 2 letters and 2 numbers (e.g. AI01).</p>
             
             <!-- NEU: Versteckte Fehlermeldung, falls die Eingabe falsch ist -->
@@ -502,17 +499,16 @@ const customization_name_trial = {
 const customization_settings_trial = {
     type: jsPsychHtmlButtonResponse,
     stimulus: function() {
-        function makeSelectRow(priorityNum, defaultCat) {
+        // Die Kategorien sind jetzt fest vorgegeben, nur noch die Werte sind wählbar
+        function makeRow(id, label, catValue, options) {
+            let opts = options.map(o => `<option value="${o.v}">${o.t}</option>`).join('');
             return `
-            <div id="row-${priorityNum}" style="display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px; width: 100%; max-width: 500px; transition: background 0.3s;">
-                <strong style="color:#32b5a1; font-size: 16px; width: 90px;">Priority ${priorityNum}:</strong>
-                <select id="cat-${priorityNum}" style="padding: 6px; font-size: 15px; border-radius: 4px; border: 1px solid #555; background: #1e2229; color: white; flex: 1;">
-                    <option value="direction" ${defaultCat === 'direction' ? 'selected' : ''}>Direction</option>
-                    <option value="bg" ${defaultCat === 'bg' ? 'selected' : ''}>Background</option>
-                    <option value="size" ${defaultCat === 'size' ? 'selected' : ''}>Size</option>
-                    <option value="type" ${defaultCat === 'type' ? 'selected' : ''}>Type</option>
-                </select>
-                <select id="val-${priorityNum}" style="padding: 6px; font-size: 15px; border-radius: 4px; border: 1px solid #555; background: #1e2229; color: white; width: 160px;">
+            <div id="row-${id}" style="display: flex; align-items: center; gap: 15px; background: rgba(255,255,255,0.05); padding: 10px 15px; border-radius: 8px; width: 100%; max-width: 500px; transition: background 0.3s;">
+                <strong style="color:#32b5a1; font-size: 16px; width: 120px;">${label}:</strong>
+                <input type="hidden" id="cat-${id}" value="${catValue}">
+                <input type="hidden" id="label-${id}" value="${label}">
+                <select id="val-${id}" style="padding: 6px; font-size: 15px; border-radius: 4px; border: 1px solid #555; background: #1e2229; color: white; flex: 1;">
+                    ${opts}
                 </select>
             </div>`;
         }
@@ -534,7 +530,7 @@ const customization_settings_trial = {
                     <div style="position:absolute; bottom:10px; left:10px; background:rgba(0,0,0,0.7); color:white; padding:5px 10px; border-radius:4px; font-weight:bold;">Preview Example</div>
                 </div>
 
-                <!-- NEU: KI-STATUS-FENSTER -->
+                <!-- KI-STATUS-FENSTER -->
                 <div style="flex: 1; background: #d0d0d0; border: 2px solid #333; padding: 20px; box-sizing: border-box; display: flex; flex-direction: column; align-items: center; color: #444; font-family: sans-serif;">
                     <div style="background: #999; border: 2px solid #333; padding: 5px 20px; font-size: 22px; font-weight: bold; letter-spacing: 4px; color: #111; margin-bottom: 30px; margin-top: 10px;">
                         ${aiName}
@@ -549,21 +545,16 @@ const customization_settings_trial = {
             <!-- KONFIGURATIONS-PANEL -->
             <div style="background:#0f172a; padding:30px; color:white; font-family:sans-serif; border-radius: 8px; border: 1px solid #334155; width: 100%; box-sizing: border-box;">
                 
-                <!-- NEU: Text hat jetzt eine ID, um ihn nach dem Durchlauf dynamisch zu ändern -->
                 <p id="instructions-text" style="text-align:center; font-size: 16px; line-height: 1.5; margin-top: 0; margin-bottom: 20px;">
-                    Think about the strategy you use to search the images. You can now align <strong>${aiName}</strong>'s search order with your own approach by using the dropdown menus for each category.<br><br>
+                    <strong>${aiName}</strong> has a fixed search order (Direction → Background → Size → Type). You can customize its starting preferences using the dropdown menus.<br><br>
                     Feel free to adjust these settings as often as you like. Click <strong style="color: #32b5a1;">Apply</strong> to run a demo with your current settings, or click <strong style="color: #32b5a1;">Proceed</strong> once you are ready to practice the task with your agent.
                 </p>
-
-                <div id="error-msg" style="color:#d9534f; display:none; text-align:center; margin-bottom:15px; font-weight:bold; padding: 10px; background: rgba(217, 83, 79, 0.1); border-radius: 4px;">
-                    Please select each category exactly once! (Do not use a category twice)
-                </div>
                 
                 <div style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
-                    ${makeSelectRow(1, 'direction')}
-                    ${makeSelectRow(2, 'bg')}
-                    ${makeSelectRow(3, 'size')}
-                    ${makeSelectRow(4, 'type')}
+                    ${makeRow(1, 'Direction', 'direction', [{v:'top_left', t:'top left'}, {v:'top_right', t:'top right'}, {v:'bottom_right', t:'bottom right'}, {v:'bottom_left', t:'bottom left'}])}
+                    ${makeRow(2, 'Background', 'bg', [{v:'dark', t:'dark areas'}, {v:'light', t:'light areas'}])}
+                    ${makeRow(3, 'Size', 'size', [{v:'large', t:'large'}, {v:'small', t:'small'}])}
+                    ${makeRow(4, 'Type', 'type', [{v:'L', t:'L'}, {v:'O', t:'O'}])}
                 </div>
                 
                 <div style="display: flex; justify-content: center; gap: 20px; margin-top: 30px;">
@@ -576,28 +567,6 @@ const customization_settings_trial = {
     },
     choices: [],
     on_load: function() {
-        const catData = {
-            direction: [{v:'top_left', t:'top left'}, {v:'top_right', t:'top right'}, {v:'bottom_right', t:'bottom right'}, {v:'bottom_left', t:'bottom left'}],
-            bg: [{v:'dark', t:'dark areas'}, {v:'light', t:'light areas'}],
-            size: [{v:'large', t:'large'}, {v:'small', t:'small'}],
-            type: [{v:'L', t:'L'}, {v:'O', t:'O'}]
-        };
-
-        function updateSubSelect(rowNum) {
-            const catSelect = document.getElementById('cat-' + rowNum);
-            const valSelect = document.getElementById('val-' + rowNum);
-            valSelect.innerHTML = '';
-            catData[catSelect.value].forEach(opt => {
-                valSelect.innerHTML += '<option value="' + opt.v + '">' + opt.t + '</option>';
-            });
-        }
-
-        for (let i = 1; i <= 4; i++) {
-            updateSubSelect(i);
-            document.getElementById('cat-' + i).addEventListener('change', () => updateSubSelect(i));
-        }
-
-        const errorMsg = document.getElementById('error-msg');
         const applyBtn = document.getElementById('apply-btn');
         const proceedBtn = document.getElementById('proceed-btn');
         const imageWrapper = document.getElementById('preview-image-wrapper');
@@ -607,24 +576,15 @@ const customization_settings_trial = {
         let previewInterval;
 
         function getSelectedConfig() {
-            let selectedCats = [];
-            for(let i=1; i<=4; i++) selectedCats.push(document.getElementById('cat-'+i).value);
-            const uniqueCats = new Set(selectedCats);
-            
-            if(uniqueCats.size !== 4) {
-                errorMsg.style.display = 'block';
-                return null;
-            }
-            errorMsg.style.display = 'none';
-            
             let tempConfig = [];
             for(let i=1; i<=4; i++) {
                 let catEl = document.getElementById('cat-'+i);
+                let labelEl = document.getElementById('label-'+i);
                 let valEl = document.getElementById('val-'+i);
                 tempConfig.push({ 
                     category: catEl.value, 
                     value: valEl.value, 
-                    label: catEl.options[catEl.selectedIndex].text, 
+                    label: labelEl.value, 
                     valueLabel: valEl.options[valEl.selectedIndex].text 
                 });
             }
@@ -632,27 +592,27 @@ const customization_settings_trial = {
         }
 
         proceedBtn.addEventListener('click', function() {
-            const finalConfig = getSelectedConfig();
-            if (finalConfig) {
-                probandenConfig = finalConfig;
-                clearInterval(previewInterval); 
-                jsPsych.finishTrial(); 
-            }
+            probandenConfig = getSelectedConfig();
+            clearInterval(previewInterval); 
+            jsPsych.finishTrial(); 
         });
 
         applyBtn.addEventListener('click', function() {
             const tempConfig = getSelectedConfig();
-            if (!tempConfig) return; 
-            
             probandenConfig = tempConfig;
             
             applyBtn.disabled = true;
             proceedBtn.disabled = true;
             applyBtn.style.opacity = '0.5';
             applyBtn.innerText = 'Running...';
+
+            // Text exakt nach Mockup aufbauen (z.B. "... starting search with large Ls on dark areas in the top left ...")
+            const dirVal = tempConfig[0].valueLabel;
+            const bgVal = tempConfig[1].valueLabel;
+            const sizeVal = tempConfig[2].valueLabel;
+            const typeVal = tempConfig[3].valueLabel;
             
-            // Text im rechten Status-Fenster zurücksetzen
-            statusText.innerHTML = `... preparing search pattern ...`;
+            statusText.innerHTML = `... starting search with ${sizeVal} ${typeVal}s on ${bgVal} in the ${dirVal} ...`;
 
             imageWrapper.classList.remove('preview-pass', 'preview-reject');
             imageWrapper.querySelectorAll('.ki-ring').forEach(el => el.remove());
@@ -670,14 +630,6 @@ const customization_settings_trial = {
 
                 previewInterval = setInterval(() => {
                     
-                    // NEU: Aktuellen Text ins rechte Fenster schreiben
-                    if (currentStep <= 4) {
-                        const stepConfig = tempConfig[currentStep - 1];
-                        statusText.innerHTML = `... processing Priority ${currentStep}:<br><strong style="color:#111; font-size: 20px;">${stepConfig.label}: ${stepConfig.valueLabel}</strong> ...`;
-                    } else if (currentStep === 5) {
-                        statusText.innerHTML = `... running Final Anomaly Scan ...`;
-                    }
-
                     aktuelleZeichenDaten.forEach(zeichen => {
                         if (zeichen.ki_setzt_ring && zeichen.render_gruppe === currentStep) {
                             const groesse = (zeichen.is_small === true || zeichen.is_small === "True") ? 'klein' : 'groß';
@@ -709,16 +661,14 @@ const customization_settings_trial = {
                             imageWrapper.classList.add('preview-pass');
                         }
 
-                        // NEU: Final verdict im rechten Fenster
                         statusText.innerHTML = `<span style="font-size: 24px; font-weight: bold; color: #111;">Final verdict:<br>${circleCount} defects</span>`;
 
-                        // NEU: Einleitungstext im dunklen Fenster anpassen
                         const isReject = circleCount >= 11;
                         const colorFlag = isReject ? 'red' : 'green';
                         const actionText = isReject ? 'reject' : 'pass';
                         const colorHex = isReject ? '#d9534f' : '#5cb85c';
 
-                        instructionsText.innerHTML = `<strong>${aiName}</strong> found ${circleCount} defects in this example and flagged the component <strong style="color:${colorHex};">${colorFlag}</strong>, recommending a ${actionText}. In this case, your task would be to <strong>${actionText}</strong> the part.<br>You can now re-customize your agent or proceed to the task.`;
+                        instructionsText.innerHTML = `<strong>${aiName}</strong> found ${circleCount} defects in this example and flagged the component <strong style="color:${colorHex};">${colorFlag}</strong>.`;
                     }
                 }, 2000); 
             });
@@ -782,7 +732,7 @@ const ai_practice_reminder_trial = {
 
 // Timeline Push mit den beiden neuen Screens anstelle des alten
 timeline.push({
-    timeline: [customization_name_trial, customization_settings_trial, ai_mistakes_trial, ai_practice_reminder_trial],
+    timeline: [customization_intro_new_1, customization_intro_new_2, customization_name_trial, customization_settings_trial, ai_mistakes_trial, ai_practice_reminder_trial],
     conditional_function: function() { return aktuelleVersuchsGruppe === 2; }
 });
 
