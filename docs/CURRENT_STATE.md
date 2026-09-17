@@ -220,3 +220,6 @@ Weitere technische Altlasten: alte `color`-/`shape`-Suchkategorien in `functions
 - Keine Browserdurchläufe, visuellen Stimulusvalidierungen oder Uploads ausgeführt. CDN-Pluginlaufzeit, wissenschaftliche Referenztreue und tatsächlicher DataPipe-Erfolg sind damit nicht bestätigt.
 
 Fehlende Quellen und offene Spezifikationen: [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).
+# Dateibestand-Pruefung (2026-09-17)
+
+Die vier eingecheckten Dateien unter `scripts/__pycache__/` waren regenerierbarer Python-Bytecode und wurden entfernt. `.gitignore` schliesst kuenftige Python-Caches aus. Die Quellenarchive, alten Stimuli, Excel-Datei, generierten Assets und Trialplaene bleiben erhalten: Sie sind entweder Laufzeitdaten, Build-Eingaben oder ausdruecklich zu bewahrende Referenzen. Die frueheren HeroUI-Dateien sind bereits entfernt; die aktuelle daisyUI-Einbindung in `index.html` und `daisy-ui.js` wird verwendet.
