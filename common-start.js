@@ -26,8 +26,8 @@ const glasses_check_trial = {
     type: jsPsychHtmlButtonResponse,
     stimulus: `
     <!-- Vollflächiger weißer Hintergrund passend zur Vorlage -->
-    <div style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: white; color: black; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: sans-serif; z-index: 9999;">
-        <div style="max-width: 900px; padding: 40px; text-align: center;">
+    <div class="glasses-screen" style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: white; color: black; display: flex; flex-direction: column; align-items: center; justify-content: center; font-family: sans-serif; z-index: 9999;">
+        <div class="glasses-card" style="max-width: 900px; padding: 40px; text-align: center;">
             <p style="font-size: 24px; line-height: 1.4; margin-bottom: 80px;">
                 This study involves looking closely at small shapes and colors on your screen. If you normally wear<br>glasses or contacts for computer work, please put them on now.
             </p>
@@ -147,8 +147,8 @@ for (let t = 1; t <= ANZAHL_TRAINING_RUNDEN; t++) {
                     <p style="color:#e0e0e0; line-height:1.5;">Click on an existing marker to remove it.</p>
                 </div>
                 <div class="button-container" style="margin-top: 20px;">
-                    <button id="btn-reject" class="action-btn btn-reset" disabled>reject</button>
                     <button id="btn-pass" class="action-btn" style="background-color: #5cb85c;" disabled>pass</button>
+                    <button id="btn-reject" class="action-btn btn-reset" disabled>reject</button>
                 </div>
             </div>
         </div>

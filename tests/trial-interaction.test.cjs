@@ -460,6 +460,24 @@ test('preview reveals rings in selected order across visible steps and resets on
     assert.equal(s.timers.size, 0);
 });
 
+test('preview rings follow the displayed image box when contain adds margins', () => {
+    const s = setup(1);
+    ['top_left', 'dark', 'large', 'L'].forEach((value, i) => {
+        s.document.getElementById(`val-${i + 1}`).value = value;
+    });
+    const image = s.document.getElementById('preview-image');
+    image.clientWidth = 960;
+    image.clientHeight = 600;
+    s.timeline[4].timeline[3].on_load();
+    s.document.getElementById('apply-btn').click();
+    s.requests[0].complete({ data: [{ shape: 'L', center_x: 960, center_y: 540,
+        bg_dark: true, is_small: false, bekommt_kreis: true }], errors: [] });
+    s.tick(32);
+    const ring = s.document.getElementById('preview-image-wrapper').children[0];
+    assert.equal(ring.style.left, '480px');
+    assert.equal(ring.style.top, '300px');
+});
+
 test('all 32 starting selections generate 32 unique ordered combinations', () => {
     const s = setup();
     const result = vm.runInContext(`(() => {

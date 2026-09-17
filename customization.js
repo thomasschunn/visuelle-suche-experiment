@@ -113,7 +113,8 @@ function mountSearchPreview(jsPsych, agentId, fixedSettings = null) {
             const marked = rows.filter(row => truth(row.bekommt_kreis));
             let index = 0;
             function draw(row) {
-                renderRing('preview-image-wrapper', row.center_x, row.center_y, truth(row.is_small) ? 'klein' : 'groß');
+                renderRing('preview-image-wrapper', row.center_x, row.center_y,
+                    truth(row.is_small) ? 'klein' : 'groß', image.naturalWidth, image);
                 rendered.add(row);
             }
             interval = setInterval(() => {

@@ -34,6 +34,7 @@
 /* All trial images are 1000:800. Reserve room above and below on short screens. */
 .trial-image-container {
     width: min(1200px, calc(100vw - 380px), calc(125vh - 130px)) !important;
+    aspect-ratio: 1000 / 800 !important;
 }
 
 @supports (height: 100dvh) {
@@ -193,4 +194,215 @@
 .ai-agent-verdict { margin-top: 20px; padding: 12px; font-weight: bold; font-size: 24px; border-radius: 6px; }
 .ai-verdict-pass { background: #174c27; color: #fff; border: 3px solid #5cb85c; }
 .ai-verdict-reject { background: #701c20; color: #fff; border: 3px solid #d9534f; }
+
+/* daisyUI light presentation. Keep stimulus sizing and response behavior above. */
+:root { color-scheme: light; }
+body, #jspsych-content, .jspsych-display-element {
+    background: #f8fafc;
+    color: #172033;
+    font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+}
+#jspsych-content { max-width: none; }
+.card[style*="background:#0f172a"],
+.card[style*="background: #0f172a"],
+.study-info-card, .ki-panel {
+    background: #fff !important;
+    color: #172033 !important;
+    border: 1px solid #dce4ed !important;
+    border-radius: 1rem !important;
+    box-shadow: 0 12px 32px rgba(31, 49, 77, .08);
+}
+.card[style*="background:#0f172a"] h2,
+.card[style*="background: #0f172a"] h2,
+.ki-panel h3 { color: #172033 !important; }
+.ki-panel h3 { border-bottom-color: #e5eaf0; font-size: 1.1rem; }
+.ki-panel p { color: #526276; font-style: normal; }
+.ki-number { background: #d9f1ea; color: #176b55; }
+.image-container { border: 1px solid #dce4ed; border-radius: .75rem; overflow: hidden; }
+.action-btn.btn, .jspsych-btn.btn { min-height: 2.75rem; border-radius: .65rem; font-weight: 700; }
+.action-btn.btn { background: #256c59 !important; border-color: #256c59 !important; color: #fff !important; }
+.action-btn.btn:hover { background: #1b5949 !important; }
+.action-btn.btn-error { background: #bd3c42 !important; border-color: #bd3c42 !important; }
+.action-btn.btn-error:hover { background: #9e2f35 !important; }
+.action-btn.btn-outline { background: #fff !important; color: #256c59 !important; }
+.action-btn.btn:disabled { opacity: .45; cursor: not-allowed; }
+.card select, .card input[type="text"], .select, .input, .textarea {
+    background: #fff !important;
+    color: #172033 !important;
+    border-color: #cbd5e1 !important;
+}
+[id^="row-"] { background: #f3f7f9 !important; }
+#preview-image-wrapper {
+    border: 0 !important;
+    background: transparent !important;
+    box-shadow: 0 10px 25px rgba(31,49,77,.08) !important;
+}
+#preview-image-wrapper.preview-pass { outline: 4px solid #5cb85c !important; }
+#preview-image-wrapper.preview-reject { outline: 4px solid #d9534f !important; }
+#status-text { color: #334155; }
+#preview-image-wrapper + div:has(> #status-text) {
+    background: #fff !important;
+    color: #172033 !important;
+    border: 1px solid #dce4ed !important;
+    border-radius: 1rem;
+}
+#preview-image-wrapper + div:has(> #status-text) > div:first-child {
+    background: #e6f2ee !important;
+    color: #205b4b !important;
+    border: 1px solid #bedacf !important;
+    border-radius: .5rem;
+}
+.ai-agent-verdict.ai-verdict-pass { background: #e5f5ea; color: #17653d; border-color: #53a66f; }
+.ai-agent-verdict.ai-verdict-reject { background: #fdebed; color: #a32935; border-color: #db6a72; }
+.jspsych-survey-likert-statement, .jspsych-survey-text-question { text-align: left; }
+
+/* Readability and alignment across generated jsPsych screens. */
+#jspsych-content [style*="background:#0f172a"],
+#jspsych-content [style*="background: #0f172a"],
+#jspsych-content [style*="background:#1e2229"] {
+    background: #fff !important;
+    color: #172033 !important;
+    border: 1px solid #dce4ed !important;
+    border-radius: 1rem !important;
+}
+#jspsych-content [style*="background:#1e2229"] p[style*="color:#e0e0e0"] { color: #334155 !important; }
+#jspsych-content h1[style*="color:#deff9a"] {
+    color: #111827 !important;
+    font-size: clamp(2rem, 4vw, 2.75rem) !important;
+    font-weight: 800 !important;
+    line-height: 1.2;
+}
+#jspsych-content i[style*="color: #5cb85c"],
+#jspsych-content i[style*="color:#5cb85c"],
+#jspsych-content strong[style*="color: #5cb85c"],
+#jspsych-content strong[style*="color:#5cb85c"] { color: #17653d !important; }
+#jspsych-content [style*="color: #32b5a1"],
+#jspsych-content [style*="color:#32b5a1"] { color: #176b55 !important; }
+#jspsych-content [style*="color: #d9534f"],
+#jspsych-content [style*="color:#d9534f"] { color: #a32935 !important; }
+.text-orange { color: #9a4c00; }
+.text-blue { color: #2055a7; }
+.scanning-active { color: #176b55 !important; text-shadow: none; }
+#status-text span[style*="color:#888"] { color: #526276 !important; }
+#jspsych-content p[style*="bottom: -60px"][style*="color: white"] { color: #172033 !important; }
+#jspsych-content button.btn,
+#jspsych-content input[type="button"].btn,
+#jspsych-content input[type="submit"].btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 1.25;
+}
+#jspsych-content .jspsych-btn.btn {
+    background: #256c59;
+    border-color: #256c59;
+    color: #fff;
+}
+#jspsych-content .jspsych-btn.btn:hover { background: #1b5949; }
+#jspsych-content #btn-pass { color: #fff !important; }
+#jspsych-content #ai-name-input { display: block; margin: 0 auto 2rem; }
+#jspsych-content input[type="text"],
+#jspsych-content input:not([type]),
+#jspsych-content textarea,
+#jspsych-content select {
+    border: 1px solid #c4c4c4 !important;
+}
+#jspsych-content button.btn-outline,
+#jspsych-content button.btn-ghost,
+#jspsych-content button:not([class]),
+#save-retry, #save-download {
+    border: 1px solid #c4c4c4 !important;
+}
+#jspsych-content [id^="row-"] {
+    display: grid !important;
+    grid-template-columns: minmax(100px, 120px) minmax(130px, 170px) minmax(0, 1fr);
+    align-items: center;
+    width: min(100%, 850px) !important;
+    max-width: none !important;
+    gap: 1rem !important;
+    text-align: left;
+}
+#jspsych-content [id^="row-"] strong { width: auto !important; }
+#jspsych-content [id^="row-"] select {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    flex: none !important;
+    color: #172033 !important;
+    background: #fff !important;
+}
+#jspsych-content [id^="order-"] { color: #334155; line-height: 1.4; overflow-wrap: anywhere; }
+@media (max-width: 620px) {
+    #jspsych-content [id^="row-"] { grid-template-columns: 1fr; }
+}
+@media (max-width: 760px) {
+    .experiment-container { flex-wrap: wrap; margin-top: 20px; gap: 16px; }
+    .image-container, .trial-image-container { width: min(100%, 1200px) !important; }
+    .right-column { width: min(100%, 480px); }
+}
+
+/* Keep the training image at its final ratio before it finishes loading. */
+#image-wrapper.trial-image-container { aspect-ratio: 1000 / 800 !important; }
+
+/* jsPsych places post-practice and post-task text directly in #jspsych-content. */
+#jspsych-content:has(#jspsych-survey-likert-form),
+#jspsych-content:has(#jspsych-survey-text-form),
+#jspsych-content:has(#jspsych-html-button-response-stimulus):not(:has(.experiment-container, .card, .glasses-screen, [style*="background:#0f172a"], [style*="background: #0f172a"])) {
+    background: #fff;
+    border: 1px solid #d7e0e9;
+    border-radius: 1rem;
+    box-shadow: 0 12px 32px rgba(31, 49, 77, .08);
+    padding: clamp(1.25rem, 3vw, 2rem);
+    width: min(900px, calc(100vw - 2rem));
+    max-width: 900px;
+    box-sizing: border-box;
+    height: auto !important;
+    min-height: 0 !important;
+    align-self: center;
+    margin: 2rem auto;
+}
+#jspsych-content:has(#jspsych-html-button-response-stimulus):not(:has(.experiment-container, .card, .glasses-screen, [style*="background:#0f172a"], [style*="background: #0f172a"])) {
+    width: fit-content;
+    max-width: min(900px, calc(100vw - 2rem));
+}
+.jspsych-survey-likert-question {
+    margin: 0 auto;
+    padding: 1.25rem 0;
+    border-bottom: 1px solid #e5eaf0;
+    text-align: left;
+}
+.jspsych-survey-likert-question:last-of-type { border-bottom: 0; }
+#jspsych-content:has(#jspsych-survey-likert-form) #jspsych-survey-likert-form,
+#jspsych-content:has(#jspsych-survey-text-form) #jspsych-survey-text-form { max-width: 100%; }
+.jspsych-survey-likert-opts {
+    position: relative;
+    background: linear-gradient(#e5e7eb, #e5e7eb) left 11px / 100% 3px no-repeat;
+}
+.jspsych-survey-likert-opts::before { display: none !important; }
+.jspsych-survey-likert-opt-label { display: block; width: 100%; text-align: center; }
+.jspsych-survey-likert-opts li input[type="radio"] {
+    left: auto !important;
+    top: auto !important;
+    margin: 0 auto !important;
+}
+.glasses-screen { background: #f8fafc !important; padding: 1rem; overflow-y: auto; }
+.glasses-card {
+    width: min(100%, 900px);
+    background: #fff;
+    border: 1px solid #d7e0e9;
+    border-radius: 1rem;
+    box-shadow: 0 12px 32px rgba(31, 49, 77, .08);
+}
+.glasses-card p { margin-bottom: 2rem !important; }
+.glasses-card > div:has(input[name="glasses"]) {
+    width: 100% !important;
+    max-width: 740px;
+    align-items: stretch !important;
+    gap: .75rem !important;
+    margin-bottom: 2rem !important;
+}
+.glasses-card label { width: 100%; justify-content: space-between; gap: 1.25rem; text-align: left; }
+.glasses-card input[type="radio"] { flex: none; margin-left: auto !important; }
 

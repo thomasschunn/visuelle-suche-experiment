@@ -93,6 +93,7 @@ Die Daten werden während des Durchlaufs im geöffneten Tab gehalten. **Vor eine
 | --- | --- |
 | „Configuration error“ gleich nach dem Öffnen | Den Link prüfen: genau ein `version`-Wert von 1 bis 4. |
 | Lokal erscheint keine WebApp | Prüfen, ob das Terminal mit dem lokalen Server noch läuft und ob der Link mit `http://127.0.0.1:8000/` beginnt. |
+
 | Speichern wird nicht bestätigt | **Retry** versuchen oder **Download CSV** nutzen; den Tab bis dahin offen lassen. |
 | Es sollen keine Testdaten hochgeladen werden | Den Link mit `&debug=1` verwenden und am Ende die CSV lokal herunterladen. |
 

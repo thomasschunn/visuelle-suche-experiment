@@ -1,0 +1,7 @@
+{
+  "name": "visuelle-suche-experiment",
+  "private": true,
+  "scripts": {
+    "test": "node --test tests/*.test.cjs"
+  }
+}
