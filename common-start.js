@@ -129,16 +129,15 @@ timeline.push({
 let training_timeline = []; 
 for (let t = 1; t <= ANZAHL_TRAINING_RUNDEN; t++) {
     const formatierteNummer = String(t).padStart(3, '0');
-    // Temporary assets explicitly authorized until the final Excel mapping exists.
     const stimulusId = `stimulus_training_${formatierteNummer}`;
-    const bildPfad = `bilder/${stimulusId}.jpg`;
+    const bildPfad = `data/generated/assets/manual_training_${formatierteNummer}/stimulus.jpg`;
     let active = false;
 
     const training_trial = {
         type: jsPsychHtmlButtonResponse,
         stimulus: `
         <div class="experiment-container">
-            <div id="image-wrapper" class="image-container" style="position:relative; width:100%; aspect-ratio: 1920/1080; cursor: crosshair;">
+            <div id="image-wrapper" class="image-container trial-image-container" style="position:relative; cursor: crosshair;">
                 <img id="training-image" src="${bildPfad}" style="position:absolute; top:0; left:0; width: 100%; height: 100%; object-fit: contain; border-radius: 4px;" />
             </div>
             <div class="right-column">
@@ -169,7 +168,8 @@ for (let t = 1; t <= ANZAHL_TRAINING_RUNDEN; t++) {
             const rejectBtn = document.getElementById('btn-reject');
             let responseStart = null;
             function enableResponse() {
-                if (!active || responseStart !== null || !image.naturalWidth) return;
+                if (!active || responseStart !== null || !image.naturalWidth || !image.naturalHeight) return;
+                imageWrapper.style.setProperty('aspect-ratio', `${image.naturalWidth} / ${image.naturalHeight}`, 'important');
                 responseStart = performance.now();
                 passBtn.disabled = false;
                 rejectBtn.disabled = false;
@@ -188,7 +188,7 @@ for (let t = 1; t <= ANZAHL_TRAINING_RUNDEN; t++) {
                 const clickX = e.clientX - rect.left;
                 const clickY = e.clientY - rect.top;
 
-                renderTrainingMarker(imageWrapper, clickX, clickY);
+                renderTrainingMarker(imageWrapper, clickX, clickY, image);
             });
 
             // 3. Navigation & Datenspeicherung

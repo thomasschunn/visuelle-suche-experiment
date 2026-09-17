@@ -1,12 +1,8 @@
 # Trial-Spezifikationen bauen
 
-## Aktueller Stand: bestaetigter Validation Blocker (Trial 28)
+## Aktueller Stand: korrigierter Main-Trial 28
 
-Main Trial 28 -> Post_PO_Images/visual_search_data(54).zip.
-Problem: required orange misses = 2, available orange targets = 1.
-Excel: 100 Symbole, 3 Targets, 2 Misses, 1 False Alarm, Agent Verdict: Pass. CSV: 1 oranges und 2 blaue Targets.
-
-Quelldaten und High-Regel bleiben unveraendert. Vollstaendige gueltige Low-Condition-Plaene (v1/v3) werden erzeugt; v2/v4 bleiben blockiert. Der Gesamtbuild meldet weiterhin einen Validation Error (Exitcode 1). `data/generated/conditions/validation_status.json` sperrt den regulaeren Start ALLER Versionen, bis ein korrigierter Stimulus oder eine ausdrueckliche Ausnahmeentscheidung vorliegt und der Build erfolgreich validiert. Fehlender Status sperrt ebenfalls. Keine unvollstaendigen High-Plaene werden als Experimentplaene exportiert. Diese Regel ersetzt die fruehere Aussage, bei diesem Blocker ueberhaupt keine Condition-Plaene zu exportieren.
+Das vom Nutzer gelieferte `Post_PO_Images/visual_search_data_PostPO_28.zip` enthaelt 100 Symbole und drei Targets, darunter zwei orange. Das urspruengliche `visual_search_data(54).zip` bleibt erhalten. Excel verlangt 2 Misses, 1 False Alarm und Verdict Pass. Der vollstaendige Build validiert alle vier Versionen; `validation_status.json` erlaubt den Start.
 
 
 ## Predictability-Preprocessing
@@ -18,7 +14,7 @@ python scripts/build_predictability.py
 python scripts/build_predictability.py --check
 ```
 
-Der vollständige Build benutzt den Import im Speicher und schreibt erst nach Validierung aller vier Conditions. Aktuell blockieren die offene Trial-24-Zuordnung sowie ein mathematisch unmöglicher High-Trial 28; siehe docs/PREDICTABILITY_VALIDATION.md. `--audit-candidates` ist strikt schreibfrei und bestätigt keine Zuordnung. Bestehende ältere Outputs werden bei einem Fehler nicht als neu gültig erklärt; `--check` muss vor Verwendung erfolgreich sein.
+Der vollständige Build benutzt den Import im Speicher und schreibt erst nach Validierung aller vier Conditions. Die Trial-24-Zuordnung ist bestaetigt; der korrigierte Main-Trial 28 macht auch den High-Plan gueltig. `--audit-candidates` ist strikt schreibfrei und bestätigt keine Zuordnung. `--check` verifiziert die reproduzierbaren Ausgaben.
 
 Fester Standardseed: **20260909**; explizit änderbar mit `--seed INTEGER`, im Plan und jedem Trial gespeichert. Algorithmus: `predictability-v1`. Symbol-IDs ergeben sich aus Stimulus-ID und CSV-Datenzeile. Farbe, Größe und Buchstabe stammen unverändert aus CSV. Der Import von vorhandenen CSV-Markierungsflags findet hier nicht statt: Die konkrete Markierung wird gemäß Excel-Misses/FAs vorab neu bestimmt.
 
@@ -39,14 +35,14 @@ python scripts/build_trial_specs.py
 python scripts/build_trial_specs.py --check
 ```
 
-Eingaben: unveränderte `Stimuli_log.xlsx`, die vorhandenen ZIP-Dateien unter `PrePO_Images/` und `Post_PO_Images/`, die fünf bestehenden Trainings-JPG/CSV-Paare sowie `scripts/source_asset_mapping.json`. Die ebenfalls vorhandenen .7z-Roharchive bleiben erhalten; der Build liest die bereits im Workspace ausgepackten ZIP-Verzeichnisse. Er entpackt ausschließlich die zwei ausdrücklich erwarteten Mitglieder jedes ZIPs in neue, eindeutige Ausgabepfade und überschreibt keine Rohstimuli.
+Eingaben: unveränderte `Stimuli_log.xlsx`, die vorhandenen ZIP-Dateien unter `PrePO_Images/` und `Post_PO_Images/`, die fünf neuen Trainingsarchive unter `Training_Images/` sowie `scripts/source_asset_mapping.json`. Die ebenfalls vorhandenen .7z-Roharchive bleiben erhalten; der Build liest die bereits im Workspace ausgepackten ZIP-Verzeichnisse. Er entpackt ausschließlich die zwei ausdrücklich erwarteten Mitglieder jedes ZIPs in neue, eindeutige Ausgabepfade und überschreibt keine Rohstimuli.
 
-**Bestaetigte Zuordnung:** `source_asset_mapping.json` enthaelt die vom Nutzer geprueften Einzelzuordnungen. Main-Trial 24 verwendet ZIP (50); ZIP (49) bleibt unveraendert erhalten und wird als superseded ausgeschlossen. Die Ausnahme wird im Build validiert und explizit in SOURCE_MAPPING.md ausgegeben. Der reine Quellenimport ist erfolgreich; der Predictability-Gesamtbuild bleibt wegen High-Trial 28 blockiert.
+**Bestaetigte Zuordnung:** `source_asset_mapping.json` enthaelt die vom Nutzer geprueften Einzelzuordnungen. Main-Trial 24 verwendet ZIP (50); ZIP (49) bleibt unveraendert erhalten und wird als superseded ausgeschlossen. Main-Trial 28 verwendet die korrigierte Nutzerdatei; das urspruengliche ZIP (54) bleibt erhalten. Der Quellenimport und der Predictability-Gesamtbuild sind erfolgreich.
 
 Nach bestätigter Zuordnung erzeugt der Build:
 
-- `data/generated/training_trials.json`: 5 Trials; existierende Trainingsassets temporär, Zahlen gegen Sheet Training geprüft.
-- `data/generated/pre_trials.json`: erste 10 Trials aus PrePO (16 vollständig spezifiziert).
+- `data/generated/training_trials.json`: 5 Trials; neue Trainingsarchive, Zahlen gegen Sheet Training geprüft.
+- `data/generated/pre_trials.json`: erste 10 Trials aus PrePO (16 vollständig spezifiziert). Die verwendeten Archive `visual_search_data_PrePO_1.zip` bis `_10.zip` sind bytegleiche Kopien der ursprünglichen Generatorarchive `(10)` bis `(19)`; die Originale bleiben erhalten.
 - `data/generated/main_trials.json`: erste 30 Trials aus PostPO (Zeilen für 31–60 nicht vollständig spezifiziert).
 - `data/generated/assets/<phase>_<trial>/`: unveränderte Bild-/CSV-Inhalte aus den Eingaben, ohne Namenskollisionen.
 - `data/generated/source_cells.json`: sämtliche gelesenen Excel-Zellen inklusive Generator Settings, Times und Notizen; keine Änderung oder Implementierung der Predictability-Regeln.

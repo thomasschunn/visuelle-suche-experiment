@@ -19,6 +19,7 @@ function boot(search) {
             calls.finish = options.on_finish;
             return {
                 data: {
+                    get: () => ({ values: () => [{ pre_trust_1: 7 }] }),
                     addProperties(properties) {
                         Object.assign(calls.properties, properties);
                         calls.events.push('properties');
@@ -31,12 +32,12 @@ function boot(search) {
     });
     for (const file of ['conditions.js', 'config.js', 'functions.js', 'common-start.js', 'customization.js', 'standard.js', 'ai-trial.js', 'storage.js', 'experiment.js']) {
         if (file === 'experiment.js') {
-            context.loadAiResources = () => ({ then(fn) {
+            context.loadAiResources = (condition, options) => { calls.loaderOptions = options; return ({ then(fn) {
                 fn(Array.from({ length: 40 }, (_, i) => ({ plan: {
                     phase: i < 10 ? 'ai_practice' : 'main_task', trial_index: i < 10 ? i + 1 : i - 9
                 }, symbols: [] })));
                 return { catch() {} };
-            } });
+            } }); };
             // Existing introduction/preview tests isolate the AI implementation, tested separately.
             context.createAiTrial = ({ plan }) => ({ type: 'button', data: plan,
                 stimulus: () => 'stimulus_001.jpg DA02' });
@@ -45,6 +46,24 @@ function boot(search) {
     }
     return { calls, context };
 }
+
+test('only explicit debug=1 enables partial loading and Submit never uploads debug data', () => {
+    for (const version of [1, 3]) for (const suffix of ['', '&debug=1', '&debug=0', '&debug=true', '&debug=1&debug=1']) {
+        const s = boot(`?version=${version}${suffix}`);
+        const debug = suffix === '&debug=1';
+        assert.equal(s.calls.loaderOptions.allowValidatedPartial, debug);
+        if (!debug) continue;
+        const nodes = {}, requests = [];
+        s.context.document.getElementById = id => nodes[id] ||= {};
+        s.context.fetch = async (...args) => { requests.push(args); return { ok: true }; };
+        // Exercise the actual storage implementation from experiment's Submit/on_finish path.
+        s.calls.timeline.at(-1).on_finish({});
+        s.calls.finish();
+        assert.equal(requests.length, 0);
+        assert.equal(nodes['save-retry'].hidden, true);
+        assert.equal(typeof nodes['save-download'].onclick, 'function');
+    }
+});
 
 test('unique UUID, optional Prolific fields and Submit gate', () => {
     const a = boot('?version=1&PROLIFIC_PID=p&STUDY_ID=s&SESSION_ID=x');

@@ -118,8 +118,9 @@ function mountSearchPreview(jsPsych, agentId, fixedSettings = null) {
             }
             interval = setInterval(() => {
                 if (!current()) return;
-                status.textContent = '... searching ...';
                 const step = steps[index++];
+                status.style.whiteSpace = 'pre-line';
+                status.textContent = `... searching ...\n${step.direction.replaceAll('_', ' ')} → ${step.background} → ${step.size} → ${step.type}`;
                 marked.forEach(row => {
                     const left = row.center_x <= ORIGINAL_BILD_BREITE / 2;
                     const top = row.center_y <= ORIGINAL_BILD_HOEHE / 2;
@@ -136,13 +137,14 @@ function mountSearchPreview(jsPsych, agentId, fixedSettings = null) {
                     status.textContent = `Final verdict: ${rendered.size} defects`;
                     setBusy(false);
                 }
-            }, SEARCH_STEP_MS);
+            }, PREVIEW_SEARCH_STEP_MS);
         }
         image.addEventListener('load', start, { once: true });
         image.addEventListener('error', fail, { once: true });
         if (image.complete && !image.naturalWidth) { fail(); return; }
         Papa.parse('tabellen/stimulus_001.csv', {
-            download: true, header: true, dynamicTyping: true,
+            // The source CSV ends with a newline; it is not an incomplete symbol row.
+            download: true, header: true, dynamicTyping: true, skipEmptyLines: true,
             complete(result) {
                 if (!current()) return;
                 rows = result.data.filter(row => row.shape);

@@ -14,9 +14,9 @@
       "workbook": "Stimuli_log.xlsx",
       "sheet": "Training",
       "row": 2,
-      "asset": "bilder/stimulus_training_001.jpg"
+      "asset": "Training_Images/visual_search_data_training_1.zip"
     },
-    "asset_status": "temporary_existing_training"
+    "asset_status": "supplied_source"
   },
   {
     "phase": "manual_training",
@@ -33,9 +33,9 @@
       "workbook": "Stimuli_log.xlsx",
       "sheet": "Training",
       "row": 3,
-      "asset": "bilder/stimulus_training_002.jpg"
+      "asset": "Training_Images/visual_search_data_training_2.zip"
     },
-    "asset_status": "temporary_existing_training"
+    "asset_status": "supplied_source"
   },
   {
     "phase": "manual_training",
@@ -52,9 +52,9 @@
       "workbook": "Stimuli_log.xlsx",
       "sheet": "Training",
       "row": 4,
-      "asset": "bilder/stimulus_training_003.jpg"
+      "asset": "Training_Images/visual_search_data_training_3.zip"
     },
-    "asset_status": "temporary_existing_training"
+    "asset_status": "supplied_source"
   },
   {
     "phase": "manual_training",
@@ -71,9 +71,9 @@
       "workbook": "Stimuli_log.xlsx",
       "sheet": "Training",
       "row": 5,
-      "asset": "bilder/stimulus_training_004.jpg"
+      "asset": "Training_Images/visual_search_data_training_4.zip"
     },
-    "asset_status": "temporary_existing_training"
+    "asset_status": "supplied_source"
   },
   {
     "phase": "manual_training",
@@ -90,8 +90,8 @@
       "workbook": "Stimuli_log.xlsx",
       "sheet": "Training",
       "row": 6,
-      "asset": "bilder/stimulus_training_005.jpg"
+      "asset": "Training_Images/visual_search_data_training_5.zip"
     },
-    "asset_status": "temporary_existing_training"
+    "asset_status": "supplied_source"
   }
 ]

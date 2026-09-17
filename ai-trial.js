@@ -52,8 +52,8 @@ function createAiTrial({ jsPsych, plan, symbols, condition, getAgentId, getSearc
             searchOrder = getSearchOrder();
             assertAi(/^[A-Z]{2}\d{2}$/.test(agentId), 'Agent ID unavailable');
             return `<div class="experiment-container">
-                <div id="ai-image-wrapper" class="image-container">
-                    <img id="ai-stimulus-image" src="${escapeAiHtml(plan.image_path)}" style="width:100%;height:100%;object-fit:contain;" />
+                <div id="ai-image-wrapper" class="image-container trial-image-container">
+                    <img id="ai-stimulus-image" src="${escapeAiHtml(plan.image_path)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;" />
                 </div>
                 <div class="right-column">
                     <div class="ki-panel"><h3>${escapeAiHtml(agentId)}</h3>
@@ -119,7 +119,7 @@ function createAiTrial({ jsPsych, plan, symbols, condition, getAgentId, getSearc
                     // Reveal the exact planned set together; do not reorder the preprocessing error sequence.
                     plan.ai_marked_symbol_ids.forEach(id => {
                         const s = byId.get(id);
-                        renderRing('ai-image-wrapper', s.center_x, s.center_y, s.size === 'small' ? 'klein' : 'groß', image.naturalWidth);
+                        renderRing('ai-image-wrapper', s.center_x, s.center_y, s.size === 'small' ? 'klein' : 'groß', image.naturalWidth, image);
                     });
                     const recommendation = document.getElementById('ai-agent-verdict');
                     recommendation.textContent = `Final verdict: ${plan.agent_verdict.toUpperCase()}`;
@@ -145,12 +145,14 @@ function createAiTrial({ jsPsych, plan, symbols, condition, getAgentId, getSearc
     };
 }
 
-async function loadAiResources(condition) {
+async function loadAiResources(condition, { allowValidatedPartial = false } = {}) {
     const validation = await fetch('data/generated/conditions/validation_status.json', { cache: 'no-store' });
     assertAi(validation.ok, 'Validated condition plan is missing: global validation status unavailable.');
     const status = await validation.json();
-    assertAi(status.experiment_start_allowed === true && Array.isArray(status.valid_versions) &&
-        [1, 2, 3, 4].every(version => status.valid_versions.includes(version)),
+    const partialDebug = status.experiment_start_allowed === false && allowValidatedPartial === true &&
+        Array.isArray(status.valid_versions) && status.valid_versions.includes(condition.version);
+    assertAi(partialDebug || (status.experiment_start_allowed === true && Array.isArray(status.valid_versions) &&
+        [1, 2, 3, 4].every(version => status.valid_versions.includes(version))),
         'Experiment start blocked by source validation. ' + (status.validation_errors || []).join(' '));
     const response = await fetch(`data/generated/conditions/v${condition.version}_trials.json`);
     assertAi(response.ok, 'Validated condition plan is missing. Run the preprocessing build after resolving its validation errors.');
@@ -189,6 +191,9 @@ async function loadAiResources(condition) {
         assertAi(symbols.length === parsed.data.length, 'Incomplete symbol metadata');
         validateAiTrialInput(plan, symbols, condition);
         resources.push({ plan, symbols });
+    }
+    if (partialDebug) {
+        console.warn(`DEBUG PARTIAL VALIDATION: Version ${condition.version} is being tested although the full four-condition experiment is not source-valid. No production data will be uploaded.`);
     }
     return resources;
 }

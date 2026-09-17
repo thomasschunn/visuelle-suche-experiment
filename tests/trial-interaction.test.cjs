@@ -4,10 +4,28 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 
+test('AI ring diameter is 25% smaller at unchanged symbol coordinates', () => {
+    const rings = [];
+    const container = { getBoundingClientRect: () => ({ width: 960 }), appendChild: ring => rings.push(ring) };
+    const context = vm.createContext({
+        ORIGINAL_BILD_BREITE: 1920,
+        document: { getElementById: () => container, createElement: () => ({ style: {}, classList: { add() {} } }) }
+    });
+    vm.runInContext(fs.readFileSync(path.join(__dirname, '..', 'functions.js'), 'utf8'), context);
+    vm.runInContext("renderRing('image', 100, 200, 'groß'); renderRing('image', 100, 200, 'klein');", context);
+    assert.ok(Math.abs(parseFloat(rings[0].style.width) - 45.6) < 0.001);
+    assert.ok(Math.abs(parseFloat(rings[1].style.width) - 28.8) < 0.001);
+    for (const ring of rings) {
+        assert.equal(ring.style.left, '50px');
+        assert.equal(ring.style.top, '100px');
+    }
+});
+
 function element() {
     const classes = new Set();
     return {
-        style: {}, children: [], handlers: {}, complete: true, naturalWidth: 1920,
+        style: { setProperty(name, value) { this[name] = value; } },
+        children: [], handlers: {}, complete: true, naturalWidth: 1920, naturalHeight: 1080,
         classList: {
             add: (...names) => names.forEach(name => classes.add(name)),
             remove: name => classes.delete(name), contains: name => classes.has(name)
@@ -265,9 +283,11 @@ for (const version of [1, 2, 3, 4]) {
                 assert.equal(trial.data.phase, 'manual_training');
                 assert.ok(!trial.stimulus.includes('ki-panel'));
                 assert.ok(!trial.stimulus.includes('SCANNING'));
+                assert.ok(trial.stimulus.includes('class="image-container trial-image-container"'));
                 const id = `stimulus_training_${String(index + 1).padStart(3, '0')}`;
-                assert.ok(trial.stimulus.includes(`bilder/${id}.jpg`));
-                assert.ok(fs.existsSync(path.join(__dirname, '..', 'bilder', `${id}.jpg`)));
+                const imagePath = path.join('data', 'generated', 'assets', `manual_training_${String(index + 1).padStart(3, '0')}`, 'stimulus.jpg');
+                assert.ok(trial.stimulus.includes(imagePath.replaceAll(path.sep, '/')));
+                assert.ok(fs.existsSync(path.join(__dirname, '..', imagePath)));
                 trial.on_load();
                 const wrapper = s.document.getElementById('image-wrapper');
                 wrapper.click({ clientX: 100, clientY: 200 });
@@ -328,8 +348,10 @@ test('training waits for successful image loading and starts RT once, without a 
     s.advance(9000);
     s.document.getElementById('btn-pass').click();
     assert.equal(s.finished.length, 0);
-    image.naturalWidth = 1920;
+    image.naturalWidth = 1000;
+    image.naturalHeight = 800;
     image.handlers.load();
+    assert.equal(s.document.getElementById('image-wrapper').style['aspect-ratio'], '1000 / 800');
     s.advance(250);
     image.handlers.load();
     s.advance(250);
@@ -374,9 +396,9 @@ for (const version of [1, 2]) {
             assert.equal(wrapper.children.length, 0);
             assert.ok(s.document.getElementById('status-text').textContent.includes('small Os on light areas in the bottom right'));
             s.requests[run].complete({ data: previewRows(), errors: [] });
-            assert.equal(s.delays[run], 15);
+            assert.equal(s.delays[run], 180);
             s.tick(1);
-            assert.equal(s.document.getElementById('status-text').textContent, '... searching ...');
+            assert.equal(s.document.getElementById('status-text').textContent, '... searching ...\nbottom right → light → small → O');
             s.document.getElementById('proceed-btn').click();
             assert.equal(s.finished.length, 1);
             s.tick(30);
@@ -406,6 +428,38 @@ for (const version of [1, 2]) {
     });
 }
 
+test('preview reveals rings in selected order across visible steps and resets on Apply', () => {
+    const s = setup(1);
+    ['bottom_right', 'light', 'small', 'O'].forEach((value, i) => { s.document.getElementById(`val-${i + 1}`).value = value; });
+    s.timeline[4].timeline[3].on_load();
+    const apply = s.document.getElementById('apply-btn');
+    const wrapper = s.document.getElementById('preview-image-wrapper');
+    const rows = ['O', 'L'].map(shape => ({ shape, center_x: 1500, center_y: 800,
+        bg_dark: false, is_small: true, bekommt_kreis: true }));
+    apply.click();
+    s.requests[0].complete({ data: rows, errors: [] });
+    assert.equal(wrapper.children.length, 0);
+    s.tick(1);
+    assert.equal(wrapper.children.length, 1);
+    assert.match(s.document.getElementById('status-text').textContent, /bottom right → light → small → O/);
+    assert.equal(apply.disabled, true);
+    s.tick(1);
+    assert.equal(wrapper.children.length, 2);
+    assert.match(s.document.getElementById('status-text').textContent, /bottom right → light → small → L/);
+    s.tick(30);
+    assert.equal(s.finished.length, 0);
+    assert.equal(apply.disabled, false);
+    s.document.getElementById('val-4').value = 'L';
+    apply.click();
+    assert.equal(wrapper.children.length, 0);
+    s.requests[1].complete({ data: rows, errors: [] });
+    s.tick(1);
+    assert.match(s.document.getElementById('status-text').textContent, /bottom right → light → small → L/);
+    assert.equal(wrapper.children.length, 1);
+    s.timeline[4].timeline[3].on_finish();
+    assert.equal(s.timers.size, 0);
+});
+
 test('all 32 starting selections generate 32 unique ordered combinations', () => {
     const s = setup();
     const result = vm.runInContext(`(() => {
@@ -428,6 +482,32 @@ test('all 32 starting selections generate 32 unique ordered combinations', () =>
         assert.equal(new Set(steps.map(step => JSON.stringify(step))).size, 32);
     });
 });
+
+for (const version of [1, 3]) {
+    test(`v${version}: preview accepts source CSV trailing newline but still rejects CSV errors`, () => {
+        const s = setup(version);
+        ['top_left', 'dark', 'large', 'L'].forEach((value, i) => { s.document.getElementById(`val-${i + 1}`).value = value; });
+        const psych = { data: { addProperties() {} }, finishTrial() {} };
+        const fixed = version === 3 ? vm.runInContext('buildCustomization(STANDARD_SEARCH_STARTS)', s.context) : null;
+        s.context.mountSearchPreview(psych, 'AI01', fixed);
+        const button = s.document.getElementById(version === 1 ? 'apply-btn' : 'preview-btn');
+        const csv = fs.readFileSync(path.join(__dirname, '..', 'tabellen/stimulus_001.csv'), 'utf8');
+        assert.match(csv, /\r?\n$/);
+        button.click();
+        // PapaParse reports TooFewFields for the final empty record unless this option is set.
+        assert.equal(s.requests[0].skipEmptyLines, true);
+        s.requests[0].complete({ data: previewRows(), errors: [] });
+        s.tick(32);
+        assert.equal(s.document.getElementById('status-text').textContent, 'Final verdict: 14 defects');
+        assert.equal(button.disabled, false);
+        button.click();
+        s.requests[1].complete({ data: previewRows(), errors: [{ code: 'TooFewFields', row: 2 }] });
+        s.tick(32);
+        assert.equal(s.document.getElementById('status-text').textContent, 'Preview could not be loaded.');
+        assert.equal(s.timers.size, 0);
+        assert.equal(button.disabled, false);
+    });
+}
 
 test('preview retries after loading failure and ignores responses after screen exit', () => {
     const s = setup();
@@ -468,7 +548,7 @@ for (const version of [3, 4]) {
             for (let run = 0; run < 2; run++) {
                 s.document.getElementById('preview-btn').click();
                 s.requests[run].complete({ data: previewRows(), errors: [] });
-                assert.equal(s.delays[run], 15);
+                assert.equal(s.delays[run], 180);
                 s.tick(32);
                 assert.equal(s.finished.length, 2);
                 assert.equal(s.document.getElementById('preview-image-wrapper').children.length, 14);

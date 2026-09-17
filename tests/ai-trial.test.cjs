@@ -96,6 +96,7 @@ for (const version of [1, 2, 3, 4]) {
                 const trial = create(s, version, item);
                 const html = trial.stimulus();
                 assert.ok(html.includes('ai-agent-verdict') && html.includes('ai-pass') && html.includes('ai-reject'));
+                assert.ok(html.includes('class="image-container trial-image-container"'));
                 trial.on_load();
                 s.document.getElementById('ai-pass').click();
                 assert.equal(s.finished.length, 0);
@@ -177,24 +178,61 @@ test('missing/invalid plans fail without fallback marking', async () => {
     assert.throws(() => create(s, 2, item), /Miss IDs/);
 });
 
-test('loader verifies all 40 trials against Excel import and CSV metadata', async () => {
-    const s = setup(), items = Array.from({ length: 40 }, (_, i) => fixture(3, i < 10 ? 'ai_practice' : 'main_task', 'Pass', i < 10 ? i + 1 : i - 9));
-    const manifest = { experiment_version: 3, customization_condition: 'standard', predictability_condition: 'low', seed: 20260909, trials: items.map(i => i.plan) };
+for (const [version, partial] of [[1, true], [3, true], [1, false], [2, false], [3, false], [4, false]]) {
+test(`v${version} partial=${partial}: loader preserves all 40 trials and rejects missing/invalid resources`, async () => {
+    const s = setup(), items = Array.from({ length: 40 }, (_, i) => fixture(version, i < 10 ? 'ai_practice' : 'main_task', 'Pass', i < 10 ? i + 1 : i - 9));
+    const condition = vm.runInContext(`EXPERIMENT_CONDITIONS[${version}]`, s.context);
+    const manifest = { experiment_version: version, customization_condition: condition.customizationCondition, predictability_condition: condition.predictabilityCondition, seed: 20260909, trials: items.map(i => i.plan) };
+    const warnings = [], requested = [];
+    s.context.console = { warn: message => warnings.push(message) };
+    const options = { allowValidatedPartial: partial };
     const bases = structuredClone(manifest.trials);
     s.context.fetch = async url => ({ ok: true,
-        json: async () => url.endsWith('validation_status.json') ? { experiment_start_allowed: true, valid_versions: [1, 2, 3, 4] } : url.includes('/conditions/') ? manifest : url.includes('pre_trials') ? bases.slice(0, 10) : bases.slice(10),
+        json: async () => url.endsWith('validation_status.json') ? { experiment_start_allowed: !partial, valid_versions: partial ? [1, 3] : [1, 2, 3, 4] } : url.includes('/conditions/') ? manifest : url.includes('pre_trials') ? bases.slice(0, 10) : bases.slice(10),
         text: async () => JSON.stringify(items.find(i => i.plan.symbol_table_path === url).symbols.map(symbol => ({
             shape: symbol.shape, color_hex: '#FF8C00', is_small: symbol.size === 'small', center_x: symbol.center_x, center_y: symbol.center_y
         })))
     });
-    const condition = vm.runInContext('EXPERIMENT_CONDITIONS[3]', s.context);
-    const resources = await s.context.loadAiResources(condition);
+    const originalFetch = s.context.fetch;
+    s.context.fetch = url => { requested.push(url); return originalFetch(url); };
+    const resources = await s.context.loadAiResources(condition, options);
     assert.equal(resources.length, 40);
+    assert.deepEqual(requested.filter(url => /v\d_trials/.test(url)), [`data/generated/conditions/v${version}_trials.json`]);
+    assert.deepEqual(warnings, partial ? [`DEBUG PARTIAL VALIDATION: Version ${version} is being tested although the full four-condition experiment is not source-valid. No production data will be uploaded.`] : []);
+    s.context.fetch = url => url.endsWith(`v${version}_trials.json`) ? { ok: false } : originalFetch(url);
+    await assert.rejects(s.context.loadAiResources(condition, options), /plan is missing/);
+    s.context.fetch = originalFetch;
+    const last = manifest.trials.pop();
+    await assert.rejects(s.context.loadAiResources(condition, options), /Expected 10 AI practice and 30 main trials/);
+    manifest.trials.push(last);
+    manifest.customization_condition = 'invalid';
+    await assert.rejects(s.context.loadAiResources(condition, options), /Condition metadata mismatch/);
+    manifest.customization_condition = condition.customizationCondition;
+    manifest.trials[0].miss_symbol_ids = [];
+    await assert.rejects(s.context.loadAiResources(condition, options), /Miss IDs/);
+    manifest.trials[0].miss_symbol_ids = items[0].symbols.slice(0, 2).map(s => s.symbol_id);
     manifest.trials[0].agent_verdict = 'Reject';
-    await assert.rejects(s.context.loadAiResources(condition), /differs from Excel import: agent_verdict/);
+    await assert.rejects(s.context.loadAiResources(condition, options), /differs from Excel import: agent_verdict/);
     manifest.trials[0].agent_verdict = 'Pass';
     manifest.trials[0].symbols[1].source_csv_row = manifest.trials[0].symbols[0].source_csv_row;
-    await assert.rejects(s.context.loadAiResources(condition), /Duplicate or incomplete source CSV rows/);
+    await assert.rejects(s.context.loadAiResources(condition, options), /Duplicate or incomplete source CSV rows/);
+});
+}
+
+test('Main rings follow the displayed image box, including contain margins', () => {
+    const s = setup(), item = fixture(1, 'main_task');
+    const image = s.document.getElementById('ai-stimulus-image');
+    image.clientWidth = 1000;
+    image.clientHeight = 900;
+    image.offsetLeft = 0;
+    image.offsetTop = 0;
+    const trial = create(s, 1, item);
+    trial.stimulus();
+    trial.on_load();
+    s.tick(32);
+    const first = s.document.getElementById('ai-image-wrapper').children[0];
+    assert.equal(first.style.left, '102px');
+    assert.equal(first.style.top, '250px');
 });
 
 test('global validation blocker prevents every version from loading even valid LOW plans', async () => {
@@ -207,5 +245,9 @@ test('global validation blocker prevents every version from loading even valid L
         };
         await assert.rejects(s.context.loadAiResources(vm.runInContext(`EXPERIMENT_CONDITIONS[${version}]`, s.context)), /Experiment start blocked/);
         assert.deepEqual(requested, ['data/generated/conditions/validation_status.json']);
+        if ([2, 4].includes(version)) {
+            await assert.rejects(s.context.loadAiResources(vm.runInContext(`EXPERIMENT_CONDITIONS[${version}]`, s.context), { allowValidatedPartial: true }), /Experiment start blocked/);
+            assert.equal(requested.length, 2);
+        }
     }
 });

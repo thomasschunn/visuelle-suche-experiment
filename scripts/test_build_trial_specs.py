@@ -23,7 +23,18 @@ class BuildTests(unittest.TestCase):
         self.assertEqual(self.mapping["status"], "confirmed")
         outputs = builder.build()
         main = json.loads(outputs["data/generated/main_trials.json"])
-        self.assertEqual(main[23]["source"]["asset"], "Post_PO_Images/visual_search_data(50).zip")
+        self.assertEqual(main[23]["source"]["asset"], "Post_PO_Images/visual_search_data_PostPO_24.zip")
+        for index, spec in enumerate(main, 1):
+            self.assertEqual(spec["source"]["asset"], f"Post_PO_Images/visual_search_data_PostPO_{index}.zip")
+            counter = index + 25 if index <= 23 else index + 26
+            original = builder.ROOT / "Post_PO_Images" / f"visual_search_data({counter}).zip"
+            renamed = builder.ROOT / spec["source"]["asset"]
+            if index == 28:
+                self.assertNotEqual(renamed.read_bytes(), original.read_bytes())
+                self.assertEqual(spec["specified_total_symbols"], 100)
+                self.assertEqual(spec["specified_targets"], 3)
+            else:
+                self.assertEqual(renamed.read_bytes(), original.read_bytes())
         self.assertTrue(all("(49).zip" not in t["source"]["asset"] for t in main))
         bad = copy.deepcopy(self.mapping)
         bad["PostPO"][23] = "Post_PO_Images/visual_search_data(49).zip"
@@ -64,9 +75,18 @@ class BuildTests(unittest.TestCase):
                         self.assertEqual(spec["specified_false_alarms"], cells[f"{fa_col}{row}"])
                         self.assertIn(spec["image_path"], outputs)
                         self.assertIn(spec["symbol_table_path"], outputs)
+                        if sheet == "PrePO":
+                            index = spec["trial_index"]
+                            self.assertEqual(spec["source"]["asset"], f"PrePO_Images/visual_search_data_PrePO_{index}.zip")
+                            original = builder.ROOT / "PrePO_Images" / f"visual_search_data({index + 9}).zip"
+                            renamed = builder.ROOT / spec["source"]["asset"]
+                            self.assertEqual(renamed.read_bytes(), original.read_bytes())
                 training = json.loads(outputs["data/generated/training_trials.json"])
                 self.assertEqual(len(training), 5)
                 self.assertTrue(all(spec["agent_verdict"] is None for spec in training))
+                for index, spec in enumerate(training, 1):
+                    self.assertEqual(spec["source"]["asset"], f"Training_Images/visual_search_data_training_{index}.zip")
+                    self.assertEqual(spec["asset_status"], "supplied_source")
 
     def test_wrong_asset_fails_validation(self):
         mapping = self.review_mapping()

@@ -520,7 +520,7 @@ const outro_trial = {
 };
 timeline.push(outro_trial);
 
-loadAiResources(condition).then(resources => {
+loadAiResources(condition, { allowValidatedPartial: debugEnabled }).then(resources => {
     for (const { plan, symbols } of resources) {
         const trial = createAiTrial({ jsPsych, plan, symbols, condition,
             getAgentId: () => aiName,

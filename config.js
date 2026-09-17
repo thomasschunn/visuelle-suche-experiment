@@ -10,8 +10,10 @@ const ANZAHL_TRAINING_RUNDEN = 5;
 // Shared verdict coding; see docs/DATA_SCHEMA.md. Independent of Yes/No coding.
 const VERDICT_CODES = Object.freeze({ pass: 1, reject: 2 });
 const YES_NO_CODES = Object.freeze({ yes: 1, no: 2 });
-// Customization preview: 32 combinations * 15 ms = 480 ms (see OPEN_QUESTIONS.md).
+// AI practice/main search timing remains 32 combinations * 15 ms = 480 ms.
 const SEARCH_STEP_MS = 15;
+// Preview-only pacing requested for a visibly sequential demonstration (5.76 seconds).
+const PREVIEW_SEARCH_STEP_MS = 180;
 let participantCustomization = null;
 
 // Probanden-ID und Dateiname

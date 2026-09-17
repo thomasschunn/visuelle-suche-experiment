@@ -1,37 +1,35 @@
 # Bestandsaufnahme
 
+Eine alltagssprachliche Anleitung zum Starten, Testen und Benutzen der WebApp steht in [BEDIENUNGSANLEITUNG.md](BEDIENUNGSANLEITUNG.md).
+
 ## Endabnahme
 
-96 JavaScript- und 18 Python-Tests bestanden. DataPipe-Erfolgsvertrag korrigiert; abgelehnte Teilplaene werden nicht mehr exportiert; doppelte CSV-Zeilenreferenzen werden zur Laufzeit verworfen. Keine Produktionsfreigabe: Main-Trial 28, fehlende Originalreferenz und manueller Browser-/Uploadtest bleiben offen. Vollstaendige Ergebnisse und Startanleitung: [FINAL_QA_REPORT.md](FINAL_QA_REPORT.md).
+Aktueller Build: 107 JavaScript- und 18 Python-Tests bestanden. Main-Trial 28 wurde mit der korrigierten Nutzerdatei ersetzt; alle vier Condition-Plaene sind vollstaendig validiert und die technische Startsperre ist aufgehoben. Fehlende Originalreferenz und manueller Browser-/Uploadtest bleiben als QA-Grenzen offen. Vollstaendige Ergebnisse und Startanleitung: [FINAL_QA_REPORT.md](FINAL_QA_REPORT.md).
 
 
 ## Datenspeicherung (aktueller Stand)
 
-UUID pro Sitzung, optionale Prolific-URL-Felder, globale Condition-/Agent-Metadaten. Upload ausschliesslich nach Submit ueber bestehenden DataPipe-Endpunkt. Analyseexport mit flachen Surveywerten, Bereichspruefung 1-7/Yes-No 1-2, Originaltexten und flachen Standard-Auswahlspalten. Retry und lokaler CSV-Download bei Uploadfehlern; Debug ohne Upload. Vollstaendiges aktuelles Variablenverzeichnis: DATA_SCHEMA.md. Startsperre Main-Trial 28 unveraendert.
+UUID pro Sitzung, optionale Prolific-URL-Felder, globale Condition-/Agent-Metadaten. Upload ausschliesslich nach Submit ueber bestehenden DataPipe-Endpunkt. Analyseexport mit flachen Surveywerten, Bereichspruefung 1-7/Yes-No 1-2, Originaltexten und flachen Standard-Auswahlspalten. Retry und lokaler CSV-Download bei Uploadfehlern; Debug ohne Upload. Vollstaendiges aktuelles Variablenverzeichnis: DATA_SCHEMA.md. Validierungsstatus erlaubt nun alle vier Versionen.
 
 
 ## Finaler Fragebogen (aktueller Stand)
 
-Der finale Fragebogenblock ist fuer alle vier Versionen nach Responsibility eingebunden. Die alten drei cust_* Items sind durch die fuenf manip_* Checks ersetzt. Zwei unabhaengige Pattern-Zweige verwenden zentrale Yes/No-Codes und verpflichtenden Freitext ausschliesslich im Yes-Zweig. Sechs AI-Attitude-Items nutzen die vorgegebenen Not-at-all/Definitely-Anker. Texte stammen wortgetreu aus dem aktuellen Auftrag. Automatisierte Tests pruefen alle vier Yes/No-Kombinationen in jeder Version, Pflichtfelder und alle sieben Skalenwerte. Die globale Startsperre wegen Main-Trial 28 bleibt bestehen.
+Der finale Fragebogenblock ist fuer alle vier Versionen nach Responsibility eingebunden. Die alten drei cust_* Items sind durch die fuenf manip_* Checks ersetzt. Zwei unabhaengige Pattern-Zweige verwenden zentrale Yes/No-Codes und verpflichtenden Freitext ausschliesslich im Yes-Zweig. Sechs AI-Attitude-Items nutzen die vorgegebenen Not-at-all/Definitely-Anker. Texte stammen wortgetreu aus dem aktuellen Auftrag. Automatisierte Tests pruefen alle vier Yes/No-Kombinationen in jeder Version, Pflichtfelder und alle sieben Skalenwerte.
 
 
 ## Main Task und Post-Fragen (aktueller Stand)
 
-experiment.js fuehrt nach den 30 geplanten Main-Trials unmittelbar Post-Einleitung, Satisfaction, Trust, separates Responsibility-Szenario und Responsibility-Fragen aus. Vorhandene Customization-Manipulationsfragen folgen erst danach. createPerceptionSurvey wird fuer Pre/Post gemeinsam verwendet; alle Antworten werden flach von Pluginindices 0-6 nach 1-7 konvertiert. Kein zweiter AI-Trialrenderer. Der Loader prueft weiterhin alle 30 Main-Trials gegen den generierten Main-Import. Automatisierte V1/V3-Tests pruefen Reihenfolge, wortgetreue Texte, alle sieben Skalenwerte und die Antwortfreigabe von Main-Trial 30. Kein vollstaendiger Browserdurchlauf: die globale Startsperre wegen Trial 28 bleibt bestehen.
+experiment.js fuehrt nach den 30 geplanten Main-Trials unmittelbar Post-Einleitung, Satisfaction, Trust, separates Responsibility-Szenario und Responsibility-Fragen aus. Vorhandene Customization-Manipulationsfragen folgen erst danach. createPerceptionSurvey wird fuer Pre/Post gemeinsam verwendet; alle Antworten werden flach von Pluginindices 0-6 nach 1-7 konvertiert. Kein zweiter AI-Trialrenderer. Der Loader prueft weiterhin alle 30 Main-Trials gegen den generierten Main-Import. Automatisierte V1/V3-Tests pruefen Reihenfolge, wortgetreue Texte, alle sieben Skalenwerte und die Antwortfreigabe von Main-Trial 30. Ein vollstaendiger Browserdurchlauf steht weiterhin aus.
 
 
 ## Abschnitt nach AI Practice (aktueller Stand)
 
-Der gemeinsame Abschnitt ist in experiment.js zwischen AI Practice und Main Task eingebunden: bestehender Reminder, 10 geplante AI-Trials, separates Wahrnehmungsintro, Ownership, Satisfaction, Trust, dynamische Main-Ueberleitung (Start). Der vorhandene Wahrnehmungsintrotext bleibt unveraendert. Survey-Antworten werden validiert, von 0-6 nach 1-7 umgerechnet und flach gespeichert; das rohe response-Objekt wird entfernt. Auch die verbleibenden alten Abschluss-Likert-Fragen verwenden diese Konvertierung, damit dort keine 0-6-Werte exportiert werden. Die globale Startsperre bleibt aktiv. Flow-/Datentests fuer v1/v3 verwenden isolierte AI-Trial-Stubs; die echte AI-Trial-Engine hat separate Tests.
+Der gemeinsame Abschnitt ist in experiment.js zwischen AI Practice und Main Task eingebunden: bestehender Reminder, 10 geplante AI-Trials, separates Wahrnehmungsintro, Ownership, Satisfaction, Trust, dynamische Main-Ueberleitung (Start). Der vorhandene Wahrnehmungsintrotext bleibt unveraendert. Survey-Antworten werden validiert, von 0-6 nach 1-7 umgerechnet und flach gespeichert; das rohe response-Objekt wird entfernt. Auch die verbleibenden alten Abschluss-Likert-Fragen verwenden diese Konvertierung, damit dort keine 0-6-Werte exportiert werden. Flow-/Datentests fuer v1/v3 verwenden isolierte AI-Trial-Stubs; die echte AI-Trial-Engine hat separate Tests.
 
 
-## Aktueller Stand: bestaetigter Validation Blocker (Trial 28)
+## Aktueller Stand: korrigierter Main-Trial 28
 
-Main Trial 28 -> Post_PO_Images/visual_search_data(54).zip.
-Problem: required orange misses = 2, available orange targets = 1.
-Excel: 100 Symbole, 3 Targets, 2 Misses, 1 False Alarm, Agent Verdict: Pass. CSV: 1 oranges und 2 blaue Targets.
-
-Quelldaten und High-Regel bleiben unveraendert. Vollstaendige gueltige Low-Condition-Plaene (v1/v3) werden erzeugt; v2/v4 bleiben blockiert. Der Gesamtbuild meldet weiterhin einen Validation Error (Exitcode 1). `data/generated/conditions/validation_status.json` sperrt den regulaeren Start ALLER Versionen, bis ein korrigierter Stimulus oder eine ausdrueckliche Ausnahmeentscheidung vorliegt und der Build erfolgreich validiert. Fehlender Status sperrt ebenfalls. Keine unvollstaendigen High-Plaene werden als Experimentplaene exportiert. Diese Regel ersetzt die fruehere Aussage, bei diesem Blocker ueberhaupt keine Condition-Plaene zu exportieren.
+Main Trial 28 verwendet `Post_PO_Images/visual_search_data_PostPO_28.zip` aus der korrigierten Nutzerdatei; das urspruengliche `visual_search_data(54).zip` bleibt erhalten. Excel: 100 Symbole, 3 Targets, 2 Misses, 1 False Alarm, Agent Verdict Pass. Die CSV hat zwei orange und ein blaues Target. Der vollstaendige Build validiert V1 bis V4, `validation_status.json` enthaelt `experiment_start_allowed=true` und keine Fehler.
 
 
 ## Aktuell: gemeinsame AI-Trials und validierter Plan-Loader
@@ -43,17 +41,17 @@ Quelldaten und High-Regel bleiben unveraendert. Vollstaendige gueltige Low-Condi
 - Nicht interaktive Ringe werden anhand der tatsächlich geladenen Bildbreite skaliert; die importierten Bilder sind nicht an die alte 1920px-Annahme gebunden. Keine Klick-/Drag-Handler am KI-Bild oder seinen Ringen. Animationen werden bei Ende abgeräumt; Bildladefehler erzeugen keine Antwort.
 - Antwortdaten enthalten alle geforderten Felder, boolesche Übereinstimmung/Korrektheit und JSON-kodierte ID-Listen. Kein Symboltable-Duplikat. RT umfasst die Zeit ab Bildfreigabe einschließlich Suchanimation; Animationsdauer separat. DATA_SCHEMA.md dokumentiert Details.
 - 67 Node-Tests bestanden: alle Kombinationen aus Phase, Version und PASS/REJECT, unveränderte Planaussage trotz abweichender Ringzahl, Markersperre, unmittelbarer Klickabschluss, Daten/Timing, Cleanup, Loader-Fehler und Quellenabgleich; bestehende Intro-/Preview-/Trainingschecks bleiben erfolgreich. Die bisherigen Tests der entfernten Altlogik wurden ersetzt.
-- Echter Teilnehmerstart aktuell bewusst blockiert: vollständige Condition-Dateien fehlen weiterhin wegen des mathematischen High-Fehlers bei Main-Trial 28. Die Quellen-JSONs sind vorhanden, reichen ohne konkrete validierte Markierungspläne aber nicht zum Start. Tests verwenden ausdrücklich synthetische Fixtures und DOM/jsPsych-Stubs; kein Browser-/Uploadtest.
+- Vollstaendige Condition-Dateien fuer V1 bis V4 sind jetzt vorhanden und validiert. Der reguläre technische Start ist nicht mehr durch Main-Trial 28 blockiert. Tests verwenden weiterhin DOM/jsPsych-Stubs; ein echter Browser-/Uploadtest steht aus.
 - Zwischen AI Practice und Main fehlen weiterhin die gesondert spezifizierten neuen Fragebögen/Übergangsseiten; dieser Schritt fügt keine fehlenden Referenztexte oder Surveyitems hinzu.
 
-## Aktuell: Assetzuordnung bestätigt und Quellenimport erfolgreich
+## Historisch: Assetzuordnung bestätigt und Quellenimport erfolgreich
 
 - Nutzerbestätigte Einzelzuordnung in scripts/source_asset_mapping.json gespeichert. ZIP-Nummern sind fortlaufende Generatorzähler, keine Trialnummern. Main-Trial 24 verwendet ausdrücklich visual_search_data(50).zip; (49) ist superseded und bleibt unverändert erhalten. Main 25–30 verwendet (51)–(56). Die Ausnahme wird beim Build geprüft und in SOURCE_MAPPING.md ausgegeben.
 - Quellenbuild erfolgreich: training_trials.json (5), pre_trials.json (10), main_trials.json (30), eindeutige Assetkopien, source_cells.json und build_manifest.json. `--check` bestätigt alle 96 Ausgaben bytegenau.
 - 7 Importtests und 8 Predictability-Tests bestanden. Der reguläre Predictability-Build scheitert jetzt nur noch an High/Main-Trial 28 (2 Misses, 1 oranges L/O). Keine Condition-Pläne erzeugt, kein Runtime-/Excel-/Rohasset-Umbau.
 - Frühere Hinweise auf eine offene Trial-24-Zuordnung in den historischen Abschnitten sind damit erledigt.
 
-## Aktuell: Predictability-Preprocessing implementiert, vollständiger Build blockiert
+## Historisch: Predictability-Preprocessing vor korrigiertem Main-Trial 28
 
 - Neu: scripts/build_predictability.py und scripts/test_predictability.py. Offline-Zuordnung mit Seed 20260909, Algorithmuskennung predictability-v1, stabilen CSV-Zeilen-IDs, markierten Symbolen, Miss-/FA-Listen und expliziter Fehlerreihenfolge. Keine Änderung der Browser-/Experimentlogik.
 - Exakte kategoriale Suche statt zufälliger Versuche: mögliche Anzahlen je Farbe/Größe/Buchstabe werden vollständig aufgezählt. Low verwendet Backtracking und berücksichtigt die letzten zwei Fehler auch über Trial- und Phasengrenzen. Gleichstände und konkrete Symbolwahl werden per Seed/SHA-256 deterministisch entschieden. Definition des Ausgewogenheitsziels siehe scripts/README.md.
@@ -61,7 +59,7 @@ Quelldaten und High-Regel bleiben unveraendert. Vollstaendige gueltige Low-Condi
 - Acht Predictability-Tests plus sechs Importtests bestanden. Unter beiden rein hypothetischen Trial-24-Zuordnungen: Low 40/40 gültig, High 39/40 gültig, Main-Trial 28 mathematisch unmöglich (2 geforderte Misses, nur 1 oranges L/O). Vier vollständige Condition-Pläne werden zusätzlich ausschließlich auf expliziten synthetischen Testdaten geprüft; keine Ersatzdaten exportiert.
 - Regulärer Build stoppt bereits an der unbestätigten Assetzuordnung. `--audit-candidates` prüft beide Möglichkeiten nur im Speicher und meldet für beide den High-Fehler. Keine finalen Condition-JSONs oder sonstigen generierten Trialdateien erstellt. Details: docs/PREDICTABILITY_VALIDATION.md.
 
-## Aktuell: Quellen vorhanden, Import vorbereitet, Asset-Zuordnung noch offen
+## Historisch: Quellen vorhanden, Import vorbereitet, Asset-Zuordnung noch offen
 
 - Neue echte Quellen: Stimuli_log.xlsx, PrePO_Images.7z, Post_PO_Images.7z und ausgepackte ZIP-Verzeichnisse. Fünf Excel-Sheets, darunter die vier geforderten; PrePO mit 16 vollständigen Specs, PostPO mit 30 vollständigen Specs und leeren Platzhaltern für 31–60. Keine Auswahlspalte im aktuellen Workbook.
 - Neu: scripts/build_trial_specs.py (Python-Standardbibliothek), scripts/source_asset_mapping.json, scripts/test_build_trial_specs.py, scripts/README.md. Validiert exakte Excel-Werte, CSV-/Generatorzahlen, Archivmitglieder und reproduzierbare Ausgabe. Keine Rohdateien verändert, keine WebApp-/Predictability-Umstellung.
@@ -110,7 +108,7 @@ Stand: 2026-09-09, nach Bereinigung der veralteten Experimentlogik. Maßstab: [R
 - Recalibrate-Button, `experimentAborted`, dadurch ausgelöstes Überspringen von Runden, Recalibration-Freitext und ausschließlich auf Recalibration bezogener Outro-Absatz entfernt. Keine Ersatztexte oder Fragen erfunden; übrige Referenztexte unverändert.
 - Admin-Skip, Admin-Zustand, Admin-Weiter-Button und veraltete Admin-Konfiguration entfernt, auch im Debugmodus. `debug=1` bietet nur noch Weiter und die bestehende, per Button beendete Eyetracker-Kalibrierung. Debug weiterhin ohne Upload, normaler OSF/DataPipe-Export unverändert.
 - Reguläre KI-Trials erhalten als minimalen Weiterweg Pass-/Reject-Buttons. Sie speichern `runde`, `is_training: false` und `entscheidung` als Pass/Reject, analog zum bestehenden Training. Entscheidungen sind ohne vorgeschriebene Wartefrist möglich, auch während der Suchanimation. Die alten Ringkorrekturzähler und Beendigungsgründe entfallen mit der zugehörigen Aufgabe. Die spätere vollständige KI-Aufgabenimplementierung bleibt ausstehend.
-- `renderRing()` ist ausschließlich nicht interaktiv: kein Klickhandler, keine Positionsänderung, `pointer-events: none`. Dies gilt für KI-Trials und Customization-Demo. `renderTrainingMarker()` kapselt die bisherige frei platzierbare und entfernbare 40-px-Zählhilfe. CSS-Hover zum Löschen gilt nur für `.training-marker`; die alte Positionsanimation ist entfernt.
+- `renderRing()` ist ausschließlich nicht interaktiv: kein Klickhandler, keine Positionsänderung, `pointer-events: none`. Dies gilt für KI-Trials und Customization-Demo. `renderTrainingMarker()` kapselt die frei platzierbare und entfernbare Zählhilfe; sie misst aktuell 72 px bei 1000 px Bildbreite und skaliert mit dem Bild. CSS-Hover zum Löschen gilt nur für `.training-marker`; die alte Positionsanimation ist entfernt.
 - Die beiden verbleibenden `setInterval`-Aufrufe animieren ausschließlich Demo beziehungsweise KI-Suche. Ihr Ablauf beendet keinen Trial. Beim Entscheiden oder Beenden eines KI-Trials werden Animationsintervalle gelöscht; verspätete Ladeantworten können keine neue Animation starten. Jede Suchanimation verwendet ihre eigenen geladenen Zeichendaten, damit verspätete Antworten früherer Trials sie nicht ersetzen.
 - `Final Anomaly Scan` bleibt bewusst erhalten: Die fünfte Rendergruppe enthielt bereits unabhängig von Drift alle per CSV markierten Zeichen, die keiner der vier Suchpräferenzen entsprechen (`functions.js`, `ladeTabelleUndBereiteVor`). Nur die frühere Driftzuweisung zu dieser Gruppe wurde entfernt. Eine neue Suchreihenfolge wird ohne Referenz nicht festgelegt.
 - Weiterhin offen: Defektregel im CSV-Fallback, Referenz-/Excel-Spezifikation, Low-/High-Verhalten, Trialzuordnung und 80 statt 10+30 KI-Trials, fehlende Stimuli 071–080, zusätzliche Fragebögen/Antwortcodierung sowie Upload-Erfolgsprüfung. Die historische Bestandsaufnahme unten beschreibt diese Punkte ausführlicher.

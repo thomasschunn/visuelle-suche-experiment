@@ -31,6 +31,17 @@
     flex-shrink: 0; 
 }
 
+/* All trial images are 1000:800. Reserve room above and below on short screens. */
+.trial-image-container {
+    width: min(1200px, calc(100vw - 380px), calc(125vh - 130px)) !important;
+}
+
+@supports (height: 100dvh) {
+    .trial-image-container {
+        width: min(1200px, calc(100vw - 380px), calc(125dvh - 130px)) !important;
+    }
+}
+
 /* Verhindert das Markieren und Ziehen der Stimulus-Bilder */
 .image-container img {
     user-select: none;

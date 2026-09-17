@@ -1,8 +1,32 @@
 # Anforderungen an die neue Experimentversion
 
+## Responsive Trial-Bildgroesse
+
+Die fuenf manuellen Trainingsbilder, zehn PrePO-Bilder und dreissig PostPO-Bilder (alle 1000:800) verwenden dieselbe responsive Breitenregel. Sie passen bei normaler Browsergroesse mit oberem und unterem Freiraum in die sichtbare Hoehe. Die Breite ist zugleich durch den Platz neben der rechten Spalte und durch 1200 px begrenzt; auf groesseren Monitoren wachsen die Bilder bis zu dieser Grenze. Die rechte Trainings-/KI-Spalte behaelt ihre Groesse.
+
+## Groesse der manuellen Trainingsmarker
+
+Die frei setzbaren Marker im Training haben bei 1000 px Originalbildbreite 72 px Durchmesser und skalieren mit der dargestellten Bildbreite. So umfassen sie auch grosse Symbole (`size_px=35`). KI-Ringe und die Interaktion zum Entfernen bleiben unveraendert.
+
+## Bildformat im manuellen Training
+
+Die fuenf Trainingsbilder fuellen ihren Bildrahmen ohne seitliche graue Flaechen. Der Rahmen uebernimmt nach erfolgreichem Laden das tatsaechliche Seitenverhaeltnis des jeweiligen Bildes; Trainingsmarker und Trial-Antwortlogik bleiben unveraendert.
+
+## KI-Ringposition in AI Practice und Main Task
+
+KI-Ringe muessen auf den CSV-Symbolzentren der tatsaechlich dargestellten Bildflaeche liegen. Die Umrechnung beruecksichtigt die Layoutgroesse des Bildes und eventuelle `object-fit: contain`-Raender. Bild- und Symbolquellen sowie die zuletzt reduzierte Ringgroesse bleiben unveraendert.
+
+## KI-Ringgroesse (aktueller Folgeauftrag)
+
+Die automatisch um Symbole gesetzten KI-Ringe in Preview, AI Practice und Main Task werden gegenueber dem bisherigen Durchmesser um 25 % verkleinert. Mittelpunkt und CSV-Koordinaten bleiben unveraendert. Die Trainingsmarker haben eine separate Groesseneinstellung.
+
+## Sichtbare Preview-Suche (aktueller Folgeauftrag)
+
+Auf Nutzerwunsch laeuft die gemeinsame Customization-/Standard-Preview sichtbar schrittweise: eigener `PREVIEW_SEARCH_STEP_MS = 180` (32 Kombinationen, rund 5,76 Sekunden), Anzeige der aktiven Kombination und sukzessive Ringe in der gewaehlten Reihenfolge. Dies ersetzt ausschliesslich fuer die Preview die fruehere 15-ms-Vorgabe. `SEARCH_STEP_MS = 15` fuer AI Practice/Main bleibt erhalten. Keine automatische Teilnehmerantwort oder Trialbeendigung; Apply startet erneut, Proceed bleibt der Abschlussbutton.
+
 ## Datenspeicherung (aktueller Stand)
 
-UUID pro Sitzung, optionale Prolific-URL-Felder, globale Condition-/Agent-Metadaten. Upload ausschliesslich nach Submit ueber bestehenden DataPipe-Endpunkt. Analyseexport mit flachen Surveywerten, Bereichspruefung 1-7/Yes-No 1-2, Originaltexten und flachen Standard-Auswahlspalten. Retry und lokaler CSV-Download bei Uploadfehlern; Debug ohne Upload. Vollstaendiges aktuelles Variablenverzeichnis: DATA_SCHEMA.md. Startsperre Main-Trial 28 unveraendert.
+UUID pro Sitzung, optionale Prolific-URL-Felder, globale Condition-/Agent-Metadaten. Upload ausschliesslich nach Submit ueber bestehenden DataPipe-Endpunkt. Analyseexport mit flachen Surveywerten, Bereichspruefung 1-7/Yes-No 1-2, Originaltexten und flachen Standard-Auswahlspalten. Retry und lokaler CSV-Download bei Uploadfehlern; Debug ohne Upload. Vollstaendiges aktuelles Variablenverzeichnis: DATA_SCHEMA.md. Der validierte Condition-Status erlaubt nun alle vier Versionen.
 
 
 ## Finaler Fragebogen (aktueller Stand)
@@ -20,13 +44,9 @@ Main Task: exakt 30 Trials ausschliesslich aus dem generierten Condition-Plan (g
 Nach dem bestehenden AI-Practice-Reminder folgen exakt 10 pre_trials, Wahrnehmungsintro, Psychological Ownership (4 Items), Satisfaction (3), Trust (2), danach die Main-Task-Ueberleitung mit aktuellem Agentennamen und Button Start. Die neun Items und die Ueberleitung werden wortgetreu aus dem Nutzerauftrag uebernommen. Skala 1 - Strongly Disagree bis 7 - Strongly Agree; flache pre_ownership_1..4, pre_satisfaction_1..3, pre_trust_1..2 als Zahlen 1-7, keine rohen 0-6-Antworten exportieren.
 
 
-## Aktueller Stand: bestaetigter Validation Blocker (Trial 28)
+## Aktueller Stand: korrigierter Main-Trial 28
 
-Main Trial 28 -> Post_PO_Images/visual_search_data(54).zip.
-Problem: required orange misses = 2, available orange targets = 1.
-Excel: 100 Symbole, 3 Targets, 2 Misses, 1 False Alarm, Agent Verdict: Pass. CSV: 1 oranges und 2 blaue Targets.
-
-Quelldaten und High-Regel bleiben unveraendert. Vollstaendige gueltige Low-Condition-Plaene (v1/v3) werden erzeugt; v2/v4 bleiben blockiert. Der Gesamtbuild meldet weiterhin einen Validation Error (Exitcode 1). `data/generated/conditions/validation_status.json` sperrt den regulaeren Start ALLER Versionen, bis ein korrigierter Stimulus oder eine ausdrueckliche Ausnahmeentscheidung vorliegt und der Build erfolgreich validiert. Fehlender Status sperrt ebenfalls. Keine unvollstaendigen High-Plaene werden als Experimentplaene exportiert. Diese Regel ersetzt die fruehere Aussage, bei diesem Blocker ueberhaupt keine Condition-Plaene zu exportieren.
+Main Trial 28 verwendet das vom Nutzer gelieferte `Post_PO_Images/visual_search_data_PostPO_28.zip`; das urspruengliche `visual_search_data(54).zip` bleibt erhalten. Excel: 100 Symbole, 3 Targets, 2 Misses, 1 False Alarm, Agent Verdict Pass. Die neue CSV hat zwei orange und ein blaues Target. Der vollstaendige Build erzeugt und validiert V1 bis V4; `validation_status.json` meldet `experiment_start_allowed=true` und keine Fehler. Die High-Regel bleibt unveraendert.
 
 
 Stand: 2026-09-09. Verbindliche Grundlage ist der Arbeitsauftrag. Die unten separat aufgeführten Codebefunde beschreiben den Prototyp und sind keine zusätzlichen experimentellen Vorgaben. Referenzquellen fehlen derzeit; siehe [OPEN_QUESTIONS.md](OPEN_QUESTIONS.md).

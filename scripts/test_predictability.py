@@ -36,12 +36,11 @@ class PredictabilityTests(unittest.TestCase):
         self.assertNotIn('data/generated/conditions/v3_trials.json', outputs)
         self.assertFalse(json.loads(outputs['data/generated/conditions/validation_status.json'])['experiment_start_allowed'])
 
-    def test_actual_high_low_parity_for_all_39_feasible_trials(self):
+    def test_actual_high_low_parity_for_all_40_trials(self):
         originals = pred.enrich(source.build())
         low = pred.allocate(originals, 'low', pred.DEFAULT_SEED)
-        feasible = [t for t in originals if not (t['phase'] == 'main_task' and t['trial_index'] == 28)]
-        high = pred.allocate(feasible, 'high', pred.DEFAULT_SEED)
-        pred.validate_plan(high, feasible)
+        high = pred.allocate(originals, 'high', pred.DEFAULT_SEED)
+        pred.validate_plan(high, originals)
         by_id = {t['stimulus_id']: t for t in low}
         for trial in high:
             other = by_id[trial['stimulus_id']]
@@ -49,16 +48,16 @@ class PredictabilityTests(unittest.TestCase):
             self.assertEqual(len(trial['false_alarm_symbol_ids']), len(other['false_alarm_symbol_ids']))
             self.assertEqual(trial['agent_verdict'], other['agent_verdict'])
 
-    def test_valid_partial_exports_keep_global_start_blocked(self):
+    def test_actual_source_exports_all_four_versions(self):
         sources = source.build()
         outputs = pred.build_plans(sources, allow_valid=True)
         self.assertEqual(outputs, pred.build_plans(sources, allow_valid=True))
         status = json.loads(outputs['data/generated/conditions/validation_status.json'])
-        self.assertFalse(status['experiment_start_allowed'])
-        self.assertEqual(status['valid_versions'], [1, 3])
-        self.assertEqual(len(outputs), 3)
-        self.assertIn('main_task trial 28', status['validation_errors'][0])
-        for version in (1, 3):
+        self.assertTrue(status['experiment_start_allowed'])
+        self.assertEqual(status['valid_versions'], [1, 2, 3, 4])
+        self.assertEqual(status['validation_errors'], [])
+        self.assertEqual(len(outputs), 5)
+        for version in (1, 2, 3, 4):
             plan = json.loads(outputs[f'data/generated/conditions/v{version}_trials.json'])
             self.assertEqual(len(plan['trials']), 40)
             pred.validate_plan(plan['trials'], pred.enrich(sources))
@@ -87,7 +86,7 @@ class PredictabilityTests(unittest.TestCase):
             self.assertEqual(trial["error_symbol_ids"], [])
             self.assertEqual(len(trial["ai_marked_symbol_ids"]), 16)
 
-    def test_actual_candidate_audits_low_passes_high_fails_trial_28(self):
+    def test_actual_candidate_audits_keep_corrected_trial_28(self):
         mapping = json.loads((source.ROOT / "scripts/source_asset_mapping.json").read_text())
         for candidate in (49, 50):
             with self.subTest(candidate=candidate):
@@ -103,13 +102,10 @@ class PredictabilityTests(unittest.TestCase):
                 self.assertEqual(low, pred.allocate(trials, "low", pred.DEFAULT_SEED))
                 trial28 = trials[10 + 27]
                 self.assertEqual(trial28["specified_misses"], 2)
-                self.assertEqual(sum(s["color"] == "orange" and s["shape"] in ("L", "O") for s in trial28["symbols"]), 1)
-                # Every other HIGH trial runs all validators, but no incomplete plan is exported.
-                feasible = [t for t in trials if t is not trial28]
-                high = pred.allocate(feasible, "high", pred.DEFAULT_SEED)
-                pred.validate_plan(high, feasible)
-                with self.assertRaisesRegex(pred.ValidationError, "trial 28.*requires 2 misses.*only 1 orange"):
-                    pred.build_plans(outputs)
+                self.assertEqual(sum(s["color"] == "orange" and s["shape"] in ("L", "O") for s in trial28["symbols"]), 2)
+                high = pred.allocate(trials, "high", pred.DEFAULT_SEED)
+                pred.validate_plan(high, trials)
+                self.assertTrue(json.loads(pred.build_plans(outputs)['data/generated/conditions/validation_status.json'])['experiment_start_allowed'])
 
     def test_illegal_runs_for_each_feature_and_across_trial_boundaries(self):
         # Use real category properties; the constructed error lists are deliberately invalid.

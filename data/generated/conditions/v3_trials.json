@@ -21,7 +21,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PrePO",
         "row": 2,
-        "asset": "PrePO_Images/visual_search_data(10).zip",
+        "asset": "PrePO_Images/visual_search_data_PrePO_1.zip",
         "generator_settings_row": 2
       },
       "asset_status": "supplied_source",
@@ -159,7 +159,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PrePO",
         "row": 3,
-        "asset": "PrePO_Images/visual_search_data(11).zip",
+        "asset": "PrePO_Images/visual_search_data_PrePO_2.zip",
         "generator_settings_row": 3
       },
       "asset_status": "supplied_source",
@@ -297,7 +297,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PrePO",
         "row": 4,
-        "asset": "PrePO_Images/visual_search_data(12).zip",
+        "asset": "PrePO_Images/visual_search_data_PrePO_3.zip",
         "generator_settings_row": 4
       },
       "asset_status": "supplied_source",
@@ -456,7 +456,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PrePO",
         "row": 5,
-        "asset": "PrePO_Images/visual_search_data(13).zip",
+        "asset": "PrePO_Images/visual_search_data_PrePO_4.zip",
         "generator_settings_row": 5
       },
       "asset_status": "supplied_source",
@@ -628,7 +628,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PrePO",
         "row": 6,
-        "asset": "PrePO_Images/visual_search_data(14).zip",
+        "asset": "PrePO_Images/visual_search_data_PrePO_5.zip",
         "generator_settings_row": 6
       },
       "asset_status": "supplied_source",
@@ -811,7 +811,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PrePO",
         "row": 7,
-        "asset": "PrePO_Images/visual_search_data(15).zip",
+        "asset": "PrePO_Images/visual_search_data_PrePO_6.zip",
         "generator_settings_row": 7
       },
       "asset_status": "supplied_source",
@@ -1006,7 +1006,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PrePO",
         "row": 8,
-        "asset": "PrePO_Images/visual_search_data(16).zip",
+        "asset": "PrePO_Images/visual_search_data_PrePO_7.zip",
         "generator_settings_row": 8
       },
       "asset_status": "supplied_source",
@@ -1224,7 +1224,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PrePO",
         "row": 9,
-        "asset": "PrePO_Images/visual_search_data(17).zip",
+        "asset": "PrePO_Images/visual_search_data_PrePO_8.zip",
         "generator_settings_row": 9
       },
       "asset_status": "supplied_source",
@@ -1461,7 +1461,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PrePO",
         "row": 10,
-        "asset": "PrePO_Images/visual_search_data(18).zip",
+        "asset": "PrePO_Images/visual_search_data_PrePO_9.zip",
         "generator_settings_row": 10
       },
       "asset_status": "supplied_source",
@@ -1711,7 +1711,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PrePO",
         "row": 11,
-        "asset": "PrePO_Images/visual_search_data(19).zip",
+        "asset": "PrePO_Images/visual_search_data_PrePO_10.zip",
         "generator_settings_row": 11
       },
       "asset_status": "supplied_source",
@@ -1980,7 +1980,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PostPO",
         "row": 2,
-        "asset": "Post_PO_Images/visual_search_data(26).zip",
+        "asset": "Post_PO_Images/visual_search_data_PostPO_1.zip",
         "generator_settings_row": 18
       },
       "asset_status": "supplied_source",
@@ -2447,7 +2447,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PostPO",
         "row": 3,
-        "asset": "Post_PO_Images/visual_search_data(27).zip",
+        "asset": "Post_PO_Images/visual_search_data_PostPO_2.zip",
         "generator_settings_row": 19
       },
       "asset_status": "supplied_source",
@@ -2920,7 +2920,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PostPO",
         "row": 4,
-        "asset": "Post_PO_Images/visual_search_data(28).zip",
+        "asset": "Post_PO_Images/visual_search_data_PostPO_3.zip",
         "generator_settings_row": 20
       },
       "asset_status": "supplied_source",
@@ -3421,7 +3421,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PostPO",
         "row": 5,
-        "asset": "Post_PO_Images/visual_search_data(29).zip",
+        "asset": "Post_PO_Images/visual_search_data_PostPO_4.zip",
         "generator_settings_row": 21
       },
       "asset_status": "supplied_source",
@@ -3925,7 +3925,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PostPO",
         "row": 6,
-        "asset": "Post_PO_Images/visual_search_data(30).zip",
+        "asset": "Post_PO_Images/visual_search_data_PostPO_5.zip",
         "generator_settings_row": 22
       },
       "asset_status": "supplied_source",
@@ -4470,7 +4470,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PostPO",
         "row": 7,
-        "asset": "Post_PO_Images/visual_search_data(31).zip",
+        "asset": "Post_PO_Images/visual_search_data_PostPO_6.zip",
         "generator_settings_row": 23
       },
       "asset_status": "supplied_source",
@@ -5008,7 +5008,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PostPO",
         "row": 8,
-        "asset": "Post_PO_Images/visual_search_data(32).zip",
+        "asset": "Post_PO_Images/visual_search_data_PostPO_7.zip",
         "generator_settings_row": 24
       },
       "asset_status": "supplied_source",
@@ -5588,7 +5588,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PostPO",
         "row": 9,
-        "asset": "Post_PO_Images/visual_search_data(33).zip",
+        "asset": "Post_PO_Images/visual_search_data_PostPO_8.zip",
         "generator_settings_row": 25
       },
       "asset_status": "supplied_source",
@@ -6161,7 +6161,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PostPO",
         "row": 10,
-        "asset": "Post_PO_Images/visual_search_data(34).zip",
+        "asset": "Post_PO_Images/visual_search_data_PostPO_9.zip",
         "generator_settings_row": 26
       },
       "asset_status": "supplied_source",
@@ -6777,7 +6777,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PostPO",
         "row": 11,
-        "asset": "Post_PO_Images/visual_search_data(35).zip",
+        "asset": "Post_PO_Images/visual_search_data_PostPO_10.zip",
         "generator_settings_row": 27
       },
       "asset_status": "supplied_source",
@@ -7383,7 +7383,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PostPO",
         "row": 12,
-        "asset": "Post_PO_Images/visual_search_data(36).zip",
+        "asset": "Post_PO_Images/visual_search_data_PostPO_11.zip",
         "generator_settings_row": 28
       },
       "asset_status": "supplied_source",
@@ -7984,7 +7984,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PostPO",
         "row": 13,
-        "asset": "Post_PO_Images/visual_search_data(37).zip",
+        "asset": "Post_PO_Images/visual_search_data_PostPO_12.zip",
         "generator_settings_row": 29
       },
       "asset_status": "supplied_source",
@@ -8597,7 +8597,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PostPO",
         "row": 14,
-        "asset": "Post_PO_Images/visual_search_data(38).zip",
+        "asset": "Post_PO_Images/visual_search_data_PostPO_13.zip",
         "generator_settings_row": 30
       },
       "asset_status": "supplied_source",
@@ -9244,7 +9244,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PostPO",
         "row": 15,
-        "asset": "Post_PO_Images/visual_search_data(39).zip",
+        "asset": "Post_PO_Images/visual_search_data_PostPO_14.zip",
         "generator_settings_row": 31
       },
       "asset_status": "supplied_source",
@@ -9888,7 +9888,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PostPO",
         "row": 16,
-        "asset": "Post_PO_Images/visual_search_data(40).zip",
+        "asset": "Post_PO_Images/visual_search_data_PostPO_15.zip",
         "generator_settings_row": 32
       },
       "asset_status": "supplied_source",
@@ -10533,7 +10533,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PostPO",
         "row": 17,
-        "asset": "Post_PO_Images/visual_search_data(41).zip",
+        "asset": "Post_PO_Images/visual_search_data_PostPO_16.zip",
         "generator_settings_row": 33
       },
       "asset_status": "supplied_source",
@@ -11176,7 +11176,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PostPO",
         "row": 18,
-        "asset": "Post_PO_Images/visual_search_data(42).zip",
+        "asset": "Post_PO_Images/visual_search_data_PostPO_17.zip",
         "generator_settings_row": 34
       },
       "asset_status": "supplied_source",
@@ -11863,7 +11863,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PostPO",
         "row": 19,
-        "asset": "Post_PO_Images/visual_search_data(43).zip",
+        "asset": "Post_PO_Images/visual_search_data_PostPO_18.zip",
         "generator_settings_row": 35
       },
       "asset_status": "supplied_source",
@@ -12544,7 +12544,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PostPO",
         "row": 20,
-        "asset": "Post_PO_Images/visual_search_data(44).zip",
+        "asset": "Post_PO_Images/visual_search_data_PostPO_19.zip",
         "generator_settings_row": 36
       },
       "asset_status": "supplied_source",
@@ -13227,7 +13227,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PostPO",
         "row": 21,
-        "asset": "Post_PO_Images/visual_search_data(45).zip",
+        "asset": "Post_PO_Images/visual_search_data_PostPO_20.zip",
         "generator_settings_row": 37
       },
       "asset_status": "supplied_source",
@@ -13900,7 +13900,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PostPO",
         "row": 22,
-        "asset": "Post_PO_Images/visual_search_data(46).zip",
+        "asset": "Post_PO_Images/visual_search_data_PostPO_21.zip",
         "generator_settings_row": 38
       },
       "asset_status": "supplied_source",
@@ -14617,7 +14617,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PostPO",
         "row": 23,
-        "asset": "Post_PO_Images/visual_search_data(47).zip",
+        "asset": "Post_PO_Images/visual_search_data_PostPO_22.zip",
         "generator_settings_row": 39
       },
       "asset_status": "supplied_source",
@@ -15341,7 +15341,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PostPO",
         "row": 24,
-        "asset": "Post_PO_Images/visual_search_data(48).zip",
+        "asset": "Post_PO_Images/visual_search_data_PostPO_23.zip",
         "generator_settings_row": 40
       },
       "asset_status": "supplied_source",
@@ -16054,7 +16054,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PostPO",
         "row": 25,
-        "asset": "Post_PO_Images/visual_search_data(50).zip",
+        "asset": "Post_PO_Images/visual_search_data_PostPO_24.zip",
         "generator_settings_row": 41
       },
       "asset_status": "supplied_source",
@@ -16768,7 +16768,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PostPO",
         "row": 26,
-        "asset": "Post_PO_Images/visual_search_data(51).zip",
+        "asset": "Post_PO_Images/visual_search_data_PostPO_25.zip",
         "generator_settings_row": 42
       },
       "asset_status": "supplied_source",
@@ -17513,7 +17513,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PostPO",
         "row": 27,
-        "asset": "Post_PO_Images/visual_search_data(52).zip",
+        "asset": "Post_PO_Images/visual_search_data_PostPO_26.zip",
         "generator_settings_row": 43
       },
       "asset_status": "supplied_source",
@@ -18273,7 +18273,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PostPO",
         "row": 28,
-        "asset": "Post_PO_Images/visual_search_data(53).zip",
+        "asset": "Post_PO_Images/visual_search_data_PostPO_27.zip",
         "generator_settings_row": 44
       },
       "asset_status": "supplied_source",
@@ -19019,7 +19019,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PostPO",
         "row": 29,
-        "asset": "Post_PO_Images/visual_search_data(54).zip",
+        "asset": "Post_PO_Images/visual_search_data_PostPO_28.zip",
         "generator_settings_row": 45
       },
       "asset_status": "supplied_source",
@@ -19030,21 +19030,21 @@
           "symbol_id": "main_task_028_s001",
           "source_csv_row": 2,
           "shape": "O",
-          "color": "blue",
+          "color": "orange",
           "size": "large"
         },
         {
           "symbol_id": "main_task_028_s002",
           "source_csv_row": 3,
           "shape": "L",
-          "color": "blue",
+          "color": "orange",
           "size": "large"
         },
         {
           "symbol_id": "main_task_028_s003",
           "source_csv_row": 4,
           "shape": "L",
-          "color": "orange",
+          "color": "blue",
           "size": "small"
         },
         {
@@ -19059,21 +19059,21 @@
           "source_csv_row": 6,
           "shape": "Q",
           "color": "orange",
-          "size": "small"
+          "size": "large"
         },
         {
           "symbol_id": "main_task_028_s006",
           "source_csv_row": 7,
           "shape": "Q",
-          "color": "blue",
+          "color": "orange",
           "size": "large"
         },
         {
           "symbol_id": "main_task_028_s007",
           "source_csv_row": 8,
-          "shape": "T",
-          "color": "blue",
-          "size": "small"
+          "shape": "Q",
+          "color": "orange",
+          "size": "large"
         },
         {
           "symbol_id": "main_task_028_s008",
@@ -19086,15 +19086,15 @@
           "symbol_id": "main_task_028_s009",
           "source_csv_row": 10,
           "shape": "T",
-          "color": "orange",
-          "size": "large"
+          "color": "blue",
+          "size": "small"
         },
         {
           "symbol_id": "main_task_028_s010",
           "source_csv_row": 11,
           "shape": "T",
           "color": "blue",
-          "size": "small"
+          "size": "large"
         },
         {
           "symbol_id": "main_task_028_s011",
@@ -19106,86 +19106,86 @@
         {
           "symbol_id": "main_task_028_s012",
           "source_csv_row": 13,
-          "shape": "Q",
-          "color": "orange",
+          "shape": "T",
+          "color": "blue",
           "size": "large"
         },
         {
           "symbol_id": "main_task_028_s013",
           "source_csv_row": 14,
-          "shape": "T",
+          "shape": "Q",
           "color": "orange",
           "size": "small"
         },
         {
           "symbol_id": "main_task_028_s014",
           "source_csv_row": 15,
-          "shape": "T",
+          "shape": "Q",
           "color": "orange",
-          "size": "small"
+          "size": "large"
         },
         {
           "symbol_id": "main_task_028_s015",
           "source_csv_row": 16,
           "shape": "Q",
-          "color": "blue",
+          "color": "orange",
           "size": "large"
         },
         {
           "symbol_id": "main_task_028_s016",
           "source_csv_row": 17,
-          "shape": "Q",
+          "shape": "T",
           "color": "blue",
           "size": "large"
         },
         {
           "symbol_id": "main_task_028_s017",
           "source_csv_row": 18,
-          "shape": "T",
+          "shape": "Q",
           "color": "orange",
-          "size": "small"
+          "size": "large"
         },
         {
           "symbol_id": "main_task_028_s018",
           "source_csv_row": 19,
-          "shape": "Q",
+          "shape": "T",
           "color": "blue",
-          "size": "large"
+          "size": "small"
         },
         {
           "symbol_id": "main_task_028_s019",
           "source_csv_row": 20,
-          "shape": "T",
+          "shape": "Q",
           "color": "orange",
-          "size": "large"
+          "size": "small"
         },
         {
           "symbol_id": "main_task_028_s020",
           "source_csv_row": 21,
-          "shape": "T",
-          "color": "blue",
-          "size": "large"
+          "shape": "Q",
+          "color": "orange",
+          "size": "small"
         },
         {
           "symbol_id": "main_task_028_s021",
           "source_csv_row": 22,
-          "shape": "Q",
-          "color": "orange",
-          "size": "small"
+          "shape": "T",
+          "color": "blue",
+          "size": "large"
         },
         {
           "symbol_id": "main_task_028_s022",
           "source_csv_row": 23,
           "shape": "Q",
-          "color": "blue",
-          "size": "small"
+          "color": "orange",
+          "size": "large"
         },
         {
           "symbol_id": "main_task_028_s023",
           "source_csv_row": 24,
-          "shape": "Q",
-          "color": "orange",
-          "size": "large"
+          "shape": "T",
+          "color": "blue",
+          "size": "small"
         },
         {
           "symbol_id": "main_task_028_s024",
@@ -19199,14 +19199,14 @@
           "source_csv_row": 26,
           "shape": "Q",
           "color": "orange",
-          "size": "large"
+          "size": "small"
         },
         {
           "symbol_id": "main_task_028_s026",
           "source_csv_row": 27,
           "shape": "T",
-          "color": "orange",
-          "size": "small"
+          "color": "blue",
+          "size": "large"
         },
         {
           "symbol_id": "main_task_028_s027",
@@ -19218,72 +19218,72 @@
         {
           "symbol_id": "main_task_028_s028",
           "source_csv_row": 29,
-          "shape": "T",
-          "color": "blue",
-          "size": "large"
+          "shape": "Q",
+          "color": "orange",
+          "size": "small"
         },
         {
           "symbol_id": "main_task_028_s029",
           "source_csv_row": 30,
           "shape": "T",
           "color": "blue",
-          "size": "large"
+          "size": "small"
         },
         {
           "symbol_id": "main_task_028_s030",
           "source_csv_row": 31,
           "shape": "Q",
-          "color": "blue",
+          "color": "orange",
           "size": "small"
         },
         {
           "symbol_id": "main_task_028_s031",
           "source_csv_row": 32,
-          "shape": "T",
-          "color": "blue",
-          "size": "small"
+          "shape": "Q",
+          "color": "orange",
+          "size": "large"
         },
         {
           "symbol_id": "main_task_028_s032",
           "source_csv_row": 33,
           "shape": "T",
-          "color": "orange",
-          "size": "large"
+          "color": "blue",
+          "size": "small"
         },
         {
           "symbol_id": "main_task_028_s033",
           "source_csv_row": 34,
-          "shape": "T",
-          "color": "blue",
+          "shape": "Q",
+          "color": "orange",
           "size": "small"
         },
         {
           "symbol_id": "main_task_028_s034",
           "source_csv_row": 35,
           "shape": "T",
-          "color": "orange",
-          "size": "small"
+          "color": "blue",
+          "size": "large"
         },
         {
           "symbol_id": "main_task_028_s035",
           "source_csv_row": 36,
-          "shape": "Q",
-          "color": "orange",
+          "shape": "T",
+          "color": "blue",
           "size": "large"
         },
         {
           "symbol_id": "main_task_028_s036",
           "source_csv_row": 37,
           "shape": "T",
-          "color": "orange",
+          "color": "blue",
           "size": "small"
         },
         {
           "symbol_id": "main_task_028_s037",
           "source_csv_row": 38,
-          "shape": "T",
-          "color": "blue",
-          "size": "large"
+          "shape": "Q",
+          "color": "orange",
+          "size": "small"
         },
         {
           "symbol_id": "main_task_028_s038",
@@ -19297,76 +19297,76 @@
           "source_csv_row": 40,
           "shape": "T",
           "color": "blue",
-          "size": "large"
+          "size": "small"
         },
         {
           "symbol_id": "main_task_028_s040",
           "source_csv_row": 41,
-          "shape": "Q",
-          "color": "orange",
+          "shape": "T",
+          "color": "blue",
           "size": "large"
         },
         {
           "symbol_id": "main_task_028_s041",
           "source_csv_row": 42,
-          "shape": "T",
+          "shape": "Q",
           "color": "orange",
           "size": "small"
         },
         {
           "symbol_id": "main_task_028_s042",
           "source_csv_row": 43,
-          "shape": "Q",
+          "shape": "T",
           "color": "blue",
-          "size": "small"
+          "size": "large"
         },
         {
           "symbol_id": "main_task_028_s043",
           "source_csv_row": 44,
-          "shape": "T",
+          "shape": "Q",
           "color": "orange",
-          "size": "large"
+          "size": "small"
         },
         {
           "symbol_id": "main_task_028_s044",
           "source_csv_row": 45,
           "shape": "T",
-          "color": "orange",
+          "color": "blue",
           "size": "small"
         },
         {
           "symbol_id": "main_task_028_s045",
           "source_csv_row": 46,
-          "shape": "Q",
+          "shape": "T",
           "color": "blue",
           "size": "large"
         },
         {
           "symbol_id": "main_task_028_s046",
           "source_csv_row": 47,
-          "shape": "Q",
+          "shape": "T",
           "color": "blue",
           "size": "large"
         },
         {
           "symbol_id": "main_task_028_s047",
           "source_csv_row": 48,
-          "shape": "Q",
+          "shape": "T",
           "color": "blue",
-          "size": "large"
+          "size": "small"
         },
         {
           "symbol_id": "main_task_028_s048",
           "source_csv_row": 49,
-          "shape": "T",
+          "shape": "Q",
           "color": "orange",
-          "size": "small"
+          "size": "large"
         },
         {
           "symbol_id": "main_task_028_s049",
           "source_csv_row": 50,
-          "shape": "T",
-          "color": "blue",
+          "shape": "Q",
+          "color": "orange",
           "size": "large"
         },
         {
@@ -19374,96 +19374,96 @@
           "source_csv_row": 51,
           "shape": "Q",
           "color": "orange",
-          "size": "small"
+          "size": "large"
         },
         {
           "symbol_id": "main_task_028_s051",
           "source_csv_row": 52,
           "shape": "Q",
-          "color": "blue",
+          "color": "orange",
           "size": "large"
         },
         {
           "symbol_id": "main_task_028_s052",
           "source_csv_row": 53,
-          "shape": "T",
+          "shape": "Q",
           "color": "orange",
           "size": "small"
         },
         {
           "symbol_id": "main_task_028_s053",
           "source_csv_row": 54,
-          "shape": "T",
+          "shape": "Q",
           "color": "orange",
-          "size": "large"
+          "size": "small"
         },
         {
           "symbol_id": "main_task_028_s054",
           "source_csv_row": 55,
           "shape": "Q",
-          "color": "blue",
+          "color": "orange",
           "size": "small"
         },
         {
           "symbol_id": "main_task_028_s055",
           "source_csv_row": 56,
-          "shape": "T",
+          "shape": "Q",
           "color": "orange",
           "size": "large"
         },
         {
           "symbol_id": "main_task_028_s056",
           "source_csv_row": 57,
-          "shape": "T",
+          "shape": "Q",
           "color": "orange",
-          "size": "small"
+          "size": "large"
         },
         {
           "symbol_id": "main_task_028_s057",
           "source_csv_row": 58,
           "shape": "Q",
           "color": "orange",
-          "size": "small"
+          "size": "large"
         },
         {
           "symbol_id": "main_task_028_s058",
           "source_csv_row": 59,
-          "shape": "Q",
+          "shape": "T",
           "color": "blue",
           "size": "large"
         },
         {
           "symbol_id": "main_task_028_s059",
           "source_csv_row": 60,
-          "shape": "T",
-          "color": "blue",
+          "shape": "Q",
+          "color": "orange",
           "size": "large"
         },
         {
           "symbol_id": "main_task_028_s060",
           "source_csv_row": 61,
-          "shape": "Q",
+          "shape": "T",
           "color": "blue",
           "size": "large"
         },
         {
           "symbol_id": "main_task_028_s061",
           "source_csv_row": 62,
-          "shape": "T",
+          "shape": "Q",
           "color": "orange",
-          "size": "large"
+          "size": "small"
         },
         {
           "symbol_id": "main_task_028_s062",
           "source_csv_row": 63,
-          "shape": "Q",
-          "color": "orange",
-          "size": "large"
+          "shape": "T",
+          "color": "blue",
+          "size": "small"
         },
         {
           "symbol_id": "main_task_028_s063",
           "source_csv_row": 64,
-          "shape": "Q",
+          "shape": "T",
           "color": "blue",
           "size": "small"
         },
@@ -19472,40 +19472,40 @@
           "source_csv_row": 65,
           "shape": "Q",
           "color": "orange",
-          "size": "large"
+          "size": "small"
         },
         {
           "symbol_id": "main_task_028_s065",
           "source_csv_row": 66,
-          "shape": "Q",
-          "color": "orange",
+          "shape": "T",
+          "color": "blue",
           "size": "small"
         },
         {
           "symbol_id": "main_task_028_s066",
           "source_csv_row": 67,
           "shape": "Q",
-          "color": "blue",
-          "size": "small"
+          "color": "orange",
+          "size": "large"
         },
         {
           "symbol_id": "main_task_028_s067",
           "source_csv_row": 68,
-          "shape": "T",
+          "shape": "Q",
           "color": "orange",
-          "size": "small"
+          "size": "large"
         },
         {
           "symbol_id": "main_task_028_s068",
           "source_csv_row": 69,
           "shape": "T",
-          "color": "orange",
+          "color": "blue",
           "size": "large"
         },
         {
           "symbol_id": "main_task_028_s069",
           "source_csv_row": 70,
-          "shape": "Q",
+          "shape": "T",
           "color": "blue",
           "size": "large"
         },
@@ -19513,154 +19513,154 @@
           "symbol_id": "main_task_028_s070",
           "source_csv_row": 71,
           "shape": "T",
-          "color": "orange",
-          "size": "large"
+          "color": "blue",
+          "size": "small"
         },
         {
           "symbol_id": "main_task_028_s071",
           "source_csv_row": 72,
-          "shape": "Q",
-          "color": "orange",
+          "shape": "T",
+          "color": "blue",
           "size": "large"
         },
         {
           "symbol_id": "main_task_028_s072",
           "source_csv_row": 73,
           "shape": "Q",
-          "color": "blue",
-          "size": "small"
+          "color": "orange",
+          "size": "large"
         },
         {
           "symbol_id": "main_task_028_s073",
           "source_csv_row": 74,
-          "shape": "Q",
-          "color": "orange",
-          "size": "small"
-        },
-        {
-          "symbol_id": "main_task_028_s074",
-          "source_csv_row": 75,
-          "shape": "Q",
-          "color": "blue",
-          "size": "small"
-        },
-        {
-          "symbol_id": "main_task_028_s075",
-          "source_csv_row": 76,
           "shape": "T",
           "color": "blue",
           "size": "large"
         },
         {
-          "symbol_id": "main_task_028_s076",
-          "source_csv_row": 77,
+          "symbol_id": "main_task_028_s074",
+          "source_csv_row": 75,
+          "shape": "T",
+          "color": "blue",
+          "size": "large"
+        },
+        {
+          "symbol_id": "main_task_028_s075",
+          "source_csv_row": 76,
           "shape": "Q",
           "color": "orange",
+          "size": "small"
+        },
+        {
+          "symbol_id": "main_task_028_s076",
+          "source_csv_row": 77,
+          "shape": "T",
+          "color": "blue",
           "size": "large"
         },
         {
           "symbol_id": "main_task_028_s077",
           "source_csv_row": 78,
           "shape": "T",
-          "color": "orange",
+          "color": "blue",
           "size": "large"
         },
         {
           "symbol_id": "main_task_028_s078",
           "source_csv_row": 79,
-          "shape": "Q",
-          "color": "orange",
-          "size": "large"
+          "shape": "T",
+          "color": "blue",
+          "size": "small"
         },
         {
           "symbol_id": "main_task_028_s079",
           "source_csv_row": 80,
           "shape": "Q",
           "color": "orange",
-          "size": "small"
+          "size": "large"
         },
         {
           "symbol_id": "main_task_028_s080",
           "source_csv_row": 81,
-          "shape": "T",
-          "color": "blue",
-          "size": "small"
+          "shape": "Q",
+          "color": "orange",
+          "size": "large"
         },
         {
           "symbol_id": "main_task_028_s081",
           "source_csv_row": 82,
-          "shape": "Q",
+          "shape": "T",
           "color": "blue",
-          "size": "large"
+          "size": "small"
         },
         {
           "symbol_id": "main_task_028_s082",
           "source_csv_row": 83,
           "shape": "T",
           "color": "blue",
-          "size": "large"
+          "size": "small"
         },
         {
           "symbol_id": "main_task_028_s083",
           "source_csv_row": 84,
-          "shape": "T",
-          "color": "blue",
+          "shape": "Q",
+          "color": "orange",
           "size": "small"
         },
         {
           "symbol_id": "main_task_028_s084",
           "source_csv_row": 85,
           "shape": "Q",
-          "color": "blue",
+          "color": "orange",
           "size": "small"
         },
         {
           "symbol_id": "main_task_028_s085",
           "source_csv_row": 86,
           "shape": "T",
-          "color": "orange",
-          "size": "large"
+          "color": "blue",
+          "size": "small"
         },
         {
           "symbol_id": "main_task_028_s086",
           "source_csv_row": 87,
-          "shape": "T",
-          "color": "blue",
-          "size": "large"
+          "shape": "Q",
+          "color": "orange",
+          "size": "small"
         },
         {
           "symbol_id": "main_task_028_s087",
           "source_csv_row": 88,
-          "shape": "Q",
+          "shape": "T",
           "color": "blue",
           "size": "small"
         },
         {
           "symbol_id": "main_task_028_s088",
           "source_csv_row": 89,
-          "shape": "Q",
+          "shape": "T",
           "color": "blue",
           "size": "small"
         },
         {
           "symbol_id": "main_task_028_s089",
           "source_csv_row": 90,
-          "shape": "Q",
-          "color": "orange",
+          "shape": "T",
+          "color": "blue",
           "size": "small"
         },
         {
           "symbol_id": "main_task_028_s090",
           "source_csv_row": 91,
-          "shape": "T",
-          "color": "blue",
-          "size": "small"
+          "shape": "Q",
+          "color": "orange",
+          "size": "large"
         },
         {
           "symbol_id": "main_task_028_s091",
           "source_csv_row": 92,
-          "shape": "T",
-          "color": "blue",
+          "shape": "Q",
+          "color": "orange",
           "size": "large"
         },
         {
@@ -19668,14 +19668,14 @@
           "source_csv_row": 93,
           "shape": "T",
           "color": "blue",
-          "size": "small"
+          "size": "large"
         },
         {
           "symbol_id": "main_task_028_s093",
           "source_csv_row": 94,
-          "shape": "Q",
-          "color": "orange",
-          "size": "large"
+          "shape": "T",
+          "color": "blue",
+          "size": "small"
         },
         {
           "symbol_id": "main_task_028_s094",
@@ -19687,23 +19687,23 @@
         {
           "symbol_id": "main_task_028_s095",
           "source_csv_row": 96,
-          "shape": "Q",
+          "shape": "T",
           "color": "blue",
-          "size": "small"
+          "size": "large"
         },
         {
           "symbol_id": "main_task_028_s096",
           "source_csv_row": 97,
-          "shape": "T",
-          "color": "blue",
+          "shape": "Q",
+          "color": "orange",
           "size": "small"
         },
         {
           "symbol_id": "main_task_028_s097",
           "source_csv_row": 98,
-          "shape": "T",
+          "shape": "Q",
           "color": "orange",
-          "size": "small"
+          "size": "large"
         },
         {
           "symbol_id": "main_task_028_s098",
@@ -19715,7 +19715,7 @@
         {
           "symbol_id": "main_task_028_s099",
           "source_csv_row": 100,
-          "shape": "Q",
+          "shape": "T",
           "color": "blue",
           "size": "large"
         },
@@ -19724,27 +19724,27 @@
           "source_csv_row": 101,
           "shape": "T",
           "color": "blue",
-          "size": "large"
+          "size": "small"
         }
       ],
       "seed": 20260909,
       "preprocessing_algorithm": "predictability-v1",
       "predictability_condition": "low",
       "ai_marked_symbol_ids": [
-        "main_task_028_s003",
+        "main_task_028_s002",
         "main_task_028_s034"
       ],
       "miss_symbol_ids": [
-        "main_task_028_s002",
-        "main_task_028_s001"
+        "main_task_028_s001",
+        "main_task_028_s003"
       ],
       "false_alarm_symbol_ids": [
         "main_task_028_s034"
       ],
       "error_symbol_ids": [
-        "main_task_028_s002",
         "main_task_028_s001",
-        "main_task_028_s034"
+        "main_task_028_s034",
+        "main_task_028_s003"
       ],
       "balance_score": 3
     },
@@ -19763,7 +19763,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PostPO",
         "row": 30,
-        "asset": "Post_PO_Images/visual_search_data(55).zip",
+        "asset": "Post_PO_Images/visual_search_data_PostPO_29.zip",
         "generator_settings_row": 46
       },
       "asset_status": "supplied_source",
@@ -20519,15 +20519,15 @@
         "main_task_029_s035",
         "main_task_029_s043",
         "main_task_029_s067",
-        "main_task_029_s090",
+        "main_task_029_s094",
         "main_task_029_s103"
       ],
       "miss_symbol_ids": [],
       "false_alarm_symbol_ids": [
-        "main_task_029_s090"
+        "main_task_029_s094"
       ],
       "error_symbol_ids": [
-        "main_task_029_s090"
+        "main_task_029_s094"
       ],
       "balance_score": 3
     },
@@ -20546,7 +20546,7 @@
         "workbook": "Stimuli_log.xlsx",
         "sheet": "PostPO",
         "row": 31,
-        "asset": "Post_PO_Images/visual_search_data(56).zip",
+        "asset": "Post_PO_Images/visual_search_data_PostPO_30.zip",
         "generator_settings_row": 47
       },
       "asset_status": "supplied_source",
@@ -21294,27 +21294,27 @@
       "predictability_condition": "low",
       "ai_marked_symbol_ids": [
         "main_task_030_s001",
+        "main_task_030_s002",
         "main_task_030_s003",
         "main_task_030_s004",
         "main_task_030_s033",
-        "main_task_030_s044",
+        "main_task_030_s049",
         "main_task_030_s051",
-        "main_task_030_s054",
-        "main_task_030_s055",
+        "main_task_030_s063",
         "main_task_030_s072",
         "main_task_030_s096"
       ],
       "miss_symbol_ids": [
-        "main_task_030_s002"
+        "main_task_030_s055"
       ],
       "false_alarm_symbol_ids": [
-        "main_task_030_s044",
-        "main_task_030_s054"
+        "main_task_030_s049",
+        "main_task_030_s063"
       ],
       "error_symbol_ids": [
-        "main_task_030_s002",
-        "main_task_030_s044",
-        "main_task_030_s054"
+        "main_task_030_s049",
+        "main_task_030_s063",
+        "main_task_030_s055"
       ],
       "balance_score": 3
     }
