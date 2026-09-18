@@ -20,6 +20,18 @@ KI-Ringe muessen auf den CSV-Symbolzentren der tatsaechlich dargestellten Bildfl
 
 Die automatisch um Symbole gesetzten KI-Ringe in Preview, AI Practice und Main Task werden gegenueber dem bisherigen Durchmesser um 25 % verkleinert. Mittelpunkt und CSV-Koordinaten bleiben unveraendert. Die Trainingsmarker haben eine separate Groesseneinstellung.
 
+## Sichtbarkeit der Ringe
+
+Die KI-Ringe in Preview, AI Practice und Main Task sowie die manuell gesetzten Trainingsmarker haben 75 % Deckkraft, damit darunterliegende Bilddetails sichtbar bleiben.
+
+## Anzahl der KI-Markierungen beim Final Verdict
+
+In AI Practice und Main Task erscheint beim Final Verdict zusaetzlich die Anzahl der von der KI gesetzten Ringe. Die Zahl stammt aus `ai_marked_symbol_ids` und stimmt dadurch mit den angezeigten KI-Markierungen ueberein.
+
+## Rundencounter in KI-Trials
+
+Oben rechts im KI-Panel zeigt ein Rundencounter die aktuelle Trialnummer. AI Practice (PrePO) zeigt `x/10`, Main Task (PostPO) zeigt `x/30`; beide Phasen zaehlen separat ab 1.
+
 ## Sichtbare Preview-Suche (aktueller Folgeauftrag)
 
 Auf Nutzerwunsch laeuft die gemeinsame Customization-/Standard-Preview sichtbar schrittweise: eigener `PREVIEW_SEARCH_STEP_MS = 180` (32 Kombinationen, rund 5,76 Sekunden), Anzeige der aktiven Kombination und sukzessive Ringe in der gewaehlten Reihenfolge. Dies ersetzt ausschliesslich fuer die Preview die fruehere 15-ms-Vorgabe. `SEARCH_STEP_MS = 15` fuer AI Practice/Main bleibt erhalten. Keine automatische Teilnehmerantwort oder Trialbeendigung; Apply startet erneut, Proceed bleibt der Abschlussbutton.

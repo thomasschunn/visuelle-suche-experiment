@@ -56,7 +56,7 @@ function createAiTrial({ jsPsych, plan, symbols, condition, getAgentId, getSearc
                     <img id="ai-stimulus-image" src="${escapeAiHtml(plan.image_path)}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:contain;" />
                 </div>
                 <div class="right-column">
-                    <div class="ki-panel"><h3>${escapeAiHtml(agentId)}</h3>
+                    <div class="ki-panel"><h3>${escapeAiHtml(agentId)}<span class="ai-round-counter" aria-label="Round ${plan.trial_index} of ${plan.phase === 'ai_practice' ? 10 : 30}">${plan.trial_index}/${plan.phase === 'ai_practice' ? 10 : 30}</span></h3>
                         <div id="ai-search-status">... searching ...</div>
                         <div id="ai-search-step"></div>
                         <div id="ai-agent-verdict" class="ai-agent-verdict" aria-live="polite"></div>
@@ -122,7 +122,7 @@ function createAiTrial({ jsPsych, plan, symbols, condition, getAgentId, getSearc
                         renderRing('ai-image-wrapper', s.center_x, s.center_y, s.size === 'small' ? 'klein' : 'groß', image.naturalWidth, image);
                     });
                     const recommendation = document.getElementById('ai-agent-verdict');
-                    recommendation.textContent = `Final verdict: ${plan.agent_verdict.toUpperCase()}`;
+                    recommendation.textContent = `Final verdict: ${plan.agent_verdict.toUpperCase()} | Defects found: ${plan.ai_marked_symbol_ids.length}`;
                     recommendation.classList.add(plan.agent_verdict === 'Pass' ? 'ai-verdict-pass' : 'ai-verdict-reject');
                     status.textContent = '';
                     animationDuration = performance.now() - startTime;

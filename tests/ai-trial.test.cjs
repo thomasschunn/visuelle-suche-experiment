@@ -96,6 +96,7 @@ for (const version of [1, 2, 3, 4]) {
                 const trial = create(s, version, item);
                 const html = trial.stimulus();
                 assert.ok(html.includes('ai-agent-verdict') && html.includes('ai-pass') && html.includes('ai-reject'));
+                assert.ok(html.includes(`<span class="ai-round-counter" aria-label="Round 1 of ${phase === 'ai_practice' ? 10 : 30}">1/${phase === 'ai_practice' ? 10 : 30}</span>`));
                 assert.ok(html.includes('class="image-container trial-image-container"'));
                 trial.on_load();
                 s.document.getElementById('ai-pass').click();
@@ -104,7 +105,7 @@ for (const version of [1, 2, 3, 4]) {
                 assert.equal(s.finished.length, 0);
                 s.tick(1);
                 const panel = s.document.getElementById('ai-agent-verdict');
-                assert.equal(panel.textContent, `Final verdict: ${verdict.toUpperCase()}`);
+                assert.equal(panel.textContent, `Final verdict: ${verdict.toUpperCase()} | Defects found: 10`);
                 assert.ok(panel.classList.contains(verdict === 'Pass' ? 'ai-verdict-pass' : 'ai-verdict-reject'));
                 // Both test verdicts have 10 rings. REJECT must never be recomputed as PASS.
                 const wrapper = s.document.getElementById('ai-image-wrapper');
@@ -217,6 +218,14 @@ test(`v${version} partial=${partial}: loader preserves all 40 trials and rejects
     manifest.trials[0].symbols[1].source_csv_row = manifest.trials[0].symbols[0].source_csv_row;
     await assert.rejects(s.context.loadAiResources(condition, options), /Duplicate or incomplete source CSV rows/);
 });
+}
+
+for (const [phase, total] of [['ai_practice', 10], ['main_task', 30]]) {
+    test(`${phase}: round counter shows the current trial in the upper right`, () => {
+        const s = setup();
+        const trial = create(s, 1, fixture(1, phase, 'Pass', 4));
+        assert.ok(trial.stimulus().includes(`aria-label="Round 4 of ${total}">4/${total}</span>`));
+    });
 }
 
 test('Main rings follow the displayed image box, including contain margins', () => {
