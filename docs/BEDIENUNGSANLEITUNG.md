@@ -21,14 +21,21 @@ Die Versionsnummer wird **über den Link** gewählt. In der WebApp gibt es dafü
 
 ## WebApp öffnen
 
-**Wenn die WebApp bereits auf einer Website liegt:** Den vollständigen Link der Studienleitung verwenden. Am Ende muss genau einmal `version=1`, `version=2`, `version=3` oder `version=4` stehen. Beispiele mit einer Platzhalteradresse:
+Am Ende muss genau einmal `version=1`, `version=2`, `version=3` oder `version=4` stehen.
 
 ```text
-https://IHRE-ADRESSE/index.html?version=1
-https://IHRE-ADRESSE/index.html?version=2
-https://IHRE-ADRESSE/index.html?version=3
-https://IHRE-ADRESSE/index.html?version=4
+https://thomasschunn.github.io/visuelle-suche-experiment/?version=1
+https://thomasschunn.github.io/visuelle-suche-experiment/?version=2
+https://thomasschunn.github.io/visuelle-suche-experiment/?version=3
+https://thomasschunn.github.io/visuelle-suche-experiment/?version=4
 ```
+
+## Debug-Modus: testen ohne Daten-Upload
+
+Zum Testen `&debug=1` **hinter die Versionsnummer** setzen. Beispiel:
+
+```text
+https://thomasschunn.github.io/visuelle-suche-experiment/?version=1&debug=1
 
 **Zum Testen auf dem eigenen Computer:** Im Projektordner ein Terminal öffnen, zum Beispiel in VS Code über „Terminal“ → „Neues Terminal“. Dort diesen Befehl eingeben und das Terminal geöffnet lassen:
 
