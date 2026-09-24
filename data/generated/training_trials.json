@@ -1,0 +1,97 @@
+[
+  {
+    "phase": "manual_training",
+    "trial_index": 1,
+    "stimulus_id": "manual_training_001",
+    "image_path": "data/generated/assets/manual_training_001/stimulus.jpg",
+    "symbol_table_path": "data/generated/assets/manual_training_001/symbols.csv",
+    "specified_total_symbols": 40,
+    "specified_targets": 8,
+    "specified_misses": null,
+    "specified_false_alarms": null,
+    "agent_verdict": null,
+    "source": {
+      "workbook": "Stimuli_log.xlsx",
+      "sheet": "Training",
+      "row": 2,
+      "asset": "Training_Images/visual_search_data_training_1.zip"
+    },
+    "asset_status": "supplied_source"
+  },
+  {
+    "phase": "manual_training",
+    "trial_index": 2,
+    "stimulus_id": "manual_training_002",
+    "image_path": "data/generated/assets/manual_training_002/stimulus.jpg",
+    "symbol_table_path": "data/generated/assets/manual_training_002/symbols.csv",
+    "specified_total_symbols": 40,
+    "specified_targets": 11,
+    "specified_misses": null,
+    "specified_false_alarms": null,
+    "agent_verdict": null,
+    "source": {
+      "workbook": "Stimuli_log.xlsx",
+      "sheet": "Training",
+      "row": 3,
+      "asset": "Training_Images/visual_search_data_training_2.zip"
+    },
+    "asset_status": "supplied_source"
+  },
+  {
+    "phase": "manual_training",
+    "trial_index": 3,
+    "stimulus_id": "manual_training_003",
+    "image_path": "data/generated/assets/manual_training_003/stimulus.jpg",
+    "symbol_table_path": "data/generated/assets/manual_training_003/symbols.csv",
+    "specified_total_symbols": 40,
+    "specified_targets": 12,
+    "specified_misses": null,
+    "specified_false_alarms": null,
+    "agent_verdict": null,
+    "source": {
+      "workbook": "Stimuli_log.xlsx",
+      "sheet": "Training",
+      "row": 4,
+      "asset": "Training_Images/visual_search_data_training_3.zip"
+    },
+    "asset_status": "supplied_source"
+  },
+  {
+    "phase": "manual_training",
+    "trial_index": 4,
+    "stimulus_id": "manual_training_004",
+    "image_path": "data/generated/assets/manual_training_004/stimulus.jpg",
+    "symbol_table_path": "data/generated/assets/manual_training_004/symbols.csv",
+    "specified_total_symbols": 40,
+    "specified_targets": 9,
+    "specified_misses": null,
+    "specified_false_alarms": null,
+    "agent_verdict": null,
+    "source": {
+      "workbook": "Stimuli_log.xlsx",
+      "sheet": "Training",
+      "row": 5,
+      "asset": "Training_Images/visual_search_data_training_4.zip"
+    },
+    "asset_status": "supplied_source"
+  },
+  {
+    "phase": "manual_training",
+    "trial_index": 5,
+    "stimulus_id": "manual_training_005",
+    "image_path": "data/generated/assets/manual_training_005/stimulus.jpg",
+    "symbol_table_path": "data/generated/assets/manual_training_005/symbols.csv",
+    "specified_total_symbols": 40,
+    "specified_targets": 7,
+    "specified_misses": null,
+    "specified_false_alarms": null,
+    "agent_verdict": null,
+    "source": {
+      "workbook": "Stimuli_log.xlsx",
+      "sheet": "Training",
+      "row": 6,
+      "asset": "Training_Images/visual_search_data_training_5.zip"
+    },
+    "asset_status": "supplied_source"
+  }
+]

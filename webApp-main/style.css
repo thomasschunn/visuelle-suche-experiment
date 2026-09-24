@@ -1,0 +1,196 @@
+/* Container für das gesamte Layout (Bild links, Panel rechts) */
+.experiment-container {
+    display: flex;
+    gap: 30px;
+    justify-content: center;
+    align-items: flex-start;
+    margin-top: 40px;
+    width: 100%; /* Gibt dem Container eine Basis-Breite */
+    max-width: 100vw;
+    padding: 0 20px;
+    box-sizing: border-box;
+}
+
+/* Der Bereich für das Prüfbild */
+.image-container {
+    /* 
+       DIE LÖSUNG: Wir nutzen 'vw' (Bildschirmbreite) statt '%'.
+       - 760px: Maximalgröße wie beim 27-Zoll-Monitor
+       - calc(100vw - 380px): Bildschirmbreite minus Panel (280px), Lücke (30px) und Ränder
+       - calc(70vh * (1920 / 1080)): Passt die Breite an, falls der Bildschirm eher flach ist (70% Höhe)
+    */
+    width: min(1200px, calc(100vw - 380px), calc(80vh * (1920 / 1080))) !important; 
+    height: auto !important; 
+    aspect-ratio: 1920 / 1080 !important; 
+    
+    background-color: #e0e0e0; 
+    border: 2px solid #555;
+    position: relative; 
+    
+    /* Verhindert, dass Flexbox die exakt berechnete Breite wieder kaputt macht */
+    flex-shrink: 0; 
+}
+
+/* All trial images are 1000:800. Reserve room above and below on short screens. */
+.trial-image-container {
+    width: min(1200px, calc(100vw - 380px), calc(125vh - 130px)) !important;
+}
+
+@supports (height: 100dvh) {
+    .trial-image-container {
+        width: min(1200px, calc(100vw - 380px), calc(125dvh - 130px)) !important;
+    }
+}
+
+/* Verhindert das Markieren und Ziehen der Stimulus-Bilder */
+.image-container img {
+    user-select: none;
+    -webkit-user-drag: none;
+    pointer-events: none; /* Klicks gehen direkt durch an das Wrapper-Element */
+}
+
+/* Das KI-Panel */
+.ki-panel {
+    width: 100%; 
+    box-sizing: border-box; 
+    
+    background-color: #1e2229;
+    color: #e0e0e0;
+    border-radius: 10px;
+    border: 2px solid #32b5a1;
+    padding: 20px;
+    font-family: sans-serif;
+    text-align: left;
+}
+
+.ki-panel h3 {
+    margin-top: 0;
+    color: #ffffff;
+    font-size: 16px;
+    letter-spacing: 1px;
+    border-bottom: 1px solid #333;
+    padding-bottom: 10px;
+}
+
+.ki-panel p {
+    font-size: 13px;
+    color: #888;
+    font-style: italic;
+}
+
+.ki-panel ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.ki-panel li {
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-size: 15px;
+}
+
+/* Die kleinen türkisen Nummern im Panel */
+.ki-number {
+    background-color: #32b5a1;
+    color: #1e2229;
+    font-weight: bold;
+    border-radius: 4px;
+    padding: 4px 10px;
+}
+
+/* Rechte Spalte, um Panel und Buttons zu stapeln */
+.right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; 
+    
+    /* Schützt das Panel davor, schrumpfen zu müssen */
+    flex-shrink: 0; 
+    width: 280px; 
+}
+
+/* Container für die beiden Buttons nebeneinander */
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+/* Grund-Design für unsere eigenen Buttons */
+.action-btn {
+    flex: 1; /* Beide Buttons werden gleich breit */
+    padding: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    color: #ffffff;
+    transition: background-color 0.2s;
+}
+
+/* Spezifische Farben */
+.btn-start {
+    background-color: #32b5a1; /* Türkis, passend zum Panel */
+}
+
+.btn-start:hover {
+    background-color: #289685;
+}
+
+.btn-reset {
+    background-color: #d9534f; /* Reject */
+}
+
+.btn-reset:hover {
+    background-color: #c9302c;
+}
+
+/* Effekt während der "KI" rechnet */
+.scanning-active {
+    color: #ffffff !important;
+    text-shadow: 0 0 8px #32b5a1; /* Leichtes türkises Leuchten */
+    transition: all 0.1s;
+}
+
+/* Farben für die Text-Updates */
+.text-orange { color: #f08e16; font-weight: bold; } /* Aus den Spezifikationen [cite: 5, 40] */
+.text-blue { color: #2660c4; font-weight: bold; }   /* Aus den Spezifikationen [cite: 5, 39] */
+
+/* KI-Ringe sind reine Anzeigen; nur Trainingsmarker sind interaktiv. */
+.ki-ring {
+    position: absolute; /* Löst den Ring aus dem normalen Layout und legt ihn über das Bild */
+    border: 3px solid #ffffff; /* Weiß und 3px stark */
+    border-radius: 50%; /* Macht aus dem Viereck einen perfekten Kreis */
+    box-sizing: border-box;
+    pointer-events: none;
+    cursor: default;
+    
+    /* Wichtig: Zentriert den Kreis exakt auf der x/y-Koordinate, statt ihn an der oberen linken Ecke aufzuhängen */
+    transform: translate(-50%, -50%);
+    
+    /* Ein minimaler Schatten hilft, falls der Hintergrund mal exakt weiß/hellgrau ist */
+    box-shadow: 0px 0px 3px rgba(0,0,0,0.3);
+    
+}
+
+.training-marker {
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.training-marker:hover {
+    border-color: #d9534f; /* Wird rot, um zu zeigen, dass man ihn löschen kann */
+    background-color: rgba(217, 83, 79, 0.2); /* Ganz leicht rot gefüllt */
+}
+
+/* Shared preview verdict styling, including the Standard branch. */
+.preview-pass { border: 4px solid #5cb85c !important; }
+.preview-reject { border: 4px solid #d9534f !important; }
+.ai-agent-verdict { margin-top: 20px; padding: 12px; font-weight: bold; font-size: 24px; border-radius: 6px; }
+.ai-verdict-pass { background: #174c27; color: #fff; border: 3px solid #5cb85c; }
+.ai-verdict-reject { background: #701c20; color: #fff; border: 3px solid #d9534f; }
+

@@ -1,0 +1,11 @@
+{
+  "experiment_start_allowed": true,
+  "seed": 20260909,
+  "valid_versions": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "validation_errors": []
+}

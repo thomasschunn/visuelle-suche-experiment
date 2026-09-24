@@ -1,0 +1,212 @@
+[
+  {
+    "phase": "ai_practice",
+    "trial_index": 1,
+    "stimulus_id": "ai_practice_001",
+    "image_path": "data/generated/assets/ai_practice_001/stimulus.jpg",
+    "symbol_table_path": "data/generated/assets/ai_practice_001/symbols.csv",
+    "specified_total_symbols": 14,
+    "specified_targets": 8,
+    "specified_misses": 0,
+    "specified_false_alarms": 0,
+    "agent_verdict": "Pass",
+    "source": {
+      "workbook": "Stimuli_log.xlsx",
+      "sheet": "PrePO",
+      "row": 2,
+      "asset": "PrePO_Images/visual_search_data_PrePO_1.zip",
+      "generator_settings_row": 2
+    },
+    "asset_status": "supplied_source",
+    "specified_agent_marked": 8
+  },
+  {
+    "phase": "ai_practice",
+    "trial_index": 2,
+    "stimulus_id": "ai_practice_002",
+    "image_path": "data/generated/assets/ai_practice_002/stimulus.jpg",
+    "symbol_table_path": "data/generated/assets/ai_practice_002/symbols.csv",
+    "specified_total_symbols": 14,
+    "specified_targets": 5,
+    "specified_misses": 1,
+    "specified_false_alarms": 0,
+    "agent_verdict": "Pass",
+    "source": {
+      "workbook": "Stimuli_log.xlsx",
+      "sheet": "PrePO",
+      "row": 3,
+      "asset": "PrePO_Images/visual_search_data_PrePO_2.zip",
+      "generator_settings_row": 3
+    },
+    "asset_status": "supplied_source",
+    "specified_agent_marked": 4
+  },
+  {
+    "phase": "ai_practice",
+    "trial_index": 3,
+    "stimulus_id": "ai_practice_003",
+    "image_path": "data/generated/assets/ai_practice_003/stimulus.jpg",
+    "symbol_table_path": "data/generated/assets/ai_practice_003/symbols.csv",
+    "specified_total_symbols": 16,
+    "specified_targets": 12,
+    "specified_misses": 1,
+    "specified_false_alarms": 0,
+    "agent_verdict": "Reject",
+    "source": {
+      "workbook": "Stimuli_log.xlsx",
+      "sheet": "PrePO",
+      "row": 4,
+      "asset": "PrePO_Images/visual_search_data_PrePO_3.zip",
+      "generator_settings_row": 4
+    },
+    "asset_status": "supplied_source",
+    "specified_agent_marked": 11
+  },
+  {
+    "phase": "ai_practice",
+    "trial_index": 4,
+    "stimulus_id": "ai_practice_004",
+    "image_path": "data/generated/assets/ai_practice_004/stimulus.jpg",
+    "symbol_table_path": "data/generated/assets/ai_practice_004/symbols.csv",
+    "specified_total_symbols": 18,
+    "specified_targets": 9,
+    "specified_misses": 0,
+    "specified_false_alarms": 1,
+    "agent_verdict": "Pass",
+    "source": {
+      "workbook": "Stimuli_log.xlsx",
+      "sheet": "PrePO",
+      "row": 5,
+      "asset": "PrePO_Images/visual_search_data_PrePO_4.zip",
+      "generator_settings_row": 5
+    },
+    "asset_status": "supplied_source",
+    "specified_agent_marked": 10
+  },
+  {
+    "phase": "ai_practice",
+    "trial_index": 5,
+    "stimulus_id": "ai_practice_005",
+    "image_path": "data/generated/assets/ai_practice_005/stimulus.jpg",
+    "symbol_table_path": "data/generated/assets/ai_practice_005/symbols.csv",
+    "specified_total_symbols": 20,
+    "specified_targets": 7,
+    "specified_misses": 2,
+    "specified_false_alarms": 0,
+    "agent_verdict": "Pass",
+    "source": {
+      "workbook": "Stimuli_log.xlsx",
+      "sheet": "PrePO",
+      "row": 6,
+      "asset": "PrePO_Images/visual_search_data_PrePO_5.zip",
+      "generator_settings_row": 6
+    },
+    "asset_status": "supplied_source",
+    "specified_agent_marked": 5
+  },
+  {
+    "phase": "ai_practice",
+    "trial_index": 6,
+    "stimulus_id": "ai_practice_006",
+    "image_path": "data/generated/assets/ai_practice_006/stimulus.jpg",
+    "symbol_table_path": "data/generated/assets/ai_practice_006/symbols.csv",
+    "specified_total_symbols": 22,
+    "specified_targets": 9,
+    "specified_misses": 0,
+    "specified_false_alarms": 0,
+    "agent_verdict": "Pass",
+    "source": {
+      "workbook": "Stimuli_log.xlsx",
+      "sheet": "PrePO",
+      "row": 7,
+      "asset": "PrePO_Images/visual_search_data_PrePO_6.zip",
+      "generator_settings_row": 7
+    },
+    "asset_status": "supplied_source",
+    "specified_agent_marked": 9
+  },
+  {
+    "phase": "ai_practice",
+    "trial_index": 7,
+    "stimulus_id": "ai_practice_007",
+    "image_path": "data/generated/assets/ai_practice_007/stimulus.jpg",
+    "symbol_table_path": "data/generated/assets/ai_practice_007/symbols.csv",
+    "specified_total_symbols": 24,
+    "specified_targets": 13,
+    "specified_misses": 0,
+    "specified_false_alarms": 1,
+    "agent_verdict": "Reject",
+    "source": {
+      "workbook": "Stimuli_log.xlsx",
+      "sheet": "PrePO",
+      "row": 8,
+      "asset": "PrePO_Images/visual_search_data_PrePO_7.zip",
+      "generator_settings_row": 8
+    },
+    "asset_status": "supplied_source",
+    "specified_agent_marked": 14
+  },
+  {
+    "phase": "ai_practice",
+    "trial_index": 8,
+    "stimulus_id": "ai_practice_008",
+    "image_path": "data/generated/assets/ai_practice_008/stimulus.jpg",
+    "symbol_table_path": "data/generated/assets/ai_practice_008/symbols.csv",
+    "specified_total_symbols": 26,
+    "specified_targets": 13,
+    "specified_misses": 1,
+    "specified_false_alarms": 2,
+    "agent_verdict": "Reject",
+    "source": {
+      "workbook": "Stimuli_log.xlsx",
+      "sheet": "PrePO",
+      "row": 9,
+      "asset": "PrePO_Images/visual_search_data_PrePO_8.zip",
+      "generator_settings_row": 9
+    },
+    "asset_status": "supplied_source",
+    "specified_agent_marked": 14
+  },
+  {
+    "phase": "ai_practice",
+    "trial_index": 9,
+    "stimulus_id": "ai_practice_009",
+    "image_path": "data/generated/assets/ai_practice_009/stimulus.jpg",
+    "symbol_table_path": "data/generated/assets/ai_practice_009/symbols.csv",
+    "specified_total_symbols": 29,
+    "specified_targets": 15,
+    "specified_misses": 0,
+    "specified_false_alarms": 0,
+    "agent_verdict": "Reject",
+    "source": {
+      "workbook": "Stimuli_log.xlsx",
+      "sheet": "PrePO",
+      "row": 10,
+      "asset": "PrePO_Images/visual_search_data_PrePO_9.zip",
+      "generator_settings_row": 10
+    },
+    "asset_status": "supplied_source",
+    "specified_agent_marked": 15
+  },
+  {
+    "phase": "ai_practice",
+    "trial_index": 10,
+    "stimulus_id": "ai_practice_010",
+    "image_path": "data/generated/assets/ai_practice_010/stimulus.jpg",
+    "symbol_table_path": "data/generated/assets/ai_practice_010/symbols.csv",
+    "specified_total_symbols": 32,
+    "specified_targets": 10,
+    "specified_misses": 1,
+    "specified_false_alarms": 0,
+    "agent_verdict": "Pass",
+    "source": {
+      "workbook": "Stimuli_log.xlsx",
+      "sheet": "PrePO",
+      "row": 11,
+      "asset": "PrePO_Images/visual_search_data_PrePO_10.zip",
+      "generator_settings_row": 11
+    },
+    "asset_status": "supplied_source",
+    "specified_agent_marked": 9
+  }
+]
